@@ -11,10 +11,6 @@ class Accessories extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public function accessoriesCategory()
-    {
-        return $this->hasMany(AccesoriesCategory::class, 'accessories_id');
-    }
 
     public function scopeWithSubtotal($query)
     {

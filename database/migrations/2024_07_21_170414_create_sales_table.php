@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('total_price');
             $table->string('ongkir')->default(0);
             $table->string('diskon')->default(0);
-            $table->string('total_pay');
+            $table->string('pay');
             $table->integer('user_id');
             $table->timestamps();
         });
