@@ -64,7 +64,7 @@ class SaleController extends Controller
         DB::beginTransaction();
 
         try {
-            // Create Sale record
+            // Create sale record
             $sale = Sale::create([
                 'customer_id' => $request->customer_id,
                 'total_item' => $request->total_item,
@@ -75,7 +75,7 @@ class SaleController extends Controller
                 'user_id' => auth()->id()
             ]);
 
-            // Save Accessories Sale and update stock
+            // Save Accessories sale and update stock
             if ($request->has('accessories')) {
                 foreach ($request->accessories as $accessory) {
                     $accessoryRecord = Accessories::find($accessory['accessories_id']);
@@ -96,7 +96,7 @@ class SaleController extends Controller
                         $accessoryRecord->stok -= $qty;
                         $accessoryRecord->save();
 
-                        // Save to Accessories Sale
+                        // Save to Accessories sale
                         AccessoriesSale::create([
                             'sale_id' => $sale->id,
                             'accessories_id' => $accessory['accessories_id'],
@@ -107,7 +107,7 @@ class SaleController extends Controller
                 }
             }
 
-            // Save Item Sale and remove from items
+            // Save Item sale and remove from items
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
                     // Save to item_sale
@@ -130,7 +130,7 @@ class SaleController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Sale saved successfully.'
+                'message' => 'sale saved successfully.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

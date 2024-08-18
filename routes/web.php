@@ -7,6 +7,7 @@ use App\Http\Controllers\Gudang\DashboardController;
 use App\Http\Controllers\Gudang\ItemCategoryController;
 use App\Http\Controllers\Gudang\ItemController;
 use App\Http\Controllers\Gudang\AccessoriesController;
+use App\Http\Controllers\EditController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -26,7 +27,9 @@ Auth::routes([
     'register' => false
 ]);
 
-
+Route::group(['middleware' => ['auth:web']], function () {
+    Route::resource('/profile/edit', EditController::class)->names('profile.edit');
+});
 Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang'], function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);

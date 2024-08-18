@@ -15,7 +15,7 @@
                 </div>
             </div>
         </div>
-        <di class="card-body">
+        <div class="card-body">
             <div class="table-responsive">
                 <table id="example" class="table table-striped table-bordered" style="width:100%">
                     <thead>
@@ -31,7 +31,7 @@
                             <td>{{$key +1}}</td>
                             <td>{{$data->name}}</td>
                             <td>
-                                <a href="{{route('gudang.cat.destroy', $data->id)}}" data-confirm-delete="true"
+                                <a href="{{route('manager.cat.destroy', $data->id)}}" data-confirm-delete="true"
                                    class="btn btn-danger btn-sm bx bx-trash" title="Delete">
                                 </a>
                                 <button data-bs-toggle="modal"
@@ -48,7 +48,7 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
-                                            <form action="{{route('gudang.cat.update', $data->id)}}"
+                                            <form action="{{route('manager.cat.update', $data->id)}}"
                                                   method="POST">
                                                 @csrf
                                                 @method('PUT')
@@ -72,11 +72,9 @@
                     </tr>
                     @endforeach
                     </tbody>
-                    </tfoot>
                 </table>
             </div>
-        </di>
-    </div>
+        </div>
     </div>
     <div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -85,7 +83,7 @@
                     <h5 class="modal-title">Add Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{route('gudang.cat.store')}}" method="POST" id="myForm">
+                <form action="{{route('manager.cat.store')}}" method="POST" id="myForm">
                     @csrf
                     <div class="modal-body">
                         <label class="col-form-label">Name Category</label>
@@ -93,7 +91,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="btn">Save<i class="bx bx-save"></i></button>
+                        <button type="submit" class="btn btn-primary" id="Btn">Save<i class="bx bx-save"></i></button>
                     </div>
                 </form>
             </div>
@@ -107,7 +105,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            $('#btn').click(function() {
+            $('#Btn').click(function() {
                 // Disable button dan ubah teksnya
                 $(this).prop('disabled', true).text('Loading...');
 

@@ -11,7 +11,7 @@
             </div>
             <div class="col-sm-6 mt-3">
                 @if(isset($cust))
-                    <a href="{{route('admin.customer.index')}}" class="btn btn-warning btn-sm float-end me-3"><i class="bx bx-arrow-back"></i> Back</a>
+                    <a href="{{route('manager.customer.index')}}" class="btn btn-warning btn-sm float-end me-3"><i class="bx bx-arrow-back"></i> Back</a>
                 @else
                 @endif
             </div>
