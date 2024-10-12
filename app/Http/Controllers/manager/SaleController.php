@@ -21,8 +21,32 @@ class SaleController extends Controller
      */
     public function index()
     {
-        $sale = Sale::with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
-        return view('manager.sale.index', compact('sale'));
+        // Ambil data penjualan
+        $sales = Sale::with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+
+        // Format nomor invoice untuk setiap transaksi
+        foreach ($sales as $data) {
+            $transactionCount = Sale::where('id', '<=', $data->id)->count();
+            $nextNumber = str_pad($transactionCount, 4, '0', STR_PAD_LEFT);
+            $currentYear = date('Y');
+            $currentMonthNumber = date('n');
+            $currentMonthRoman = $this->convertToRoman($currentMonthNumber);
+
+            // Format nomor invoice
+            $data->invoiceNumber = "INV/DND/{$nextNumber}/{$currentMonthRoman}/{$currentYear}";
+        }
+
+        // Pass data ke view
+        return view('manager.sale.index', compact('sales'));
+    }
+    private function convertToRoman($monthNumber)
+    {
+        $months = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+        ];
+
+        return $months[$monthNumber];
     }
 
     /**
@@ -68,6 +92,8 @@ class SaleController extends Controller
                 'ongkir' => $request->ongkir,
                 'diskon' => $request->diskon,
                 'pay' => $request->bayar,
+                'nominal_in' => $request->nominal_in,
+                'deadlines' => $request->deadlines,
                 'user_id' => auth()->id()
             ]);
 
@@ -97,7 +123,8 @@ class SaleController extends Controller
                             'sale_id' => $sale->id,
                             'accessories_id' => $accessory['accessories_id'],
                             'qty' => $qty,
-                            'subtotal' => $accessory['subtotal']
+                            'subtotal' => $accessory['subtotal'],
+                            'acces_out' => now()
                         ]);
                     }
                 }
@@ -106,19 +133,24 @@ class SaleController extends Controller
             // Save Item sale and remove from items
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
-                    // Save to item_sale
-                    ItemSale::create([
-                        'sale_id' => $sale->id,
-                        'itemcategory_id' => $item['itemcategory_id'],
-                        'name' => $item['name'],
-                        'no_seri' => $item['no_seri'],
-                        'price' => $item['price']
-                    ]);
-
-                    // Remove item from items
-                    Item::where('itemcategory_id', $item['itemcategory_id'])
+                    $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
                         ->where('no_seri', $item['no_seri'])
-                        ->delete();
+                        ->first();
+
+                    if ($itemRecord) {
+                        // Save to item_sale
+                        ItemSale::create([
+                            'sale_id' => $sale->id,
+                            'itemcategory_id' => $item['itemcategory_id'],
+                            'name' => $item['name'],
+                            'no_seri' => $item['no_seri'],
+                            'price' => $item['price'],
+                            'date_in' => $itemRecord->created_at // Use created_at from the items table
+                        ]);
+
+                        // Remove item from items
+                        $itemRecord->delete();
+                    }
                 }
             }
 
@@ -126,7 +158,7 @@ class SaleController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'sale saved successfully.'
+                'message' => 'Sale saved successfully.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -136,7 +168,6 @@ class SaleController extends Controller
             ], 500);
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -154,11 +185,14 @@ class SaleController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id) //ieu fungsi jang ngambil form edit?enya
     {
-        $sale = Sale::with(['itemSales', 'accessoriesSales.accessories'])->findOrFail($id);
+        if (\request()->ajax()){
+            $sale = Sale::with(['itemSales', 'accessoriesSales.accessories'])->findOrFail($id);
+            return response()->json($sale);
+        }
         $customers = Customer::all();
-
+        $sale = Sale::with(['itemSales', 'accessoriesSales.accessories'])->findOrFail($id);
         return view('manager.sale.edit', compact('sale', 'customers'));
     }
 
@@ -171,92 +205,73 @@ class SaleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Dapatkan data penjualan yang ada
-        $sale = Sale::findOrFail($id);
+        DB::beginTransaction();
 
-        // Data item dan aksesori yang saat ini terkait dengan penjualan
-        $currentItems = $sale->itemSales;
-        $currentAccessories = $sale->accessoriesSales;
+        try {
+            $sale = Sale::findOrFail($id);
+            $sale->customer_id = $request->customer_id;
+            $sale->total_price = str_replace('.', '', $request->total_price); // Total harga tanpa titik
+            $sale->diskon = $request->diskon;
+            $sale->ongkir = $request->ongkir;
+            $sale->nominal_in = $request->nominal_in;
+            $sale->deadlines = $request->deadlines;
+            $sale->total_item = $request->total_item;
+            $sale->pay = str_replace('.', '', $request->bayar); // Bayar tanpa titik
+            $sale->save();
+            ItemSale::where('sale_id', $id);
+            AccessoriesSale::where('sale_id', $id);
 
-        // Dapatkan item dan aksesori baru dari request
-        $newItems = $request->input('items', []); // array of item ids
-        $newAccessories = $request->input('accessories', []); // array of accessories ids with quantities
-
-        // Hapus item yang tidak ada di data baru dan kembalikan ke stok
-        foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->item_id, $newItems)) {
-                // Kembalikan stok item ke tabel items
-                $item = Item::findOrFail($currentItem->item_id);
-                $item->status = 1; // Atur status item kembali ke 1 (tersedia)
-                $item->save();
-
-                // Hapus dari tabel item_sales
-                $currentItem->delete();
-            }
-        }
-
-        // Hapus aksesori yang tidak ada di data baru dan kembalikan ke stok
-        foreach ($currentAccessories as $currentAccessory) {
-            $found = false;
-            foreach ($newAccessories as $newAccessory) {
-                if ($currentAccessory->accessories_id == $newAccessory['id']) {
-                    $found = true;
-                    break;
+            //eta no_seri teh naon weuh di request. salah a kuduna items etamana nama colom dina item_sales
+            //ke ieu dibenerken cobaan hela edit deui save hela?nya
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $itemSale = new ItemSale();
+                    $itemSale->sale_id = $sale->id;
+                    $itemSale->name = $item['name'];//item_name weuh di request oh name hungkul soalna ieu teh mindahkeun ti item ka item_name. Enya  pokokna $requiewst->item_name pasti error soalna null. weuh di jero request
+                    $itemSale->no_seri = $item['no_seri']; //no seri ieu teh di jero item_sales? enya
+                    $itemSale->price = str_replace('.', '', $item['price']);
+                    $itemSale->itemcategory_id = $item['itemcategory_id'];
+                    $itemSale->date_in = now();
+                    $itemSale->save();
                 }
             }
 
-            if (!$found) {
-                // Kembalikan stok aksesori ke tabel accessories
-                $accessory = Accessories::findOrFail($currentAccessory->accessories_id);
-                $accessory->stok += $currentAccessory->qty;
-                $accessory->save();
+            //ieu naon accecories_id? data nu dikirimna accessories
+            //data request anu dikirim kadieu teh ieu
+            //euweuh data accessories_id, ayana data accessories. jadi if request->hgas('accessories_id') moal kapanggil
 
-                // Hapus dari tabel accessories_sales
-                $currentAccessory->delete();
+            //kitu cara manggilna. bieu mah salah save tos
+            if ($request->has('accessories')) {
+                foreach ($request->accessories as $item) {
+                    $id = $item['id'] ?? null;
+                    $accessoriesSale = AccessoriesSale::firstOrNew(['id' => $id]);
+                    $accessoriesSale->sale_id = $item['sale_id'];
+                    $accessoriesSale->accessories_id = $item['accessories_id'];
+                    $accessoriesSale->qty = $item['qty'];
+                    $accessoriesSale->subtotal = $item['subtotal'];//$request->qty[$key] * str_replace('.', '', $request->price[$key]);
+                    $accessoriesSale->acces_out= now();
+                    $accessoriesSale->save();
+                }
             }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction updated successfully!',
+                'reqest' => $request->all()
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update transaction! ' . $e->getMessage(),
+                'request' => $request->all() //save
+            ], 500);
         }
-
-        // Tambah atau perbarui item baru di penjualan
-        foreach ($newItems as $itemId) {
-            // Periksa apakah item sudah ada di penjualan
-            if (!$sale->itemSales->where('item_id', $itemId)->exists()) {
-                $sale->itemSales()->create(['item_id' => $itemId]);
-
-                // Set item status ke 2 (dipesan) jika perlu
-                $item = Item::findOrFail($itemId);
-                $item->status = 2; // Atur status item ke 2 (dipesan)
-                $item->save();
-            }
-        }
-
-        // Tambah atau perbarui aksesori baru di penjualan
-        foreach ($newAccessories as $newAccessory) {
-            $accessoryId = $newAccessory['id'];
-            $quantity = $newAccessory['qty'];
-
-            // Periksa apakah aksesori sudah ada di penjualan
-            $existingAccessory = $sale->accessoriesSales->where('accessories_id', $accessoryId)->first();
-            if ($existingAccessory) {
-                // Perbarui kuantitas aksesori jika sudah ada
-                $existingAccessory->qty = $quantity;
-                $existingAccessory->subtotal = $quantity * $existingAccessory->accessory->price; // Misalkan harga aksesori bisa didapat dari relasi
-                $existingAccessory->save();
-            } else {
-                // Tambah aksesori baru ke penjualan
-                $sale->accessoriesSales()->create([
-                    'accessories_id' => $accessoryId,
-                    'qty' => $quantity,
-                    'subtotal' => $quantity * Accessories::findOrFail($accessoryId)->price,
-                ]);
-            }
-        }
-
-        // Simpan perubahan lainnya ke model Sale
-        $sale->update($request->except(['items', 'accessories'])); // Update field selain items dan accessories
-
-        return redirect()->route('sales.index')->with('success', 'Sale updated successfully.');
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -282,5 +297,12 @@ class SaleController extends Controller
         } else {
             return response()->json(['status' => 'error', 'message' => 'Code Accessories or No Seri not found!']);
         }
+    }
+    public function bayar(Request $request, $id)
+    {
+        $sale = Sale::findOrFail($id);
+        $sale->nominal_in = $request->input('nominal_in');
+        $sale->save();
+        return back()->withSuccess('Pembayaran Lunas');
     }
 }

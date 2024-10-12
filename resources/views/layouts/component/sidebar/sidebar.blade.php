@@ -68,6 +68,48 @@
             </ul>
         </li>
         <li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='bx bx-import'></i>
+                </div>
+                <div class="menu-title">Barang Masuk</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="{{route('gudang.item.itemin')}}">
+                        <i class='bx bx-radio-circle'></i>
+                        Items
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('gudang.acces.accesin')}}">
+                        <i class='bx bx-radio-circle'></i>
+                        Accessories
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='bx bx-export'></i>
+                </div>
+                <div class="menu-title">Barang Keluar</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="{{route('gudang.item.itemout')}}">
+                        <i class='bx bx-radio-circle'></i>
+                        Items
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('gudang.acces.accesout')}}">
+                        <i class='bx bx-radio-circle'></i>
+                        Accessories
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
             <a href="{{route('gudang.item.report')}}">
                 <div class="parent-icon"><i class='bx bx-file'></i>
                 </div>

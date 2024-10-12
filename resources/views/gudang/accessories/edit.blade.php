@@ -25,7 +25,6 @@
             <table class="table mt-2 table-stok">
                 <thead>
                 <tr>
-                    <th scope="col">No</th>
                     <th scope="col">Code Acces</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
@@ -54,10 +53,6 @@
                 autoWidth: false,
                 data: [],
                 columns: [
-                    { data: null, searchable: false, sortable: false, render: function(data, type, row, meta) {
-                            return meta.row + 1;
-                        }
-                    },
                     { data: 'code_acces' },
                     { data: 'name' },
                     {

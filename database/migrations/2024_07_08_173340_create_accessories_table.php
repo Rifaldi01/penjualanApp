@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('price');
-            $table->bigInteger('code_acces');
+            $table->string('code_acces');
             $table->bigInteger('stok')->default(0);
             $table->timestamps();
         });

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('accessories_id');
             $table->string('qty');
             $table->string('subtotal');
+            $table->date('acces_out');
             $table->timestamps();
         });
     }

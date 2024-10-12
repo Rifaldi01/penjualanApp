@@ -25,8 +25,33 @@ class SaleController extends Controller
      */
     public function index()
     {
-        $sale = Sale::with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
-        return view('admin.sale.index', compact('sale'));
+        // Ambil data penjualan
+        $sales = Sale::with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+
+        // Format nomor invoice untuk setiap transaksi
+        foreach ($sales as $data) {
+            $transactionCount = Sale::where('id', '<=', $data->id)->count();
+            $nextNumber = str_pad($transactionCount, 4, '0', STR_PAD_LEFT);
+            $currentYear = date('Y');
+            $currentMonthNumber = date('n');
+            $currentMonthRoman = $this->convertToRoman($currentMonthNumber);
+
+            // Format nomor invoice
+            $data->invoiceNumber = "INV/DND/{$nextNumber}/{$currentMonthRoman}/{$currentYear}";
+        }
+
+        // Pass data ke view
+        return view('admin.sale.index', compact('sales'));
+    }
+
+    private function convertToRoman($monthNumber)
+    {
+        $months = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+        ];
+
+        return $months[$monthNumber];
     }
 
     /**
@@ -72,6 +97,8 @@ class SaleController extends Controller
                 'ongkir' => $request->ongkir,
                 'diskon' => $request->diskon,
                 'pay' => $request->bayar,
+                'nominal_in' => $request->nominal_in,
+                'deadlines' => $request->deadlines,
                 'user_id' => auth()->id()
             ]);
 
@@ -101,7 +128,8 @@ class SaleController extends Controller
                             'sale_id' => $sale->id,
                             'accessories_id' => $accessory['accessories_id'],
                             'qty' => $qty,
-                            'subtotal' => $accessory['subtotal']
+                            'subtotal' => $accessory['subtotal'],
+                            'acces_out' => now()
                         ]);
                     }
                 }
@@ -110,19 +138,24 @@ class SaleController extends Controller
             // Save Item sale and remove from items
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
-                    // Save to item_sale
-                    ItemSale::create([
-                        'sale_id' => $sale->id,
-                        'itemcategory_id' => $item['itemcategory_id'],
-                        'name' => $item['name'],
-                        'no_seri' => $item['no_seri'],
-                        'price' => $item['price']
-                    ]);
-
-                    // Remove item from items
-                    Item::where('itemcategory_id', $item['itemcategory_id'])
+                    $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
                         ->where('no_seri', $item['no_seri'])
-                        ->delete();
+                        ->first();
+
+                    if ($itemRecord) {
+                        // Save to item_sale
+                        ItemSale::create([
+                            'sale_id' => $sale->id,
+                            'itemcategory_id' => $item['itemcategory_id'],
+                            'name' => $item['name'],
+                            'no_seri' => $item['no_seri'],
+                            'price' => $item['price'],
+                            'date_in' => $itemRecord->created_at // Use created_at from the items table
+                        ]);
+
+                        // Remove item from items
+                        $itemRecord->delete();
+                    }
                 }
             }
 
@@ -130,7 +163,7 @@ class SaleController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'sale saved successfully.'
+                'message' => 'Sale saved successfully.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -160,7 +193,7 @@ class SaleController extends Controller
      */
     public function edit($id)
     {
-        //
+
     }
 
     /**
@@ -172,7 +205,10 @@ class SaleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $sale = Sale::findOrFail($id);
+        $sale->nominal_in = $request->input('nominal_in');
+        $sale->save();
+        return back()->withSuccess('Pembayaran Lunas');
     }
 
     /**

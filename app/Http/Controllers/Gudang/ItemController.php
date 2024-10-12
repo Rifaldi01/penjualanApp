@@ -175,5 +175,19 @@ class ItemController extends Controller
 
         return view('gudang.report-item.index', compact('report', 'categories', 'mostSoldCategories', 'leastSoldCategories', 'categorySalesCount'));
     }
+    public function itemin()
+    {
+        $items = Item::with('cat')->get();
+        $itemSales = ItemSale::with('itemCategory')->get();
 
+        // Menggabungkan kedua koleksi menjadi satu
+        $itemin = $items->merge($itemSales);
+
+        return view('gudang.item.itemin', compact('itemin'));
+    }
+    public function itemout()
+    {
+        $itemout = ItemSale::with('itemCategory')->get();
+        return view('gudang.item.itemin', compact('itemout'));
+    }
 }

@@ -10,8 +10,8 @@
 	<link href="{{URL::to('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet" />
 	<link href="{{URL::to('assets/plugins/metismenu/css/metisMenu.min.css')}}" rel="stylesheet"/>
 	<link href="{{URL::to('assets/plugins/datatable/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet" />
-
-	<!-- loader-->
+    <link href="{{URL::to('assets/css/flatpickr.min.css')}}" rel="stylesheet"/>
+    <!-- loader-->
 	<link href="{{URL::to('assets/css/pace.min.css')}}" rel="stylesheet"/>
 	<script src="{{URL::to('assets/js/pace.min.js')}}"></script>
 	<!-- Bootstrap CSS -->

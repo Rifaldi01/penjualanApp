@@ -69,6 +69,16 @@
                 </div>
             </div>
             <div class="row mb-3">
+                <label for="input47" class="col-sm-3 col-form-label">&nbsp;&nbsp;Company</label>
+                <div class="col-sm-9">
+                    <div class="position-relative input-icon">
+                        <input class="form-control" name="company" id="input47" placeholder="(Optional)"
+                               value="{{isset($cust) ? $cust->company : null}}">
+                        <span class="position-absolute top-50 translate-middle-y"><i class='bx bx-building'></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
                 <label for="input47" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Address</label>
                 <div class="col-sm-9">
                     <textarea class="form-control" name="addres" id="input47" rows="3" placeholder="Address"

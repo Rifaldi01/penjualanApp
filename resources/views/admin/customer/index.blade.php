@@ -55,6 +55,7 @@
                         <th>WhatsApp</th>
                         <th>Phone</th>
                         <th>Address</th>
+                        <th>Company</th>
                         <th width="12%">Action</th>
                     </tr>
                     </thead>
@@ -74,6 +75,7 @@
                                 @endif
                             </td>
                             <td>{{$data->addres}}</td>
+                            <td>{{$data->company}}</td>
                             <td>
                                 <a href="{{route('admin.customer.destroy', $data->id)}}" data-confirm-delete="true"
                                    type="submit" class=" bx bx-trash btn btn-sm btn-danger"

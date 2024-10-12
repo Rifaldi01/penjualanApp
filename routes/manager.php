@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
 
     //sale
     Route::resource('/sale', SaleController::class)->names('manager.sale');
+    Route::put('/bayar/{id}', [SaleController::class, 'bayar'])->name('manager.sale.bayar');
     Route::post('/fetch-data', [SaleController::class, 'fetchData'])->name('manager.sale.checkcode');
     //end sale
 

@@ -10,7 +10,15 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $report = Sale::with('customer')->get();
+        $report = Sale::with('customer', 'accessories', 'itemSales')->get();
+        $report->each(function($sale) {
+            $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
+
+            $sale->itemSales = $sale->itemSales->map(function($itemSale) {
+                return $itemSale->name;
+            })->implode(', ');
+        });
+        //return $report;
         $income = $report->sum('pay');
         return view('admin.report.index', compact('report', 'income'));
     }
@@ -26,8 +34,16 @@ class ReportController extends Controller
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        $report = $query->with('customer') // Assuming you have a relationship with the customer model
+        $report = $query->with('customer', 'accessories', 'itemSales') // Assuming you have a relationship with the customer model
         ->get();
+
+        $report->each(function($sale) {
+            $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
+
+            $sale->itemSales = $sale->itemSales->map(function($itemSale) {
+                return $itemSale->name . ' - ' .'('. $itemSale->no_seri . ')';
+            });
+        });
 
         $income = $report->sum('pay'); // Assuming 'pay' is the column representing total income
 

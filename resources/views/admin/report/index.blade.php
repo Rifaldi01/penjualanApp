@@ -44,6 +44,8 @@
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
                         <th>Customer</th>
+                        <th>Item</th>
+                        <th>Accessories</th>
                         <th class="text-center" width="5%">Total Item</th>
                         <th class="text-center" width="5%">Total Price</th>
                         <th class="text-center" width="5%">Diskon</th>
@@ -57,7 +59,7 @@
                     <tfoot>
                     <tr>
                         <th colspan="5" class="text-center">Total Income</th>
-                        <th colspan="3" class="text-center" id="total-income">0</th>
+                        <th colspan="5" class="text-center" id="total-income">0</th>
                     </tr>
                     </tfoot>
                 </table>
@@ -93,18 +95,32 @@
                         $('#total-income').text(formatRupiah(totalIncome));
 
                         response.report.forEach(function (data, index) {
+                            var itemSalesList = '';
+                            if (data.itemSales && data.itemSales.length > 0) {
+                                itemSalesList = data.itemSales.join(', ');
+                            }
+
+                            var accessoriesList = '';
+                            if (data.accessories && data.accessories.length > 0) {
+                                accessoriesList = data.accessories.map(function(accessory) {
+                                    return `${accessory.name} - ( ${accessory.pivot.qty} )`;
+                                }).join(', ');
+                            }
+
                             var row = `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${formatDate(data.created_at)}</td>
-                                    <td>${data.customer.name}</td>
-                                    <td class="text-center">${data.total_item}</td>
-                                    <td>${formatRupiah(data.total_price)}</td>
-                                    <td>${formatRupiah(data.diskon)}</td>
-                                    <td>${formatRupiah(data.ongkir)}</td>
-                                    <td>${formatRupiah(data.pay)}</td>
-                                </tr>
-                            `;
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${formatDate(data.created_at)}</td>
+                            <td>${data.customer ? data.customer.name : 'N/A'}</td>
+                            <td>${itemSalesList}</td>
+                            <td>${accessoriesList}</td>
+                            <td class="text-center">${data.total_item}</td>
+                            <td>${formatRupiah(data.total_price)}</td>
+                            <td>${formatRupiah(data.diskon)}</td>
+                            <td>${formatRupiah(data.ongkir)}</td>
+                            <td>${formatRupiah(data.pay)}</td>
+                        </tr>
+                    `;
                             reportBody.append(row);
                         });
                     },
@@ -114,7 +130,6 @@
                 });
             }
 
-            // Load all data on page load
             loadData();
 
             $('#filter-btn').on('click', function () {
@@ -125,11 +140,8 @@
             });
 
             $('#reset-btn').click(function () {
-                // Clear the date inputs
                 $('#starDate').val('');
                 $('#endDate').val('');
-
-                // Reload data without filters
                 loadData();
             });
 
@@ -154,29 +166,37 @@
                         customize: function(doc) {
                             doc.content = [];
 
+                            doc.pageSize = {
+                                width: 842,
+                                height: 595
+                            };
+                            doc.pageOrientation = 'landscape';
+
+                            doc.pageMargins = [20, 20, 20, 20];
+
                             var thead = $('#filter-table thead').clone();
                             var headers = [];
                             thead.find('th').each(function() {
                                 headers.push({ text: $(this).text(), style: 'tableHeader' });
                             });
-                            doc.content.push({
-                                table: {
-                                    headerRows: 1,
-                                    body: [headers],
-                                    style: 'table'
-                                },
-                                layout: 'lightHorizontalLines'
-                            });
+
+                            var tableBody = [];
+                            tableBody.push(headers);
 
                             $('#filter-table tbody tr').each(function() {
                                 var row = [];
                                 $(this).find('td').each(function() {
-                                    row.push({ text: $(this).text(), style: 'tableCell' });
+                                    var cellText = $(this).text();
+                                    if ($(this).find('ul').length > 0) {
+                                        cellText = $(this).find('ul').html().replace(/<\/?li>/g, '');
+                                        cellText = cellText.split('</li>').filter(item => item).map(item => ({ text: item.trim() }));
+                                    }
+                                    row.push({ text: cellText, style: 'tableCell' });
                                 });
                                 while (row.length < headers.length) {
                                     row.push({ text: '' });
                                 }
-                                doc.content[0].table.body.push(row);
+                                tableBody.push(row);
                             });
 
                             var tfoot = $('#filter-table tfoot').clone();
@@ -188,8 +208,18 @@
                                 while (footerRow.length < headers.length) {
                                     footerRow.push({ text: '' });
                                 }
-                                doc.content[0].table.body.push(footerRow);
+                                tableBody.push(footerRow);
                             }
+
+                            doc.content.push({
+                                table: {
+                                    headerRows: 1,
+                                    body: tableBody,
+                                    widths: Array(headers.length).fill('*'),
+                                    style: 'table'
+                                },
+                                layout: 'lightHorizontalLines'
+                            });
 
                             doc.styles = {
                                 table: {
@@ -213,7 +243,6 @@
                         },
                         customize: function(win) {
                             $(win.document.body).find('table').addClass('compact').css('font-size', '10px');
-
                             var bodyContent = $('#filter-table tbody').clone();
                             $(win.document.body).find('table').append(bodyContent);
                             var footerContent = $('#filter-table tfoot').clone();
@@ -226,5 +255,6 @@
             table.buttons().container()
                 .appendTo('#filter-table_wrapper .col-md-6:eq(0)');
         });
+
     </script>
 @endpush

@@ -48,4 +48,8 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
     Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
     Route::get('/report/filter', [ReportController::class, 'filter'])->name('report.filter');
     //report end
+
+    //print
+    Route::get('/transaksi/nota-kecil', [SaleController::class, 'notaKecil'])->name('transaksi.nota_kecil');
+    //end print
 });

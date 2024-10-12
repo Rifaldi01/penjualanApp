@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('ongkir')->default(0);
             $table->string('diskon')->default(0);
             $table->string('pay');
+            $table->string('nominal_in');
+            $table->date('deadlines')->nullable();
             $table->integer('user_id');
             $table->timestamps();
         });

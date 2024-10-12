@@ -5,7 +5,7 @@
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List Items</h4>
+                        <h4 class="text-uppercase">List Accessories</h4>
                     </div>
                 </div>
                 <div class="col-6">
@@ -21,9 +21,8 @@
                 <table id="example4" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
-                        <th width="2%">No</th>
+                        <th width="2%">Code Access</th>
                         <th>Name</th>
-                        <th>Code Acces</th>
                         <th>Price</th>
                         <th class="text-center">Barcode</th>
                         <th class="text-center" width="10%">Stok</th>
@@ -33,11 +32,10 @@
                     <tbody>
                     @foreach($acces as $key => $data)
                         <tr>
-                            <td>{{$key + 1}}</td>
+                            <td>{{$data->code_acces}}</td>
                             <td>
                                 <a class="text-dark">{{$data->name}}</a>
                             </td>
-                            <td>{{$data->code_acces}}</td>
                             <td>
                                 <a class="text-dark">{{formatRupiah($data->price)}},-</a>
                             </td>

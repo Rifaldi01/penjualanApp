@@ -22,6 +22,11 @@ class Sale extends Model
     {
         return $this->hasMany(AccessoriesSale::class);
     }
+    public function accessories()
+    {
+        return $this->belongsToMany(Accessories::class, 'accessories_sales', 'sale_id', 'accessories_id')
+            ->withPivot('qty');
+    }
 
     public function itemSales()
     {

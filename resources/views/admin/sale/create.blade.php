@@ -17,7 +17,8 @@
                     </label>
                     <div class="col-lg-5">
                         <div class="input-group">
-                            <input type="text" class="form-control" name="code" id="code" placeholder="Enter Code or Serial">
+                            <input type="text" class="form-control" name="code" id="code"
+                                   placeholder="Enter Code or Serial">
                         </div>
                     </div>
                 </div>
@@ -34,20 +35,31 @@
                 </thead>
                 <tbody id="accessoriesTableBody"></tbody>
             </table>
+            <form action="" class="form-pembelian" method="post">
+                @csrf
             <div class="row">
                 <div class="col-lg-8">
                     <div class="bg-primary">
                         <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
                     </div>
+                    <div class=" col-lg-4 float-end">
+                        <div class="mt-2">
+                            <label for="">Nominal In</label>
+                            <input type="number" name="nominal_in" class="form-control" id="nominal_in">
+                        </div>
+                        <div class="mt-2">
+                            <label for="">Pay Plan</label>
+                            <input type="text" class="form-control datepicker" name="deadlines" id="deadlines">
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-4">
-                    <form action="" class="form-pembelian" method="post">
-                        @csrf
                         <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
                             <label for="customer" class="col-lg-4 control-label">Customer</label>
                             <div class="col-lg-8">
-                                <select name="customer_id" id="single-select-field" data-placeholder="--Pilih Customer--" class="form-control accessory-select">
+                                <select name="customer_id" id="single-select-field"
+                                        data-placeholder="--Pilih Customer--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customer as $data)
                                         <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -84,7 +96,9 @@
             </div>
             <hr>
             <div class="box-footer">
-                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Save</button>
+                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
+                    Save
+                </button>
             </div>
         </div>
     </div>
@@ -175,6 +189,7 @@
                 bayar += ongkir;
 
                 $('#totalrp').val('Rp. ' + Math.floor(total).toLocaleString('id-ID'));
+                $('#nominal_in').val('' + Math.floor(bayar));
                 $('#bayarrp').val('Rp. ' + Math.floor(bayar).toLocaleString('id-ID'));
                 $('#totalAmount').text('Bayar Rp. ' + Math.floor(bayar).toLocaleString('id-ID'));
 
@@ -292,6 +307,7 @@
                                 name: data.name,
                                 price: parseFloat(data.price.replace(/[^0-9,-]/g, "").replace(',', '.')),
                                 no_seri: data.code,
+                                date_in: data.created_at
                             });
                         }
                     }
@@ -307,6 +323,8 @@
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
+                        nominal_in: $('#nominal_in').val(),
+                        deadlines: $('#deadlines').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
                         items: itemsData
@@ -361,6 +379,7 @@
             }
         });
     </script>
+
 @endpush
 
 

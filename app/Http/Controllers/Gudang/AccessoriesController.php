@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Gudang;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
+use App\Models\AccessoriesIn;
 use App\Models\AccessoriesSale;
 use App\Models\Item;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -119,11 +121,22 @@ class AccessoriesController extends Controller
             'name' => 'required|',
             'price' => 'required'
         ],[
-            'name' => 'Nama Accessories Wajib Diisi',
+            'name.required' => 'Nama Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
         ]);
+
         if ($id === null) {
-            $codeAcces = time();
+            // Dapatkan dua digit terakhir tahun, bulan, dan hari
+            $currentDate = date('ymd'); // contoh: 240822 untuk 22 Agustus 2024
+
+            // Dapatkan jumlah accessories yang diinput pada hari ini
+            $countToday = Accessories::whereDate('created_at', date('Y-m-d'))->count();
+
+            // Nomor urut dengan padding tiga digit
+            $newCode = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+
+            // Format kode akses baru
+            $codeAcces = 'P-' . $currentDate . $newCode; // contoh output: P-240822001
         }
 
         $acces = Accessories::firstOrNew(['id' => $id]);
@@ -138,6 +151,7 @@ class AccessoriesController extends Controller
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('gudang.acces.index');
     }
+
 
     public function editmultiple()
     {
@@ -169,17 +183,46 @@ class AccessoriesController extends Controller
 
         // Loop melalui setiap aksesori dan perbarui stoknya
         foreach ($accessoriesData as $accessoryData) {
+            // Temukan aksesori berdasarkan kode
             $accessory = Accessories::where('code_acces', $accessoryData['code_acces'])->first();
 
             if ($accessory) {
-                $accessory->stok += $accessoryData['stok'];
+                // Simpan stok sebelumnya
+                $previousStock = $accessory->stok;
+
+                // Perbarui stok
+                $accessory->stok = $previousStock + $accessoryData['stok'];
                 $accessory->save();
+
+                // Cek apakah ada entri di accessories_ins dengan accessories_id yang sama pada tanggal yang sama
+                $today = now()->format('Y-m-d');
+                $existingAccessoriesIn = AccessoriesIn::where('accessories_id', $accessory->id)
+                    ->whereDate('date_in', $today)
+                    ->first();
+
+                if ($existingAccessoriesIn) {
+                    // Jika sudah ada, perbarui qty saja
+                    $existingAccessoriesIn->qty += $accessoryData['stok'];
+                    $existingAccessoriesIn->save();
+                } else {
+                    // Jika belum ada, buat entri baru di tabel accessories_ins
+                    AccessoriesIn::create([
+                        'accessories_id' => $accessory->id,
+                        'qty' => $accessoryData['stok'],
+                        'date_in' => now(),
+                    ]);
+                }
+            } else {
+                // Jika aksesori tidak ditemukan, kembalikan respons kesalahan
+                return response()->json(['success' => false, 'message' => 'Accessory not found for code: ' . $accessoryData['code_acces']], 404);
             }
         }
 
         // Kembalikan respons sukses
         return response()->json(['success' => true, 'message' => 'Accessories updated successfully!']);
     }
+
+
     public function download(Accessories $acces)
     {
         $generator = new BarcodeGeneratorPNG();
@@ -197,5 +240,15 @@ class AccessoriesController extends Controller
     {
         $report = AccessoriesSale::with('sale', 'accessories')->get();
         return view('gudang.report-acces.index', compact('report'));
+    }
+    public function accesin()
+    {
+        $accesin = AccessoriesIn::with('accessories')->get();
+        return view('gudang.accessories.accesin', compact('accesin'));
+    }
+    public function accesout()
+    {
+        $accesout = AccessoriesSale::with('accessories')->get();
+        return view('gudang.accessories.accesin', compact('accesout'));
     }
 }

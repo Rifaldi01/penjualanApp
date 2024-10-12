@@ -122,6 +122,7 @@ class CustomerController extends Controller
         $cust->name = $request->input('name');
         $cust->phone_wa = $request->input('phone_wa');
         $cust->phone = $request->input('phone');
+        $cust->company = $request->input('company');
         $cust->addres = $request->input('addres');
         $cust->save();
         Alert::success('Success', 'Save Data Success');
@@ -130,11 +131,20 @@ class CustomerController extends Controller
 
     public function import(Request $request)
     {
-        $customer = $request->file('file');
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
 
+        $customer = $request->file('file');
         $namefile = $customer->getClientOriginalName();
         $customer->move('file/customer/', $namefile);
-        Excel::import(new CustomerImport, public_path('file/customer/'. $namefile));
-        return redirect()->back()->withSuccess('Import Data Success');
+
+        try {
+            // Import data
+            Excel::import(new CustomerImport, public_path('file/customer/' . $namefile));
+            return redirect()->back()->with('success', 'Import Data Success');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

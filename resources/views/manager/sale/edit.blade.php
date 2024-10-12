@@ -9,9 +9,8 @@
             </div>
         </div>
         <div class="card-body">
-            <form class="form-sale" method="POST" action="{{ route('manager.sale.update', $sale->id) }}">
+            <form class="form-sale">
                 @csrf
-                @method('PUT')
                 <div class="form-group row">
                     <label for="code" class="col-lg-2 mt-2">
                         <strong>Kode:</strong>
@@ -34,24 +33,34 @@
                 </tr>
                 </thead>
                 <tbody id="accessoriesTableBody">
-                @foreach($sale->itemSales as $itemSale)
-                    <tr>
-                        <td>{{ $itemSale->no_seri }}</td>
-                        <td>{{ $itemSale->name }}</td>
-                        <td>{{ number_format($itemSale->price, 0, ',', '.') }}</td>
-                        <td><input type="number" name="qty[]" class="form-control stok-input" value="1"></td>
-                        <td><button class="btn btn-danger btn-sm bx bx-trash" type="button"></button></td>
-                    </tr>
-                @endforeach
-                @foreach($sale->accessoriesSales as $accessoriesSale)
-                    <tr>
-                        <td>{{ $accessoriesSale->accessories->code_acces }}</td>
-                        <td>{{ $accessoriesSale->accessories->name }}</td>
-                        <td>{{ number_format($accessoriesSale->accessories->price, 0, ',', '.') }}</td>
-                        <td><input type="number" name="qty[]" class="form-control stok-input" value="{{ $accessoriesSale->qty }}"></td>
-                        <td><button class="btn btn-danger btn-sm bx bx-trash" type="button"></button></td>
-                    </tr>
-                @endforeach
+{{--                @foreach($sale->accessoriesSales as $accessory)--}}
+{{--                    <tr>--}}
+{{--                        <td>{{ $accessory->accessories->code_acces }}</td>--}}
+{{--                        <td>{{ $accessory->accessories->name }}</td>--}}
+{{--                        <td>{{ formatRupiah($accessory->accessories->price) }}</td>--}}
+{{--                        <td>--}}
+{{--                            <input type="number" name="qty[]" class="form-control stok-input" value="{{ $accessory->qty }}" />--}}
+{{--                            <input type="hidden" name="accessories_id[]" value="{{ $accessory->accessories_id }}">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <button class="btn btn-danger btn-sm bx bx-trash" type="button"></button>--}}
+{{--                        </td>--}}
+{{--                    </tr>--}}
+{{--                @endforeach--}}
+
+{{--                @foreach($sale->itemSales as $item)--}}
+{{--                    <tr>--}}
+{{--                        <td>{{ $item->no_seri }}</td>--}}
+{{--                        <td>{{ $item->name }}</td>--}}
+{{--                        <td>{{ formatRupiah($item->price) }}</td>--}}
+{{--                        <td>--}}
+{{--                            <input type="number" class="form-control stok-input" value="1" readonly>--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <button class="btn btn-danger btn-sm bx bx-trash" type="button"></button>--}}
+{{--                        </td>--}}
+{{--                    </tr>--}}
+{{--                @endforeach--}}
                 </tbody>
             </table>
             <div class="row">
@@ -59,13 +68,27 @@
                     <div class="bg-primary">
                         <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
                     </div>
+                    <form action="" class="form-pembelian" method="post">
+                        @csrf
+                    <div class=" col-lg-4 float-end">
+                        <div class="mt-2">
+                            <label for="">Nominal In</label>
+                            <input type="number" name="nominal_in" class="form-control" id="nominal_in" value="{{$sale->nominal_in}}">
+                        </div>
+                        <div class="mt-2">
+                            <label for="">Pay Plan</label>
+                            <input type="text" class="form-control datepicker" name="deadlines" id="deadlines" value="{{$sale->deadlines}}">
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-4">
-                    <form class="form-pembelian">
+
+
+                        <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
                             <label for="customer" class="col-lg-4 control-label">Customer</label>
                             <div class="col-lg-8">
-                                <select name="customer_id" id="single-select-field" class="form-control accessory-select">
+                                <select name="customer_id" id="single-select-field" data-placeholder="--Pilih Customer--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customers as $customer)
                                         <option value="{{ $customer->id }}" {{ $sale->customer_id == $customer->id ? 'selected' : '' }}>
@@ -78,34 +101,33 @@
                         <div class="form-group row mb-2">
                             <label for="totalrp" class="col-lg-4 control-label">Total Price</label>
                             <div class="col-lg-8">
-                                <input type="text" id="totalrp" class="form-control" value="{{ number_format($sale->total_price, 0, ',', '.') }}" readonly>
+                                <input type="text" id="totalrp" class="form-control" readonly value="{{formatRupiah($sale->total_price)}}">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="diskon" class="col-lg-4 control-label">Diskon</label>
                             <div class="col-lg-8">
-                                <input type="number" name="diskon" id="diskon" class="form-control" value="{{ $sale->diskon }}">
+                                <input type="number" name="diskon" id="diskon" class="form-control" value="0">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="ongkir" class="col-lg-4 control-label">Ongkir</label>
                             <div class="col-lg-8">
-                                <input type="number" name="ongkir" id="ongkir" class="form-control" value="{{ $sale->ongkir }}">
+                                <input type="number" name="ongkir" id="ongkir" class="form-control" value="0">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="bayar" class="col-lg-4 control-label">Bayar</label>
                             <div class="col-lg-8">
-                                <input type="text" id="bayarrp" name="bayar" class="form-control" value="{{ number_format($sale->bayar, 0, ',', '.') }}" readonly>
+                                <input type="text" id="bayarrp" name="bayar" class="form-control" readonly value="{{formatRupiah($sale->pay)}}">
                             </div>
                         </div>
-                        <input type="hidden" name="total_item" id="total_item" value="{{ $sale->total_item }}" readonly>
                     </form>
                 </div>
             </div>
             <hr>
             <div class="box-footer">
-                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Update</button>
+                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Save</button>
             </div>
         </div>
     </div>
@@ -134,8 +156,8 @@
                         }
                     },
                     {
-                        data: 'stok', render: function (data, type, row) {
-                            return '<input type="number" name="qty[]" class="form-control stok-input" value="" + data + "" >';
+                        data: 'qty', render: function (data, type, row) {
+                            return '<input type="number" name="qty[]" class="form-control stok-input" value="'+data+'"/>'; //save
                         }
                     },
                     {
@@ -149,6 +171,18 @@
                 paginate: false,
                 lengthChange: false,
                 buttons: []
+            });
+
+            let data1 = @json($sale->accessoriesSales);
+            data1.forEach(item => {
+                table.row.add({
+                    code: item.accessories.code_acces,
+                    name: item.accessories.name,
+                    price: item.accessories.price,
+                    accessories_id: item.accessories_id,
+                    qty: item.qty,
+                    id: item.id
+                }).draw();
             });
 
             function formatRupiah(amount) {
@@ -244,12 +278,12 @@
                                     table.rows().every(function () {
                                         let data = this.data();
                                         if (response.type === 'accessory' && data.code === response.data.code_acces) {
-                                            data.stok += 1;
+                                            data.qty += 1;
                                             this.data(data).draw();
                                             found = true;
                                             return false;
                                         } else if (response.type === 'item' && data.no_seri === response.data.no_seri) {
-                                            data.stok += 1;
+                                            data.qty += 1;
                                             this.data(data).draw();
                                             found = true;
                                             return false;
@@ -262,7 +296,7 @@
                                                 code: response.data.code_acces,
                                                 name: response.data.name,
                                                 price: response.data.price,
-                                                stok: 1,
+                                                qty: 1,
                                                 accessories_id: response.data.id
                                             }).draw();
                                         } else if (response.type === 'item') {
@@ -270,7 +304,7 @@
                                                 code: response.data.no_seri,
                                                 name: response.data.name,
                                                 price: response.data.price,
-                                                stok: 1,
+                                                qty: 1,
                                                 itemcategory_id: response.data.itemcategory_id
                                             }).draw();
                                         }
@@ -295,32 +329,50 @@
 
                 let accessoriesData = [];
                 let itemsData = [];
+                let sale_id = '{{ $sale->id }}';
 
                 table.rows().every(function () {
                     let data = this.data();
-                    let qty = $(this.node()).find('input.stok-input').val();
+                    if (data) {
+                        let qty = parseInt($(this.node()).find('input.stok-input').val());
 
-                    if (data.code && data.name && qty) {
-                        if (data.accessories_id) {
+                        if (data.accessories_id && qty > 0) {
                             accessoriesData.push({
+                                id: data.id,
+                                sale_id: sale_id,
                                 accessories_id: data.accessories_id,
                                 qty: qty,
                                 subtotal: parseFloat(data.price.replace(/[^0-9,-]/g, "").replace(',', '.')) * qty
                             });
                         } else if (data.itemcategory_id) {
                             itemsData.push({
+                                sale_id: sale_id,
                                 itemcategory_id: data.itemcategory_id,
                                 name: data.name,
-                                price: parseFloat(data.price.replace(/[^0-9,-]/g, "").replace(',', '.')),
                                 no_seri: data.code,
+                                price: parseFloat(data.price.replace(/[^0-9,-]/g, "").replace(',', '.')),
                             });
                         }
+                    }
+
+                });
+
+                $.ajax({
+                    url: '{{route('manager.sale.edit', $sale->id)}}',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#totalrp').val(data.total_price);
+                        $('#diskon').val(data.diskon);
+                        $('#ongkir').val(data.ongkir);
+                        $('#bayarrp').val(data.pay);
+                        $('#nominal_in').val(data.nominal_in);
+                        $('#deadlines').val(data.deadlines);
                     }
                 });
 
                 $.ajax({
-                    url: '{{ route('manager.sale.store') }}',
-                    method: 'POST',
+                    url: '{{ route('manager.sale.update', $sale->id) }}',
+                    method: 'PUT',
                     data: {
                         _token: '{{ csrf_token() }}',
                         customer_id: $('select[name="customer_id"]').val(),
@@ -328,9 +380,12 @@
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
+                        nominal_in: $('#nominal_in').val(),
+                        deadlines: $('#deadlines').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
-                        items: itemsData
+                        items: itemsData,
+
                     },
                     success: function (response) {
                         if (response.status === 'success') {
@@ -383,5 +438,3 @@
         });
     </script>
 @endpush
-
-
