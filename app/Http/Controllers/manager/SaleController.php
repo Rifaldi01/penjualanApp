@@ -188,11 +188,11 @@ class SaleController extends Controller
     public function edit($id) //ieu fungsi jang ngambil form edit?enya
     {
         if (\request()->ajax()){
-            $sale = Sale::with(['itemSales', 'accessoriesSales.accessories'])->findOrFail($id);
+            $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories'])->findOrFail($id);
             return response()->json($sale);
         }
         $customers = Customer::all();
-        $sale = Sale::with(['itemSales', 'accessoriesSales.accessories'])->findOrFail($id);
+        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories'])->findOrFail($id);
         return view('manager.sale.edit', compact('sale', 'customers'));
     }
 
@@ -221,39 +221,63 @@ class SaleController extends Controller
             ItemSale::where('sale_id', $id);
             AccessoriesSale::where('sale_id', $id);
 
-            //eta no_seri teh naon weuh di request. salah a kuduna items etamana nama colom dina item_sales
-            //ke ieu dibenerken cobaan hela edit deui save hela?nya
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
-                    $itemSale = new ItemSale();
-                    $itemSale->sale_id = $sale->id;
-                    $itemSale->name = $item['name'];//item_name weuh di request oh name hungkul soalna ieu teh mindahkeun ti item ka item_name. Enya  pokokna $requiewst->item_name pasti error soalna null. weuh di jero request
-                    $itemSale->no_seri = $item['no_seri']; //no seri ieu teh di jero item_sales? enya
-                    $itemSale->price = str_replace('.', '', $item['price']);
-                    $itemSale->itemcategory_id = $item['itemcategory_id'];
-                    $itemSale->date_in = now();
-                    $itemSale->save();
+                    // Temukan item di tabel items berdasarkan no_seri
+                    $existingItem = Item::where('no_seri', $item['no_seri'])->first();
+                    if ($existingItem) {
+                        // Pindahkan data ke tabel item_sales
+                        $itemSale = new ItemSale();
+                        $itemSale->sale_id = $sale->id;
+                        $itemSale->name = $existingItem->name;
+                        $itemSale->no_seri = $existingItem->no_seri;
+                        $itemSale->price = $existingItem->price;
+                        $itemSale->itemcategory_id = $existingItem->itemcategory_id;
+                        $itemSale->date_in = now();
+                        $itemSale->save();
+
+                        // Hapus item dari tabel items
+                        $existingItem->delete();
+                    }
                 }
             }
 
-            //ieu naon accecories_id? data nu dikirimna accessories
-            //data request anu dikirim kadieu teh ieu
-            //euweuh data accessories_id, ayana data accessories. jadi if request->hgas('accessories_id') moal kapanggil
 
-            //kitu cara manggilna. bieu mah salah save tos
+
             if ($request->has('accessories')) {
-                foreach ($request->accessories as $item) {
-                    $id = $item['id'] ?? null;
+                foreach ($request->accessories as $accessory) {
+                    $id = $accessory['id'] ?? null;
                     $accessoriesSale = AccessoriesSale::firstOrNew(['id' => $id]);
-                    $accessoriesSale->sale_id = $item['sale_id'];
-                    $accessoriesSale->accessories_id = $item['accessories_id'];
-                    $accessoriesSale->qty = $item['qty'];
-                    $accessoriesSale->subtotal = $item['subtotal'];//$request->qty[$key] * str_replace('.', '', $request->price[$key]);
-                    $accessoriesSale->acces_out= now();
-                    $accessoriesSale->save();
+
+                    // Dapatkan aksesori terkait berdasarkan accessories_id
+                    $accessoryModel = Accessories::find($accessory['accessories_id']);
+                    if ($accessoryModel) {
+                        // Dapatkan qty lama jika aksesori sudah ada, jika tidak, set 0 (untuk aksesori baru)
+                        $previousQty = $accessoriesSale->exists ? $accessoriesSale->qty : 0;
+                        $newQty = $accessory['qty'];
+
+                        // Jika aksesori baru, kurangi stok berdasarkan qty baru
+                        if (!$accessoriesSale->exists) {
+                            $accessoryModel->stok -= $newQty;
+                        } else {
+                            // Jika aksesori lama, hitung perbedaan stok berdasarkan perubahan qty
+                            $stockDifference = $previousQty - $newQty;
+                            $accessoryModel->stok += $stockDifference;
+                        }
+
+                        // Simpan perubahan stok
+                        $accessoryModel->save();
+
+                        // Simpan atau perbarui AccessoriesSale
+                        $accessoriesSale->sale_id = $sale->id;
+                        $accessoriesSale->accessories_id = $accessory['accessories_id'];
+                        $accessoriesSale->qty = $newQty;
+                        $accessoriesSale->subtotal = str_replace('.', '', $accessory['subtotal']);
+                        $accessoriesSale->acces_out = now();
+                        $accessoriesSale->save();
+                    }
                 }
             }
-
             DB::commit();
 
             return response()->json([
@@ -281,8 +305,64 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            // Cari itemSale berdasarkan ID
+            $itemSale = ItemSale::find($id);
+            $accessorySale = AccessoriesSale::find($id);
+
+            if ($itemSale) {
+                // Pindahkan data itemSale ke tabel items
+                // Mencari item berdasarkan category_id
+                $item = Item::where('id', $itemSale->itemcategory_id)->first();
+
+                // Jika item tidak ditemukan, buat item baru
+                if (!$item) {
+                    // Membuat item baru dengan data dari itemSale
+                    $item = Item::create([
+                        'itemcategory_id' => $itemSale->itemcategory_id,
+                        'name' => $itemSale->name,
+                        'price' => $itemSale->price,
+                        'no_seri' => $itemSale->no_seri,
+                        'status' => 0 // Pastikan status sesuai dengan yang diinginkan
+                    ]);
+                }
+
+                // Hapus item dari tabel item_sales
+                $itemSale->delete();
+
+            } elseif ($accessorySale) {
+                // Kembalikan aksesori ke stok dan hapus dari accessories_sales
+                $accessory = Accessories::find($accessorySale->accessories_id);
+
+                if ($accessory) {
+                    // Tambahkan qty ke stok
+                    $accessory->stok += $accessorySale->qty;
+                    $accessory->save();
+                }
+
+                // Hapus aksesori dari tabel accessories_sales
+                $accessorySale->delete();
+
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan.'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Item berhasil dipindahkan dan dihapus.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
 
     public function fetchData(Request $request)
     {

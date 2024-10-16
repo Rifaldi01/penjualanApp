@@ -33,34 +33,6 @@
                 </tr>
                 </thead>
                 <tbody id="accessoriesTableBody">
-{{--                @foreach($sale->accessoriesSales as $accessory)--}}
-{{--                    <tr>--}}
-{{--                        <td>{{ $accessory->accessories->code_acces }}</td>--}}
-{{--                        <td>{{ $accessory->accessories->name }}</td>--}}
-{{--                        <td>{{ formatRupiah($accessory->accessories->price) }}</td>--}}
-{{--                        <td>--}}
-{{--                            <input type="number" name="qty[]" class="form-control stok-input" value="{{ $accessory->qty }}" />--}}
-{{--                            <input type="hidden" name="accessories_id[]" value="{{ $accessory->accessories_id }}">--}}
-{{--                        </td>--}}
-{{--                        <td>--}}
-{{--                            <button class="btn btn-danger btn-sm bx bx-trash" type="button"></button>--}}
-{{--                        </td>--}}
-{{--                    </tr>--}}
-{{--                @endforeach--}}
-
-{{--                @foreach($sale->itemSales as $item)--}}
-{{--                    <tr>--}}
-{{--                        <td>{{ $item->no_seri }}</td>--}}
-{{--                        <td>{{ $item->name }}</td>--}}
-{{--                        <td>{{ formatRupiah($item->price) }}</td>--}}
-{{--                        <td>--}}
-{{--                            <input type="number" class="form-control stok-input" value="1" readonly>--}}
-{{--                        </td>--}}
-{{--                        <td>--}}
-{{--                            <button class="btn btn-danger btn-sm bx bx-trash" type="button"></button>--}}
-{{--                        </td>--}}
-{{--                    </tr>--}}
-{{--                @endforeach--}}
                 </tbody>
             </table>
             <div class="row">
@@ -157,12 +129,12 @@
                     },
                     {
                         data: 'qty', render: function (data, type, row) {
-                            return '<input type="number" name="qty[]" class="form-control stok-input" value="'+data+'"/>'; //save
+                            return '<input type="number" name="qty[]" class="form-control stok-input" value="'+data+'"/>';
                         }
                     },
                     {
                         data: null, searchable: false, sortable: false, render: function (data, type, row) {
-                            return '<button class="btn btn-danger btn-sm bx bx-trash" type="button"></button>';
+                            return `<button class="btn btn-danger btn-delete bx bx-trash" data-id="${row.id}"></button>`;
                         }
                     }
                 ],
@@ -181,7 +153,18 @@
                     price: item.accessories.price,
                     accessories_id: item.accessories_id,
                     qty: item.qty,
-                    id: item.id
+                    id: item.id // pastikan menggunakan item.id untuk aksesori
+                }).draw();
+            });
+
+            let data2 = @json($sale->itemSales);
+            data2.forEach(item => {
+                table.row.add({
+                    code: item.no_seri,
+                    name: item.name,
+                    price: item.price,
+                    qty: 1, // Misalnya hanya ada 1 per item no_seri
+                    id: item.id // pastikan menggunakan item.id untuk item
                 }).draw();
             });
 
@@ -346,6 +329,7 @@
                             });
                         } else if (data.itemcategory_id) {
                             itemsData.push({
+                                id: data.id,
                                 sale_id: sale_id,
                                 itemcategory_id: data.itemcategory_id,
                                 name: data.name,
@@ -436,5 +420,53 @@
                 calculateTotal();
             }
         });
+    </script>
+    <script>
+        $(document).on('click', '.btn-delete', function () {
+            let itemId = $(this).data('id'); // Gunakan ID yang benar dari itemSale atau accessorySale
+            Swal.fire({
+                title: 'Anda yakin?',
+                text: "Data akan dihapus dan tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `{{ route('manager.sale.destroy', ':id') }}`.replace(':id', itemId),
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                Swal.fire(
+                                    'Dihapus!',
+                                    response.message,
+                                    'success'
+                                );
+                                // Reload atau update tampilan setelah delete
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function (xhr) {
+                            Swal.fire(
+                                'Gagal!',
+                                'Terjadi kesalahan saat menghapus data.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
     </script>
 @endpush
