@@ -12,7 +12,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <table id="excel" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
                         <th width="4%">No</th>
@@ -161,17 +161,21 @@
 @push('head') @endpush
 @push('js')
     <script>
-        $(document).ready(function () {
-            var table = $('#example').DataTable();
+        $(document).ready(function() {
+            var table = $('#excel').DataTable( {
+                lengthChange: false,
+                buttons: [ 'excel']
+            } );
 
-            // Mengurutkan ulang nomor saat tabel diurutkan atau difilter
+            table.buttons().container()
+                .appendTo( '#excel_wrapper .col-md-6:eq(0)' );
             table.on('order.dt search.dt', function () {
                 let i = 1;
                 table.cells(null, 0, {search: 'applied', order: 'applied'}).every(function (cell) {
                     this.data(i++);
                 });
             }).draw();
-        });
+        } );
     </script>
     <script>
         $(document).ready(function () {

@@ -125,12 +125,12 @@
                             <div class="col-lg-4">
                                 <div class="mb-2 text-center">Hormat Kami,</div>
                                 <div class="text-center">
-                                    <img src="{{asset('images/dnd-ttd.png')}}"
-                                         class="print-img" alt="dnd logo">
+                                    <br>
+                                    <br>
                                 </div>
                                 <div
                                     class="mt-2 text-center">{{Auth::user()->name}}</div>
-                                <div class="text-center">Administration</div>
+                                <div class="text-center">Gudang</div>
                             </div>
                         </div>
                     </div>

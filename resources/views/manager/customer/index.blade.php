@@ -62,7 +62,7 @@
                     @foreach($cust as $key => $data)
                         <tr>
                             <th>{{$key +1}}</th>
-                            <td>{{$data->name}}</td>
+                            <td><a href="{{route('manager.customer.show', $data->id)}}" class="text-dark">{{$data->name}}</a></td>
                             <td>0{{$data->phone_wa}}</td>
                             <td>
                                 @if(isset($data->phone))

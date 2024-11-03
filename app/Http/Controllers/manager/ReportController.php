@@ -26,14 +26,45 @@ class ReportController extends Controller
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        $report = $query->with('customer') // Assuming you have a relationship with the customer model
+        $report = $query->with('customer', 'accessories', 'itemSales') // Assuming you have a relationship with the customer model
         ->get();
 
-        $income = $report->sum('pay'); // Assuming 'pay' is the column representing total income
+        $totalIncome = 0;
+        $totalCapital = 0;
+
+        $report->each(function($sale) use (&$totalIncome, &$totalCapital) {
+            // Sum up total sales income
+            $totalIncome += $sale->pay;
+
+            // Calculate capital price for each accessory in the sale
+            $accessoryCapital = $sale->accessories->sum(function($accessory) {
+                return $accessory->pivot->qty * $accessory->capital_price;
+            });
+
+            // Calculate capital price for each item in the sale
+            $itemCapital = $sale->itemSales->sum(function($itemSale) {
+                return $itemSale->capital_price;
+            });
+
+            // Accumulate total capital cost for the sale
+            $totalCapital += $accessoryCapital + $itemCapital;
+
+            // Format the accessories list for each sale
+            $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
+
+            // Format item sales list with name and serial number
+            $sale->itemSales = $sale->itemSales->map(function($itemSale) {
+                return $itemSale->name . ' - (' . $itemSale->no_seri . ')';
+            });
+        });
+
+        // Calculate profit
+        $profit = $totalIncome - $totalCapital;
 
         return response()->json([
             'report' => $report,
-            'income' => $income
+            'income' => $totalIncome,
+            'profit' => $profit
         ]);
     }
 }

@@ -145,6 +145,7 @@ class SaleController extends Controller
                             'name' => $item['name'],
                             'no_seri' => $item['no_seri'],
                             'price' => $item['price'],
+                            'capital_price' => $itemRecord->capital_price,
                             'date_in' => $itemRecord->created_at // Use created_at from the items table
                         ]);
 
@@ -232,6 +233,7 @@ class SaleController extends Controller
                         $itemSale->name = $existingItem->name;
                         $itemSale->no_seri = $existingItem->no_seri;
                         $itemSale->price = $existingItem->price;
+                        $itemSale->capital_price = $existingItem->capital_price;
                         $itemSale->itemcategory_id = $existingItem->itemcategory_id;
                         $itemSale->date_in = now();
                         $itemSale->save();
@@ -322,6 +324,7 @@ class SaleController extends Controller
                         'itemcategory_id' => $itemSale->itemcategory_id,
                         'name' => $itemSale->name,
                         'price' => $itemSale->price,
+                        'capital_price' => $itemSale->capital_price,
                         'no_seri' => $itemSale->no_seri,
                         'status' => 0 // Pastikan status sesuai dengan yang diinginkan
                     ]);

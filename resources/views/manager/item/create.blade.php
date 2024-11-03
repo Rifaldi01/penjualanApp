@@ -59,6 +59,13 @@
                 <input type="text" name="no_seri" class="form-control" placeholder="Enter No Seri"
                        value="{{isset($item) ? $item->no_seri : null}}">
             </div>
+            <div class="mt-3 mb-2">
+                <label class="col-form-label">Capital Price</label>
+                <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
+                    <input type="text" name="capital_price" class="form-control" onkeyup="formatRupiah(this)"
+                           value="{{isset($item) ? $item->capital_price : null}}" placeholder="0">
+                </div>
+            </div>
             <div class="mb-2">
                 <label class="col-form-label">Price</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>

@@ -150,6 +150,7 @@ class SaleController extends Controller
                             'name' => $item['name'],
                             'no_seri' => $item['no_seri'],
                             'price' => $item['price'],
+                            'capital_price' => $itemRecord->capital_price,
                             'date_in' => $itemRecord->created_at // Use created_at from the items table
                         ]);
 

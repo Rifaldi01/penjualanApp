@@ -38,6 +38,13 @@
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
+                <div class=" mb-2">
+                    <label class="col-form-label">Capital Price</label>
+                    <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
+                        <input type="text" name="capital_price" class="form-control" onkeyup="formatRupiah(this)"
+                               value="{{isset($acces) ? $acces->capital_price : null}}" placeholder="0">
+                    </div>
+                </div>
                 <div class="mb-2">
                     <label class="col-form-label">Harga</label>
                     <div class="input-group">

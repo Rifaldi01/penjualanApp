@@ -132,6 +132,7 @@ class ItemController extends Controller
         $item->name    = $request->input('name');
         $item->no_seri = $request->input('no_seri');
         $item->price = $request->input('price');
+        $item->capital_price = $request->input('capital_price');
         $item->save();
         Alert::success('Success', 'Upload Data Success');
         return redirect()->route('manager.item.index');

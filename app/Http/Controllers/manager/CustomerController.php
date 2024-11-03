@@ -65,7 +65,10 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        $sale = $customer->sale()->with('customer', 'itemSales.itemCategory', 'accessoriesSales.accessories')->get();
+        //return $sale;
+        return view('manager.customer.show', compact('customer', 'sale'));
     }
 
     /**

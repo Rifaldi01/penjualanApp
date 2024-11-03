@@ -61,6 +61,10 @@
                         <th colspan="5" class="text-center">Total Income</th>
                         <th colspan="5" class="text-center" id="total-income">0</th>
                     </tr>
+                    <tr>
+                        <th colspan="5" class="text-center">Profit</th>
+                        <th colspan="5" class="text-center" id="profit">0</th>
+                    </tr>
                     </tfoot>
                 </table>
             </div>
@@ -93,34 +97,42 @@
 
                         var totalIncome = response.income;
                         $('#total-income').text(formatRupiah(totalIncome));
+                        var profit = response.profit;
+                        $('#profit').text(formatRupiah(profit));
 
                         response.report.forEach(function (data, index) {
-                            var itemSalesList = '';
+                            // Generate list of item sales as a vertical list
+                            var itemSalesList = '<ul>';
                             if (data.itemSales && data.itemSales.length > 0) {
-                                itemSalesList = data.itemSales.join(', ');
+                                data.itemSales.forEach(function(item) {
+                                    itemSalesList += `<li>${item}</li>`;
+                                });
                             }
+                            itemSalesList += '</ul>';
 
-                            var accessoriesList = '';
+                            // Generate list of accessories as a vertical list
+                            var accessoriesList = '<ul>';
                             if (data.accessories && data.accessories.length > 0) {
-                                accessoriesList = data.accessories.map(function(accessory) {
-                                    return `${accessory.name} - ( ${accessory.pivot.qty} )`;
-                                }).join(', ');
+                                data.accessories.forEach(function(accessory) {
+                                    accessoriesList += `<li>${accessory.name} - (${accessory.pivot.qty})</li>`;
+                                });
                             }
+                            accessoriesList += '</ul>';
 
                             var row = `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${formatDate(data.created_at)}</td>
-                            <td>${data.customer ? data.customer.name : 'N/A'}</td>
-                            <td>${itemSalesList}</td>
-                            <td>${accessoriesList}</td>
-                            <td class="text-center">${data.total_item}</td>
-                            <td>${formatRupiah(data.total_price)}</td>
-                            <td>${formatRupiah(data.diskon)}</td>
-                            <td>${formatRupiah(data.ongkir)}</td>
-                            <td>${formatRupiah(data.pay)}</td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${formatDate(data.created_at)}</td>
+                                <td>${data.customer ? data.customer.name : 'N/A'}</td>
+                                <td>${itemSalesList}</td>
+                                <td>${accessoriesList}</td>
+                                <td class="text-center">${data.total_item}</td>
+                                <td>${formatRupiah(data.total_price)}</td>
+                                <td>${formatRupiah(data.diskon)}</td>
+                                <td>${formatRupiah(data.ongkir)}</td>
+                                <td>${formatRupiah(data.pay)}</td>
+                            </tr>
+                        `;
                             reportBody.append(row);
                         });
                     },
@@ -255,6 +267,6 @@
             table.buttons().container()
                 .appendTo('#filter-table_wrapper .col-md-6:eq(0)');
         });
-
     </script>
+
 @endpush

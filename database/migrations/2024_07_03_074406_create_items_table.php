@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('itemcategory_id');
             $table->string('name');
             $table->string('price');
+            $table->string('capital_price')->nullable();
             $table->string('no_seri')->unique();
             $table->integer('status')->default('0');
             $table->timestamps();

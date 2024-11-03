@@ -24,6 +24,7 @@
                         <th width="2%">No</th>
                         <th>Name</th>
                         <th>Code Acces</th>
+                        <th>Capital Price</th>
                         <th>Price</th>
                         <th class="text-center">Barcode</th>
                         <th class="text-center" width="10%">Stok</th>
@@ -39,7 +40,10 @@
                             </td>
                             <td>{{$data->code_acces}}</td>
                             <td>
-                                <a class="text-dark">{{formatRupiah($data->price)}},-</a>
+                               {{formatRupiah($data->capital_price)}},-
+                            </td>
+                            <td>
+                                {{formatRupiah($data->price)}},-
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('acces.download', $data) }}" class="btn btn-white px-5">

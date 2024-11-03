@@ -4,6 +4,7 @@ namespace App\Http\Controllers\manager;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
+use App\Models\AccessoriesIn;
 use App\Models\AccessoriesSale;
 use Illuminate\Http\Request;
 use Picqer\Barcode\BarcodeGeneratorPNG;
@@ -118,16 +119,28 @@ class AccesoriesController extends Controller
             'name' => 'required|',
             'price' => 'required'
         ],[
-            'name' => 'Nama Accessories Wajib Diisi',
+            'name.required' => 'Nama Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
         ]);
+
         if ($id === null) {
-            $codeAcces = time();
+            // Dapatkan dua digit terakhir tahun, bulan, dan hari
+            $currentDate = date('ymd'); // contoh: 240822 untuk 22 Agustus 2024
+
+            // Dapatkan jumlah accessories yang diinput pada hari ini
+            $countToday = Accessories::whereDate('created_at', date('Y-m-d'))->count();
+
+            // Nomor urut dengan padding tiga digit
+            $newCode = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+
+            // Format kode akses baru
+            $codeAcces = 'P-' . $currentDate . $newCode; // contoh output: P-240822001
         }
 
         $acces = Accessories::firstOrNew(['id' => $id]);
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
+        $acces->capital_price = $request->input('capital_price');
 
         if ($id === null) {
             $acces->code_acces = $codeAcces;
@@ -168,11 +181,38 @@ class AccesoriesController extends Controller
 
         // Loop melalui setiap aksesori dan perbarui stoknya
         foreach ($accessoriesData as $accessoryData) {
+            // Temukan aksesori berdasarkan kode
             $accessory = Accessories::where('code_acces', $accessoryData['code_acces'])->first();
 
             if ($accessory) {
-                $accessory->stok += $accessoryData['stok'];
+                // Simpan stok sebelumnya
+                $previousStock = $accessory->stok;
+
+                // Perbarui stok
+                $accessory->stok = $previousStock + $accessoryData['stok'];
                 $accessory->save();
+
+                // Cek apakah ada entri di accessories_ins dengan accessories_id yang sama pada tanggal yang sama
+                $today = now()->format('Y-m-d');
+                $existingAccessoriesIn = AccessoriesIn::where('accessories_id', $accessory->id)
+                    ->whereDate('date_in', $today)
+                    ->first();
+
+                if ($existingAccessoriesIn) {
+                    // Jika sudah ada, perbarui qty saja
+                    $existingAccessoriesIn->qty += $accessoryData['stok'];
+                    $existingAccessoriesIn->save();
+                } else {
+                    // Jika belum ada, buat entri baru di tabel accessories_ins
+                    AccessoriesIn::create([
+                        'accessories_id' => $accessory->id,
+                        'qty' => $accessoryData['stok'],
+                        'date_in' => now(),
+                    ]);
+                }
+            } else {
+                // Jika aksesori tidak ditemukan, kembalikan respons kesalahan
+                return response()->json(['success' => false, 'message' => 'Accessory not found for code: ' . $accessoryData['code_acces']], 404);
             }
         }
 

@@ -306,6 +306,7 @@
                                 itemcategory_id: data.itemcategory_id,
                                 name: data.name,
                                 price: parseFloat(data.price.replace(/[^0-9,-]/g, "").replace(',', '.')),
+                                capital_price: data.capital_price,
                                 no_seri: data.code,
                                 date_in: data.created_at
                             });

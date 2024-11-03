@@ -24,6 +24,7 @@
                         <th width="2%">No</th>
                         <th>Name</th>
                         <th>No Seri</th>
+                        <th>Capital Price</th>
                         <th>Price</th>
                         <th class="text-center">Barcode</th>
                         <th class="text-center" width="15%">Action</th>
@@ -37,6 +38,7 @@
                                 <a class="text-dark">{{$item->name}}</a>
                             </td>
                             <td>{{$item->cat->name}}-{{$item->no_seri}}</td>
+                            <td>{{formatRupiah($item->capital_price)}},-</td>
                             <td>{{formatRupiah($item->price)}},-</td>
                             <td class="text-center">
                                 <a href="{{ route('manager.items.download', $item) }}" class="btn btn-white px-5">
