@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSale;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Milon\Barcode\DNS1D;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -175,5 +177,55 @@ class ItemController extends Controller
         $leastSoldCategories = $categorySalesCount->sort()->take(5); // 5 kategori paling jarang terjual
 
         return view('manager.report-item.index', compact('report', 'categories', 'mostSoldCategories', 'leastSoldCategories', 'categorySalesCount'));
+    }
+    public function itemin()
+    {
+        $items = Item::with('cat')->get();
+        $itemSales = ItemSale::with('itemCategory')->get();
+
+        // Menggabungkan kedua koleksi menjadi satu
+        $itemin = $items->merge($itemSales);
+
+        return view('manager.item.itemin', compact('itemin'));
+    }
+    public function itemout()
+    {
+        $itemout = ItemSale::with('itemCategory')->get();
+        return view('manager.item.itemin', compact('itemout'));
+    }
+    public function print(Request $request)
+    {
+        // Periksa apakah input 'items' ada, berupa array, dan memiliki minimal 3 elemen
+        if (!$request->has('items') || !is_array($request->items) || count($request->items) < 3) {
+            return redirect()->back()->withErrors(['error' => 'Pilih minimal tiga items untuk dicetak barcodenya.']);
+        }
+
+        // Ambil data items berdasarkan ID yang dipilih
+        $items = Item::whereIn('id', $request->items)->get();
+
+        if ($items->isEmpty()) {
+            return redirect()->back()->withErrors(['error' => 'items yang dipilih tidak ditemukan.']);
+        }
+
+        $barcodeGenerator = new DNS1D();
+        $barcodeGenerator->setStorPath(storage_path('framework/cache/'));
+
+
+        $barcodePath = [];
+        foreach ($items as $item) {
+            $barcode = $barcodeGenerator->getBarcodePNG($item->no_seri, 'C128');
+            $filePath = public_path('/images/barcodes/items/' . $item->no_seri . '.png');
+            file_put_contents($filePath, base64_decode($barcode));
+            $barcodePath[$item->id] = public_path('images/barcodes/items/' . $item->no_seri . '.png');
+        }
+
+        $no  = 1;
+        $pdf = Pdf::loadView('manager.item.barcode-pdf', compact('items', 'no', 'barcodePath'));
+
+        $currentDate = date('d-m-Y'); // Format tanggal
+        $fileName = "items-$currentDate.pdf";
+
+        // Download PDF
+        return $pdf->stream($fileName);
     }
 }

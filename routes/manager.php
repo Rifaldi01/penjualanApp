@@ -34,6 +34,10 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::resource('/item', ItemController::class)->names('manager.item');
     Route::get('/items/{item}/download', [ItemController::class, 'download'])->name('manager.items.download');
     Route::get('item-report', [ItemController::class, 'report'])->name('manager.item.report');
+    Route::post('/item/print', [ItemController::class, 'print'])->name('manager.item.print');
+    Route::get('/itmein', [ItemController::class, 'itemin'])->name('manager.item.itemin');
+    Route::get('/itmeout', [ItemController::class, 'itemout'])->name('manager.item.itemout');
+
     //item end
 
     //Item Category
@@ -51,6 +55,9 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::post('check/access', [AccesoriesController::class, 'checkCode'])->name('manager.acces.checkcode');
     Route::get('/acces/{acces}/download', [AccesoriesController::class, 'download'])->name('acces.download');
     Route::get('acces-report', [AccesoriesController::class, 'report'])->name('manager.acces.report');
+    Route::get('/accesin', [AccesoriesController::class, 'accesin'])->name('manager.acces.accesin');
+    Route::get('/accesout', [AccesoriesController::class, 'accesout'])->name('manager.acces.accesout');
+    Route::post('/acces/print', [AccesoriesController::class, 'print'])->name('manager.acces.print');
     //accessories end
 
     //report

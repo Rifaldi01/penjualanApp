@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "barryvdh/laravel-dompdf": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^3.7",
         "laravel/framework": "^9.19",
@@ -14,7 +15,7 @@
         "laravel/ui": "^4.5",
         "maatwebsite/excel": "^3.1",
         "milon/barcode": "^11.0",
-        "picqer/php-barcode-generator": "^2.4",
+        "picqer/php-barcode-generator": "^3.2",
         "realrashid/sweet-alert": "^7.2",
         "spatie/laravel-html": "^3.5",
         "spatie/laravel-permission": "^6.9"
@@ -74,5 +75,3 @@
     "minimum-stability": "stable",
     "prefer-stable": true
 }
-
-

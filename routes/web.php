@@ -39,6 +39,8 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::get('item-report', [ItemController::class, 'report'])->name('gudang.item.report');
     Route::get('/itmein', [ItemController::class, 'itemin'])->name('gudang.item.itemin');
     Route::get('/itmeout', [ItemController::class, 'itemout'])->name('gudang.item.itemout');
+    Route::post('/item/print', [ItemController::class, 'print'])->name('gudang.item.print');
+
     //Item end
 
     //Item Category
@@ -54,6 +56,7 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::get('acces-report', [AccessoriesController::class, 'report'])->name('gudang.acces.report');
     Route::get('/accesin', [AccessoriesController::class, 'accesin'])->name('gudang.acces.accesin');
     Route::get('/accesout', [AccessoriesController::class, 'accesout'])->name('gudang.acces.accesout');
+    Route::post('/acces/print', [AccessoriesController::class, 'print'])->name('gudang.acces.print');
     //accessories end
 
 });

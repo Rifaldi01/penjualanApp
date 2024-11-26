@@ -17,21 +17,39 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="box-header with-border">
+                <!-- Form untuk cetak barcode -->
+                <form id="printBarcodeForm" action="{{ route('gudang.item.print') }}" method="POST" target="_blank">
+                    @csrf
+                    <div class="btn-group mb-1">
+                        <button type="submit" class="btn btn-info btn-sm">
+                            <i class="bx bx-barcode"></i> Print Barcode
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="table-responsive">
-                <table id="example3" class="table table-striped table-bordered" style="width:100%">
+                <table id="example" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
+                        <th width="5%">
+                            <input type="checkbox" id="select_all">
+                        </th>
                         <th width="2%">No</th>
                         <th>Name</th>
                         <th>No Seri</th>
                         <th>Price</th>
-                        <th class="text-center">Barcode</th>
+                        <th class="text-center" width="5%">Jumalah Barcode</th>
                         <th class="text-center" width="15%">Action</th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach($items as $key => $item)
                         <tr>
+                            <td>
+                                <input type="checkbox" name="items[]" value="{{ $item->id }}" class="select_item" form="printBarcodeForm">
+                            </td>
                             <td>{{$key + 1}}</td>
                             <td>
                                 <a class="text-dark">{{$item->name}}</a>
@@ -39,10 +57,7 @@
                             <td>{{$item->cat->name}}-{{$item->no_seri}}</td>
                             <td>{{formatRupiah($item->price)}},-</td>
                             <td class="text-center">
-                                <a href="{{ route('items.download', $item) }}" class="btn btn-white px-5">
-                                    <img src="data:image/png;base64,{{ $barcodes[$item->id] ?? '' }}" alt="Barcode">
-                                    <div>{{ $item->cat->name }}-{{ $item->no_seri }}</div>
-                                </a>
+                                <input type="number" class="form-control" value="1" readonly>
                             </td>
                             <td class="text-center">
                                 <a href="{{route('gudang.item.destroy', $item->id)}}" data-confirm-delete="true"
@@ -67,5 +82,11 @@
 
 @endpush
 @push('js')
-
+    <script>
+        // Checkbox untuk memilih semua accessories
+        document.getElementById('select_all').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.select_item');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
 @endpush

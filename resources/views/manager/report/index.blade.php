@@ -51,6 +51,7 @@
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
                         <th class="text-center" width="5%">Total Pay</th>
+                        <th class="text-center" width="5%">Tgl Pembayaran</th>
                     </tr>
                     </thead>
                     <tbody id="report-body">
@@ -59,11 +60,11 @@
                     <tfoot>
                     <tr>
                         <th colspan="5" class="text-center">Total Income</th>
-                        <th colspan="5" class="text-center" id="total-income">0</th>
+                        <th colspan="6" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
                         <th colspan="5" class="text-center">Profit</th>
-                        <th colspan="5" class="text-center" id="profit">0</th>
+                        <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     </tfoot>
                 </table>
@@ -119,6 +120,19 @@
                             }
                             accessoriesList += '</ul>';
 
+                            var debtList = '<ul>';
+                            if (data.debt && data.debt.length > 0) {
+                                data.debt.forEach(function(debt) {
+                                    // Sesuaikan properti yang ingin ditampilkan
+                                    var bankName = debt.bank ? debt.bank.name : '';
+                                    var description = debt.description ? debt.description : '';
+                                    var datePay = debt.date_pay ? debt.date_pay : 'Tanggal tidak tersedia';
+
+                                    debtList += `<li>${datePay} - ${bankName || description}</li>`;
+                                });
+                            }
+                            debtList += '</ul>';
+
                             var row = `
                             <tr>
                                 <td>${index + 1}</td>
@@ -131,6 +145,7 @@
                                 <td>${formatRupiah(data.diskon)}</td>
                                 <td>${formatRupiah(data.ongkir)}</td>
                                 <td>${formatRupiah(data.pay)}</td>
+                                <td>${debtList}</td>
                             </tr>
                         `;
                             reportBody.append(row);

@@ -5,12 +5,15 @@ namespace App\Http\Controllers\manager;
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
 use App\Models\AccessoriesSale;
+use App\Models\Bank;
 use App\Models\Customer;
+use App\Models\Debt;
 use App\Models\Item;
 use App\Models\ItemSale;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SaleController extends Controller
 {
@@ -35,9 +38,9 @@ class SaleController extends Controller
             // Format nomor invoice
             $data->invoiceNumber = "INV/DND/{$nextNumber}/{$currentMonthRoman}/{$currentYear}";
         }
-
+        $bank = Bank::all();
         // Pass data ke view
-        return view('manager.sale.index', compact('sales'));
+        return view('manager.sale.index', compact('sales', 'bank'));
     }
     private function convertToRoman($monthNumber)
     {
@@ -96,6 +99,14 @@ class SaleController extends Controller
                 'deadlines' => $request->deadlines,
                 'user_id' => auth()->id()
             ]);
+
+            if ($request->nominal_in && $request->nominal_in >= 0) {
+                Debt::create([
+                    'sale_id' => $sale->id,
+                    'pay_debts' => $request->nominal_in,
+                    'date_pay' => now(), // Gunakan tanggal saat ini
+                ]);
+            }
 
             // Save Accessories sale and update stock
             if ($request->has('accessories')) {
@@ -221,6 +232,31 @@ class SaleController extends Controller
             $sale->save();
             ItemSale::where('sale_id', $id);
             AccessoriesSale::where('sale_id', $id);
+            Debt::where('sale_id', $id);
+
+            if ($request->nominal_in == 0) {
+                // Hapus semua hutang terkait jika nominal_in = 0
+                Debt::where('sale_id', $sale->id)->delete();
+            } else {
+                // Periksa apakah ada hutang pada tanggal yang sama
+                $debt = Debt::where('sale_id', $sale->id)
+                    ->whereDate('created_at', now()->toDateString())
+                    ->first();
+
+                if ($debt) {
+                    // Jika ada, perbarui hutang
+                    $debt->pay_debts = $request->nominal_in;
+                    $debt->date_pay = now();
+                    $debt->save();
+                } else {
+                    // Jika tidak ada, buat data hutang baru
+                    Debt::create([
+                        'sale_id' => $sale->id,
+                        'pay_debts' => $request->nominal_in,
+                        'date_pay' => now(),
+                    ]);
+                }
+            }
 
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
@@ -383,9 +419,33 @@ class SaleController extends Controller
     }
     public function bayar(Request $request, $id)
     {
+        $validator = Validator::make($request->all(), [
+            'nominal_in'         => 'required',
+            'pay_debts'        => 'required|numeric|',
+            'date_pay'       => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+        // Format ulang input nominal_in dan pay_debts untuk menghapus simbol dan titik
+        $nominal_in = str_replace(['Rp.', '.', ' '], '', $request->input('nominal_in'));
+        $pay_debts = str_replace(['Rp.', '.', ' '], '', $request->input('pay_debts'));
+
+        // Update nominal_in di tabel sales
         $sale = Sale::findOrFail($id);
-        $sale->nominal_in = $request->input('nominal_in');
+        $sale->nominal_in = $nominal_in;
         $sale->save();
-        return back()->withSuccess('Pembayaran Lunas');
+
+        // Simpan data ke tabel debts
+        $debts = Debt::create([
+            'sale_id' => $id,
+            'bank_id' => $request->input('bank_id'),
+            'pay_debts' => $pay_debts,
+            'date_pay' => $request->input('date_pay'),
+            'description' => $request->input('description'),
+        ]);
+
+        return back()->withSuccess('Pembayaran Berhasil');
     }
 }
