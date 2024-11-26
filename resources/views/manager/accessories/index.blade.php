@@ -36,6 +36,7 @@
                                 </th>
                                 <th width="2%">Code Access</th>
                                 <th>Name</th>
+                                <th>Modal</th>
                                 <th>Price</th>
                                 <th class="text-center">Jumlah Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
@@ -50,6 +51,7 @@
                                     </td>
                                     <td>{{ $data->code_acces }}</td>
                                     <td>{{ $data->name }}</td>
+                                    <td>{{ formatRupiah($data->capital_price) }},-</td>
                                     <td>{{ formatRupiah($data->price) }},-</td>
                                     <td class="text-center">
                                         <input type="number" name="barcode_quantity[{{ $data->id }}]" placeholder="Jumlah Barcode" class="form-control" min="1">                                    </td>

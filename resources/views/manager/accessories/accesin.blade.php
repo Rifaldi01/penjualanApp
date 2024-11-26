@@ -18,6 +18,7 @@
                         <th class="text-center">Tanggal</th>
                         <th>Code Access</th>
                         <th>Name</th>
+                        <th>Modal</th>
                         <th>Price</th>
                         <th class="text-center" width="10%">Stok</th>
                     </tr>
@@ -31,9 +32,8 @@
                             <td>
                                 <a class="text-dark">{{$data->accessories->name}}</a>
                             </td>
-                            <td>
-                                <a class="text-dark">{{formatRupiah($data->accessories->price)}},-</a>
-                            </td>
+                            <td>{{formatRupiah($data->accessories->capital_price)}},-</td>
+                            <td>{{formatRupiah($data->accessories->price)}},-</td>
                             <td class="text-center">{{$data->qty}}</td>
                         </tr>
                     @endforeach
@@ -45,6 +45,7 @@
                                 <td>
                                     <a class="text-dark">{{$acces->accessories->name}}</a>
                                 </td>
+                                <td>{{formatRupiah($acces->accessories->capital_price)}},-</td>
                                 <td>
                                     <a class="text-dark">{{formatRupiah($acces->accessories->price)}},-</a>
                                 </td>

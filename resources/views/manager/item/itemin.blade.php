@@ -24,6 +24,7 @@
                         <th width="15%">No Seri</th>
                         <th>Name</th>
                         <th>Category</th>
+                        <th>Modal</th>
                         <th>Price</th>
                     </tr>
                     </thead>
@@ -51,6 +52,7 @@
                                 <td>
                                     {{ isset($item->itemCategory) ? $item->itemCategory->name : $item->cat->name }}
                                 </td>
+                                <td>{{ formatRupiah($item->capital_price) }}</td>
                                 <td>{{ formatRupiah($item->price) }}</td>
                             </tr>
                         @endforeach
@@ -61,6 +63,7 @@
                                 <td>{{ $item->itemCategory->name}}-{{ $item->no_seri }}</td>
                                 <td><a class="text-dark">{{ $item->name }}</a></td>
                                 <td>{{$item->itemCategory->name}}</td>
+                                <td>{{ formatRupiah($item->capital_price) }}</td>
                                 <td>{{ formatRupiah($item->price) }}</td>
                             </tr>
                         @endforeach
