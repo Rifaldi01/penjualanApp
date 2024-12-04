@@ -47,13 +47,19 @@
         .code {
             font-size: 1em;
             margin-top: 10px;
-            word-wrap: break-word;
-            display: inline-block;
-            letter-spacing: 4px;
             background-color: black;
             color: white;
             padding: 5px;
             border-radius: 3px;
+
+            /* Flexbox for spacing */
+            display: flex;
+            justify-content: center;
+            gap: 5px; /* Adjust gap to control spacing */
+        }
+
+        .code span {
+            display: inline-block;
         }
 
         /* Responsiveness */
@@ -103,7 +109,11 @@
                     <div class="barcode">
                         {!! $barcodeFile !!}
                     </div>
-                    <div class="code">{{ $accessory->code_acces }}</div>
+                    <div class="code">
+                        @foreach (str_split($accessory->code_acces) as $char)
+                            <span>{{ $char }}</span>
+                        @endforeach
+                    </div>
                 </td>
                 @if ($no++ % 4 == 0)
     </tr><tr>
