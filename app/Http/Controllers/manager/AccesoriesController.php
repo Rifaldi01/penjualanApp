@@ -252,29 +252,35 @@ class AccesoriesController extends Controller
     }
     public function print(Request $request)
     {
+        // Ambil ID accessories yang dipilih dan jumlah barcode
         $selectedAccessories = $request->input('accessories', []);
         $barcodeQuantities = $request->input('barcode_quantity', []);
 
+        // Validasi apakah ada accessories yang dipilih
         if (!$request->has('accessories') || !is_array($request->accessories)) {
             return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 accessories untuk dicetak.']);
         }
 
+        // Ambil data accessories yang dipilih
         $accessories = Accessories::whereIn('id', $request->accessories)->get();
 
         if ($accessories->isEmpty()) {
             return redirect()->back()->withErrors(['error' => 'Accessories yang dipilih tidak ditemukan.']);
         }
 
+        // Hitung total jumlah barcode yang diminta
         $totalBarcodes = 0;
         foreach ($request->input('barcode_quantity', []) as $quantity) {
             $totalBarcodes += (int)$quantity;
         }
 
+        // Validasi jumlah minimal barcode atau accessories
         if ($totalBarcodes < 4 && count($request->accessories) < 3) {
             return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
         }
 
 
+        // Ambil data accessories berdasarkan ID yang dipilih
         $barcodes = Accessories::whereIn('id', $selectedAccessories)
             ->select('id', 'code_acces', 'name')
             ->get();
@@ -283,26 +289,30 @@ class AccesoriesController extends Controller
         $barcodePaths = [];
         $invalidBarcodes = [];
 
+        // Generate barcode untuk masing-masing accessories
         foreach ($barcodes as $accessory) {
             $codeLength = strlen($accessory->code_acces);
 
+            // Validasi panjang barcode
             if ($codeLength > 9 || $codeLength < 1) {
                 $invalidBarcodes[] = $accessory->name . ' (' . $accessory->code_acces . ')';
                 continue;
             }
 
-            $quantity = $barcodeQuantities[$accessory->id] ?? 1;
+            $quantity = $barcodeQuantities[$accessory->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$accessory->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128);
+                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128,2 , 60, 'black', false);
             }
         }
 
+        // Jika ada barcode tidak valid, tampilkan pesan error
         if (!empty($invalidBarcodes)) {
             $errorMessages = 'Kode berikut tidak valid (panjang harus 1-9 karakter): ' . implode(', ', $invalidBarcodes);
             return back()->with('error', $errorMessages);
         }
 
+        // Render PDF
         $html = view('manager.accessories.barcode-pdf', [
             'accessories' => $barcodes,
             'barcodePath' => $barcodePaths,

@@ -23,14 +23,14 @@
 
         table {
             width: 100%;
-            border-spacing: 3px;
+            border-spacing: 5px;
             table-layout: fixed;
         }
 
         td {
             width: 10%;
             height: auto;
-            border: 1px solid #333;
+            border: 0.5px solid #333;
             vertical-align: middle;
             padding: 10px;
             text-align: center;
@@ -49,13 +49,13 @@
             margin-top: 10px;
             background-color: black;
             color: white;
-            padding: 5px;
+            padding: 3px;
             border-radius: 3px;
 
             /* Flexbox for spacing */
             display: flex;
             justify-content: center;
-            gap: 5px; /* Adjust gap to control spacing */
+            gap: 15px; /* Adjust gap to control spacing */
         }
 
         .code span {
@@ -70,7 +70,7 @@
 
             .code {
                 font-size: 0.9em;
-                letter-spacing: 3px;
+                letter-spacing: 6px;
             }
         }
 

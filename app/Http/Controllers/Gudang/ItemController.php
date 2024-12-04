@@ -7,8 +7,10 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSale;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Milon\Barcode\DNS1D;
+use Picqer\Barcode\BarcodeGeneratorHTML;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -194,38 +196,72 @@ class ItemController extends Controller
     }
     public function print(Request $request)
     {
-        // Periksa apakah input 'items' ada, berupa array, dan memiliki minimal 3 elemen
-        if (!$request->has('items') || !is_array($request->items) || count($request->items) < 3) {
-            return redirect()->back()->withErrors(['error' => 'Pilih minimal tiga items untuk dicetak barcodenya.']);
+        // Ambil ID accessories yang dipilih dan jumlah barcode
+        $selectedItems = $request->input('items', []);
+        $barcodeQuantities = $request->input('barcode_quantity', []);
+
+        // Validasi apakah ada accessories yang dipilih
+        if (!$request->has('items') || !is_array($request->items)) {
+            return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 accessories untuk dicetak.']);
         }
 
-        // Ambil data items berdasarkan ID yang dipilih
+        // Ambil data accessories yang dipilih
         $items = Item::whereIn('id', $request->items)->get();
 
         if ($items->isEmpty()) {
-            return redirect()->back()->withErrors(['error' => 'items yang dipilih tidak ditemukan.']);
+            return redirect()->back()->withErrors(['error' => 'Accessories yang dipilih tidak ditemukan.']);
         }
 
-        $barcodeGenerator = new DNS1D();
-        $barcodeGenerator->setStorPath(storage_path('framework/cache/'));
-
-
-        $barcodePath = [];
-        foreach ($items as $item) {
-            $barcode = $barcodeGenerator->getBarcodePNG($item->no_seri, 'C128');
-            $filePath = public_path('/images/barcodes/items/' . $item->no_seri . '.png');
-            file_put_contents($filePath, base64_decode($barcode));
-            $barcodePath[$item->id] = public_path('images/barcodes/items/' . $item->no_seri . '.png');
+        // Hitung total jumlah barcode yang diminta
+        $totalBarcodes = 0;
+        foreach ($request->input('barcode_quantity', []) as $quantity) {
+            $totalBarcodes += (int)$quantity;
         }
 
-        $no  = 1;
-        $pdf = Pdf::loadView('gudang.item.barcode-pdf', compact('items', 'no', 'barcodePath'));
+        // Validasi jumlah minimal barcode atau accessories
+        if ($totalBarcodes < 4 && count($request->items) < 3) {
+            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
+        }
 
-        $currentDate = date('d-m-Y'); // Format tanggal
-        $fileName = "items-$currentDate.pdf";
 
-        // Download PDF
-        return $pdf->stream($fileName);
+        // Ambil data accessories berdasarkan ID yang dipilih
+        $barcodes = Item::whereIn('id', $selectedItems)
+            ->select('id', 'no_seri', 'name')
+            ->get();
+
+        $generator = new BarcodeGeneratorHTML();
+        $barcodePaths = [];
+        $invalidBarcodes = [];
+
+        // Generate barcode untuk masing-masing accessories
+        foreach ($barcodes as $items) {
+            $codeLength = strlen($items->no_seri);
+
+            // Validasi panjang barcode
+
+
+            $quantity = $barcodeQuantities[$items->id] ?? 1; // Default 1 jika tidak diisi
+            $barcodePaths[$items->id] = [];
+            for ($i = 0; $i < $quantity; $i++) {
+                $barcodePaths[$items->id][] = $generator->getBarcode($items->no_seri, $generator::TYPE_CODE_128,2 , 60, 'black', );
+            }
+        }
+
+        // Jika ada barcode tidak valid, tampilkan pesan error
+
+
+        // Render PDF
+        $html = view('gudang.item.barcode-pdf', [
+            'items' => $barcodes,
+            'barcodePath' => $barcodePaths,
+        ])->render();
+
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return $dompdf->stream('barcode-item.pdf', ['Attachment' => false]);
     }
 
 }

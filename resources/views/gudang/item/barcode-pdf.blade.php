@@ -8,70 +8,112 @@
 
     <style>
         @page {
-            size: A4; /* Menentukan ukuran kertas A4 */
-            margin: 20mm; /* Menentukan margin halaman */
+            size: A4 landscape;
+            margin: 20mm;
         }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
         .text-center {
             text-align: center;
         }
 
         table {
             width: 100%;
-            border-spacing: 3px; /* Menghilangkan jarak antar sel */
+            border-spacing: 5px;
+            table-layout: fixed;
         }
 
         td {
-            width: 33.33%; /* Lebar setiap kolom sama, 1/3 dari tabel */
-            height: 100px; /* Tinggi tetap untuk setiap sel */
-            border: 1px solid #333; /* Border untuk setiap sisi */
-            vertical-align: middle; /* Vertikal di tengah */
-            padding: 10px; /* Memberikan ruang di dalam sel */
-            text-align: center; /* Menjaga teks tetap rata tengah */
+            width: 10%;
+            height: auto;
+            border: 0.5px solid #333;
+            vertical-align: middle;
+            padding: 10px;
+            text-align: center;
         }
 
-        img {
-            display: block;
-            margin: 0 auto; /* Membuat gambar berada di tengah */
-            margin-bottom: 10px; /* Memberikan ruang di bawah gambar */
-        }
 
         .code {
-            font-size: 1.1em; /* Ukuran font untuk kode */
-            margin-bottom: 5px;
-            word-wrap: break-word;
-            display: inline-block;
-            letter-spacing: 6.4px /* Memberikan ruang di bawah kode akses */
-        }
-
-        .price {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: #ffffff;
-            padding: 5px;
-            font-size: 0.9em; /* Ukuran font untuk harga */
-            border-radius: 3px; /* Sedikit melengkung di sudut */
-            margin-top: 5px; /* Memberikan ruang di atas harga */
-        }
-        .bg{
-            background-color: black ;
+            font-size: 1em;
+            margin-top: 10px;
+            background-color: black;
             color: white;
-            width: 170px;
+            padding: 3px;
+            border-radius: 3px;
 
+            /* Flexbox for spacing */
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Adjust gap to control spacing */
+        }
+
+        .code span {
+            display: inline-block;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            td {
+                padding: 5px;
+            }
+
+            .code {
+                font-size: 0.9em;
+                letter-spacing: 6px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            td {
+                padding: 3px;
+                font-size: 0.8em;
+            }
+
+            .code {
+                font-size: 0.8em;
+                letter-spacing: 2.5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            td {
+                padding: 2px;
+                font-size: 0.7em;
+            }
+
+            .code {
+                font-size: 0.7em;
+                letter-spacing: 2px;
+            }
         }
     </style>
 </head>
 <body>
 <table>
     <tr>
+        @php $no = 1; @endphp
         @foreach ($items as $item)
-            <td class="text-center">
-                <img src="{{ $barcodePath[$item->id] }}" alt="{{ $item->name }}" width="170" height="60">
-                <div class="code bg">{{ $item->no_seri }}</div>
-            </td>
-            @if ($no++ % 3 == 0)
+            @foreach ($barcodePath[$item->id] as $barcodeFile)
+                <td>
+
+                       <center> {!! $barcodeFile !!}</center>
+                    <div class="code">
+                        @foreach (str_split($item->no_seri) as $char)
+                            <span>{{ $char }}</span>
+                        @endforeach
+                    </div>
+                </td>
+                @if ($no++ % 4 == 0)
     </tr><tr>
         @endif
         @endforeach
+        @endforeach
     </tr>
 </table>
+
 </body>
 </html>
