@@ -29,7 +29,7 @@
                 </div>
             @endforeach
         @endif
-        <form class="card-body p-4" action="{{$url}}" method="POST" enctype="multipart/form-data" id="myForm">
+        <form class="card-body p-4" action="{{$url}}" method="POST" enctype="multipart/form-data" id="myFormItem">
             @csrf
             @isset($item)
                 @method('PUT')
@@ -62,11 +62,11 @@
             <div class="mb-2">
                 <label class="col-form-label">Price</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
-                    <input type="text" name="price" class="form-control" onkeyup="formatRupiah(this)"
+                    <input type="text" name="price" class="form-control" onkeyup="formatRupiahItem(this)"
                            value="{{isset($item) ? $item->price : null}}" placeholder="0">
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Save<i
+                    <button type="submit" class="btn btn-dnd float-end" id="submitBtnItem">Save<i
                             class="bx bx-save"></i></button>
                     @if(isset($item))
                         <a href="{{route('gudang.item.index')}}" class="btn btn-warning float-end me-2"><i
@@ -87,13 +87,43 @@
 @push('js')
     <script>
         $(document).ready(function () {
-            $('#submitBtn').click(function () {
+            $('#submitBtnItem').click(function () {
                 // Disable button dan ubah teksnya
                 $(this).prop('disabled', true).text('Loading...');
 
                 // Kirim form secara manual
-                $('#myForm').submit();
+                $('#myFormItem').submit();
             });
         });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#submitBtnItem').click(function(event) {
+
+                // Hapus titik dari input harga
+                let priceInput = $('input[name="price"]');
+                let priceValue = priceInput.val().replace(/\./g, '');
+                priceInput.val(priceValue);
+
+                // Kirim form secara manual
+                $('#myFormItem').submit();
+            });
+        });
+
+        function formatRupiahItem(element) {
+            let value  = element.value.replace(/[^,\d]/g, '');
+            let split  = value.split(',');
+            let sisa   = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            element.value = rupiah;
+        }
     </script>
 @endpush

@@ -8,10 +8,9 @@
 
     <style>
         @page {
-            size: A4 landscape;
+            size: A4;
             margin: 20mm;
         }
-
         .text-center {
             text-align: center;
         }
@@ -19,12 +18,11 @@
         table {
             width: 100%;
             border-spacing: 3px;
-            table-layout: fixed;
         }
 
         td {
-            width: 10%;
-            height: auto;
+            width: 33.33%;
+            height: 100px;
             border: 1px solid #333;
             vertical-align: middle;
             padding: 10px;
@@ -35,42 +33,33 @@
             display: block;
             margin: 0 auto;
             margin-bottom: 10px;
-            max-width: 100%; /* Membatasi lebar gambar barcode */
-            height: auto;   /* Menjaga proporsi gambar */
-        }
-
-        .barcode {
-            display: block;
-            margin: 0 auto;
-            width: 100%;
         }
 
         .code {
             font-size: 1.1em;
-            margin-top: 10px;
+            margin-bottom: 5px;
             word-wrap: break-word;
             display: inline-block;
             letter-spacing: 6.4px;
+        }
+
+        .bg{
             background-color: black;
             color: white;
-            padding: 5px;
-            border-radius: 3px;
+            width: 170px;
         }
     </style>
 </head>
 <body>
 <table>
     <tr>
-        @php $no = 1; @endphp
         @foreach ($accessories as $accessory)
             @foreach ($barcodePath[$accessory->id] as $barcodeFile)
-                <td>
-                    <div class="barcode">
-                        {!! $barcodeFile !!}
-                    </div>
-                    <div class="code">{{ $accessory->code_acces }}</div>
+                <td class="text-center">
+                    <img src="{{ $barcodeFile }}" alt="{{ $accessory->name }}" width="170" height="60">
+                    <div class="code bg">{{ $accessory->code_acces }}</div>
                 </td>
-                @if ($no++ % 4 == 0)
+                @if ($no++ % 3 == 0)
     </tr><tr>
         @endif
         @endforeach
