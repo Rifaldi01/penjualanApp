@@ -66,6 +66,14 @@
                         <th colspan="5" class="text-center">Profit</th>
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
+                    <tr>
+                        <th colspan="5" class="text-center">Diskon</th>
+                        <th colspan="6" class="text-center" id="diskon">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="text-center">Ongkir</th>
+                        <th colspan="6" class="text-center" id="ongkir">0</th>
+                    </tr>
                     </tfoot>
                 </table>
             </div>
@@ -100,6 +108,10 @@
                         $('#total-income').text(formatRupiah(totalIncome));
                         var profit = response.profit;
                         $('#profit').text(formatRupiah(profit));
+                        var totalDiskon = response.diskon;
+                        $('#diskon').text(formatRupiah(totalDiskon));
+                        var totalOngkir = response.ongkir;
+                        $('#ongkir').text(formatRupiah(totalOngkir));
 
                         response.report.forEach(function (data, index) {
                             // Generate list of item sales as a vertical list

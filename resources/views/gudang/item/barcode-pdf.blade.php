@@ -63,7 +63,7 @@
 
             .code {
                 font-size: 0.9em;
-                letter-spacing: 6px;
+                letter-spacing: 4px;
             }
         }
 

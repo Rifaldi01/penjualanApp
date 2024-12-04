@@ -27,11 +27,13 @@ class ReportController extends Controller
 
         });
         //return $report;
-        $income = $report->sum('pay'); // Assuming 'pay' is the column representing total income
+        $income = $report->sum('pay');
+        $diskon = $report->sum('diskon');
+        $ongkir = $report->sum('ongkir');
         $totalCapitalPriceItem = ItemSale::sum('capital_price');
         $totalCapitalPriceAcces = Accessories::sum('capital_price');
         $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
-        return view('admin.report.index', compact('report', 'income', 'profit'));
+        return view('admin.report.index', compact('report', 'income', 'profit', 'diskon', 'ongkir'));
     }
     public function filter(Request $request)
     {
@@ -50,15 +52,19 @@ class ReportController extends Controller
 
         $totalIncome = 0;
         $totalCapital = 0;
+        $totalDiskon = 0;
+        $totalOngkir = 0;
 
-        $report->each(function($sale) use (&$totalIncome, &$totalCapital) {
+        $report->each(function($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir) {
             // Sum up total sales income
             $totalIncome += $sale->pay;
-
+            $totalDiskon += $sale->diskon;
+            $totalOngkir += $sale->ongkir;
             // Calculate capital price for each accessory in the sale
             $accessoryCapital = $sale->accessories->sum(function($accessory) {
                 return $accessory->pivot->qty * $accessory->capital_price;
             });
+
 
             // Calculate capital price for each item in the sale
             $itemCapital = $sale->itemSales->sum(function($itemSale) {
@@ -89,7 +95,9 @@ class ReportController extends Controller
         return response()->json([
             'report' => $report,
             'income' => $totalIncome,
-            'profit' => $profit
+            'profit' => $profit,
+            'diskon' => $totalDiskon,
+            'ongkir' => $totalOngkir,
         ]);
     }
 
