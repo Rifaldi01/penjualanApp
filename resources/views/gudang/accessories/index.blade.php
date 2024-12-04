@@ -28,7 +28,7 @@
                         </button>
                     </div>
                     <div class="table-responsive">
-                        <table id="example" class="table table-striped table-bordered" style="width:100%">
+                        <table id="exampleA" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                             <tr>
                                 <th width="5%">
@@ -73,13 +73,23 @@
     </div>
 @endsection
 
-@push('js')
-    <script>
-        // Checkbox untuk memilih semua accessories
-        document.getElementById('select_all').addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('.select_item');
-            checkboxes.forEach(cb => cb.checked = this.checked);
-        });
-    </script>
-@endpush
+        @push('js')
+            <script>
+                // Checkbox untuk memilih semua accessories
+                document.getElementById('select_all').addEventListener('change', function () {
+                    const checkboxes = document.querySelectorAll('.select_item');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+
+                // Inisialisasi DataTables
+                $(document).ready(function () {
+                    $('#exampleA').DataTable({
+                        lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+                        pageLength: 10, // Default halaman pertama
+                        responsive: true, // Untuk tampilan responsif
+                    });
+                });
+            </script>
+    @endpush
+
 
