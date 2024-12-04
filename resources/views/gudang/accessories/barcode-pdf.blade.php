@@ -12,6 +12,11 @@
             margin: 20mm;
         }
 
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
         .text-center {
             text-align: center;
         }
@@ -31,30 +36,60 @@
             text-align: center;
         }
 
-        img {
-            display: block;
-            margin: 0 auto;
-            margin-bottom: 10px;
-            max-width: 100%; /* Membatasi lebar gambar barcode */
-            height: auto;   /* Menjaga proporsi gambar */
-        }
-
         .barcode {
             display: block;
             margin: 0 auto;
-            width: 100%;
+            max-width: 100%; /* Membatasi lebar maksimal */
+            max-height: 80px; /* Membatasi tinggi maksimal */
+            object-fit: contain; /* Menjaga proporsi barcode */
         }
 
         .code {
-            font-size: 1.1em;
+            font-size: 1em;
             margin-top: 10px;
             word-wrap: break-word;
             display: inline-block;
-            letter-spacing: 6.4px;
+            letter-spacing: 4px;
             background-color: black;
             color: white;
             padding: 5px;
             border-radius: 3px;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            td {
+                padding: 5px;
+            }
+
+            .code {
+                font-size: 0.9em;
+                letter-spacing: 3px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            td {
+                padding: 3px;
+                font-size: 0.8em;
+            }
+
+            .code {
+                font-size: 0.8em;
+                letter-spacing: 2.5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            td {
+                padding: 2px;
+                font-size: 0.7em;
+            }
+
+            .code {
+                font-size: 0.7em;
+                letter-spacing: 2px;
+            }
         }
     </style>
 </head>

@@ -7,8 +7,10 @@ use App\Models\Accessories;
 use App\Models\AccessoriesIn;
 use App\Models\AccessoriesSale;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Milon\Barcode\DNS1D;
+use Picqer\Barcode\BarcodeGeneratorHTML;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -26,7 +28,7 @@ class AccesoriesController extends Controller
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
-        $acces = Accessories::latest()->paginate(10); // Mengambil data accessories terbaru dengan pagination
+        $acces = Accessories::all(); // Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
         foreach ($acces as $data) { // Loop melalui setiap accessories
@@ -251,63 +253,68 @@ class AccesoriesController extends Controller
     }
     public function print(Request $request)
     {
-        // Validasi apakah ada accessories yang dipilih
+        $selectedAccessories = $request->input('accessories', []);
+        $barcodeQuantities = $request->input('barcode_quantity', []);
+
         if (!$request->has('accessories') || !is_array($request->accessories)) {
-            return redirect()->back()->withErrors(['error' => 'Pilih minimal satu accessories untuk dicetak.']);
+            return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 accessories untuk dicetak.']);
         }
 
-        // Ambil data accessories yang dipilih
         $accessories = Accessories::whereIn('id', $request->accessories)->get();
 
         if ($accessories->isEmpty()) {
             return redirect()->back()->withErrors(['error' => 'Accessories yang dipilih tidak ditemukan.']);
         }
 
-        // Hitung total jumlah barcode yang diminta
         $totalBarcodes = 0;
         foreach ($request->input('barcode_quantity', []) as $quantity) {
             $totalBarcodes += (int)$quantity;
         }
 
-        // Validasi jumlah minimal barcode atau accessories
-        if ($totalBarcodes < 3 && count($request->accessories) < 3) {
-            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 3, maka minimal pilih 3 accessories.']);
+        if ($totalBarcodes < 4 && count($request->accessories) < 3) {
+            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
         }
 
-        // Inisialisasi barcode generator
-        $barcodeGenerator = new DNS1D();
-        $barcodeGenerator->setStorPath(storage_path('framework/cache/'));
 
-        // Array untuk menyimpan path barcode per aksesori
-        $barcodePath = [];
+        $barcodes = Accessories::whereIn('id', $selectedAccessories)
+            ->select('id', 'code_acces', 'name')
+            ->get();
 
-        // Loop untuk setiap aksesori
-        foreach ($accessories as $accessory) {
-            // Ambil jumlah barcode dari input form
-            $quantity = (int)($request->input('barcode_quantity')[$accessory->id] ?? 1); // Default 1 jika tidak ada input
+        $generator = new BarcodeGeneratorHTML();
+        $barcodePaths = [];
+        $invalidBarcodes = [];
 
-            // Simpan barcode untuk setiap quantity yang diminta
-            $barcodePath[$accessory->id] = [];
+        foreach ($barcodes as $accessory) {
+            $codeLength = strlen($accessory->code_acces);
+
+            if ($codeLength > 9 || $codeLength < 1) {
+                $invalidBarcodes[] = $accessory->name . ' (' . $accessory->code_acces . ')';
+                continue;
+            }
+
+            $quantity = $barcodeQuantities[$accessory->id] ?? 1;
+            $barcodePaths[$accessory->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcode = $barcodeGenerator->getBarcodePNG($accessory->code_acces, 'C128');
-                $filePath = public_path('/images/barcodes/accessories/' . $accessory->code_acces . '-' . ($i + 1) . '.png');
-                file_put_contents($filePath, base64_decode($barcode));
-                $barcodePath[$accessory->id][] = public_path('images/barcodes/accessories/' . $accessory->code_acces . '-' . ($i + 1) . '.png');
+                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128);
             }
         }
 
-        // Untuk penomoran di halaman PDF
-        $no = 1;
+        if (!empty($invalidBarcodes)) {
+            $errorMessages = 'Kode berikut tidak valid (panjang harus 1-9 karakter): ' . implode(', ', $invalidBarcodes);
+            return back()->with('error', $errorMessages);
+        }
 
-        // Generate PDF
-        $pdf = Pdf::loadView('manager.accessories.barcode-pdf', compact('accessories', 'no', 'barcodePath'));
+        $html = view('manager.accessories.barcode-pdf', [
+            'accessories' => $barcodes,
+            'barcodePath' => $barcodePaths,
+        ])->render();
 
-        // Menyimpan atau mendownload PDF
-        $currentDate = date('d-m-Y'); // Format tanggal
-        $fileName = "accessories-$currentDate.pdf";
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
 
-        // Download PDF
-        return $pdf->stream($fileName);
+        return $dompdf->stream('barcode.pdf', ['Attachment' => false]);
     }
 
 }

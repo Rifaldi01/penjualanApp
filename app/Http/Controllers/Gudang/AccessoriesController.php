@@ -30,7 +30,7 @@ class AccessoriesController extends Controller
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
-        $acces = Accessories::latest()->paginate(10); // Mengambil data accessories terbaru dengan pagination
+        $acces = Accessories::latest()->paginate(); // Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
         foreach ($acces as $data) { // Loop melalui setiap accessories
@@ -263,7 +263,7 @@ class AccessoriesController extends Controller
 
         // Validasi apakah ada accessories yang dipilih
         if (!$request->has('accessories') || !is_array($request->accessories)) {
-            return redirect()->back()->withErrors(['error' => 'Pilih minimal satu accessories untuk dicetak.']);
+            return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 accessories untuk dicetak.']);
         }
 
         // Ambil data accessories yang dipilih
@@ -280,8 +280,8 @@ class AccessoriesController extends Controller
         }
 
         // Validasi jumlah minimal barcode atau accessories
-        if ($totalBarcodes < 3 && count($request->accessories) < 3) {
-            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 3, maka minimal pilih 3 accessories.']);
+        if ($totalBarcodes < 4 && count($request->accessories) < 3) {
+            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
         }
 
 
