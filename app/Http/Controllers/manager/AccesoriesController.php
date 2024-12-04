@@ -127,7 +127,7 @@ class AccesoriesController extends Controller
 
         if ($id === null) {
             // Dapatkan dua digit terakhir tahun, bulan, dan hari
-            $currentDate = date('ymd'); // contoh: 240822 untuk 22 Agustus 2024
+            $currentDate = date('md'); // contoh: 240822 untuk 22 Agustus 2024
 
             // Dapatkan jumlah accessories yang diinput pada hari ini
             $countToday = Accessories::whereDate('created_at', date('Y-m-d'))->count();
