@@ -219,7 +219,7 @@ class ItemController extends Controller
         }
 
         // Validasi jumlah minimal barcode atau accessories
-        if ($totalBarcodes < 4 && count($request->items) < 3) {
+        if ($totalBarcodes < 4 && count($request->items) < 4) {
             return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
         }
 

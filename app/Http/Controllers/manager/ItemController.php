@@ -197,20 +197,20 @@ class ItemController extends Controller
     }
     public function print(Request $request)
     {
-        // Ambil ID accessories yang dipilih dan jumlah barcode
+        // Ambil ID Items yang dipilih dan jumlah barcode
         $selectedItems = $request->input('items', []);
         $barcodeQuantities = $request->input('barcode_quantity', []);
 
-        // Validasi apakah ada accessories yang dipilih
+        // Validasi apakah ada Items yang dipilih
         if (!$request->has('items') || !is_array($request->items)) {
-            return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 accessories untuk dicetak.']);
+            return redirect()->back()->withErrors(['error' => 'Pilih minimal 4 Items untuk dicetak.']);
         }
 
-        // Ambil data accessories yang dipilih
+        // Ambil data Items yang dipilih
         $items = Item::whereIn('id', $request->items)->get();
 
         if ($items->isEmpty()) {
-            return redirect()->back()->withErrors(['error' => 'Accessories yang dipilih tidak ditemukan.']);
+            return redirect()->back()->withErrors(['error' => 'Items yang dipilih tidak ditemukan.']);
         }
 
         // Hitung total jumlah barcode yang diminta
@@ -219,13 +219,13 @@ class ItemController extends Controller
             $totalBarcodes += (int)$quantity;
         }
 
-        // Validasi jumlah minimal barcode atau accessories
-        if ($totalBarcodes < 4 && count($request->items) < 3) {
-            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 accessories.']);
+        // Validasi jumlah minimal barcode atau Items
+        if ($totalBarcodes < 4 && count($request->items) < 4) {
+            return redirect()->back()->withErrors(['error' => 'Jika jumlah barcode kurang dari 4, maka minimal pilih 4 Items.']);
         }
 
 
-        // Ambil data accessories berdasarkan ID yang dipilih
+        // Ambil data Items berdasarkan ID yang dipilih
         $barcodes = Item::whereIn('id', $selectedItems)
             ->select('id', 'no_seri', 'name')
             ->get();
@@ -234,7 +234,7 @@ class ItemController extends Controller
         $barcodePaths = [];
         $invalidBarcodes = [];
 
-        // Generate barcode untuk masing-masing accessories
+        // Generate barcode untuk masing-masing Items
         foreach ($barcodes as $items) {
             $codeLength = strlen($items->no_seri);
 
