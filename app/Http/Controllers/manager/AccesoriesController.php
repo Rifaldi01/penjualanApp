@@ -23,7 +23,6 @@ class AccesoriesController extends Controller
      */
     public function index()
     {
-        $acces = Accessories::latest()->paginate();
         $title = 'Delete Item!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);

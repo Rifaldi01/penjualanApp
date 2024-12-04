@@ -25,12 +25,11 @@ class AccessoriesController extends Controller
      */
     public function index()
     {
-        $acces = Accessories::latest()->paginate();
         $title = 'Delete Item!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
-        $acces = Accessories::latest()->paginate(); // Mengambil data accessories terbaru dengan pagination
+        $acces = Accessories::all(); // Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
         foreach ($acces as $data) { // Loop melalui setiap accessories
