@@ -37,11 +37,8 @@
         }
 
         .barcode {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%; /* Membatasi lebar maksimal */
-            max-height: 80px; /* Membatasi tinggi maksimal */
-            object-fit: contain; /* Menjaga proporsi barcode */
+            resize: both;
+            overflow: auto;
         }
 
         .code {
