@@ -243,7 +243,7 @@ class ItemController extends Controller
             $quantity = $barcodeQuantities[$items->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$items->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodePaths[$items->id][] = $generator->getBarcode($items->no_seri, $generator::TYPE_CODE_128,);
+                $barcodePaths[$items->id][] = $generator->getBarcode($items->no_seri, $generator::TYPE_CODE_128, );
             }
         }
 
