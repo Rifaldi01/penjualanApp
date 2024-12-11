@@ -218,7 +218,7 @@ class SaleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nominal_in'         => 'required',
-            'pay_debts'        => 'required|numeric|',
+            'pay_debts'        => 'required|',
             'date_pay'       => 'required',
         ]);
 

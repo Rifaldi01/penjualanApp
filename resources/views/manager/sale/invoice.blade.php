@@ -119,20 +119,52 @@
                         </div>
                     </div>
                     <div class="mt-5">
-                        <div class="row">
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-4">
-                                <div class="mb-2 text-center">Hormat Kami,</div>
-                                <div class="text-center">
-                                    <img src="{{asset('images/dnd-ttd.png')}}"
-                                         class="print-img" alt="dnd logo">
-                                </div>
-                                <div
-                                    class="mt-2 text-center">{{Auth::user()->name}}</div>
-                                <div class="text-center">Administration</div>
-                            </div>
-                        </div>
+                        <table class="table">
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td class="text-center" width="4%" style="border: none;">Hormat Kami,</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td class="text-center" width="4%" style="border: none;">
+                                    {{Auth::user()->name}} <br>
+                                    Administration
+                                </td>
+                            </tr>
+                        </table>
+                        {{--                        <div class="row">--}}
+                        {{--                            <div class="col-lg-4"></div>--}}
+                        {{--                            <div class="col-lg-4"></div>--}}
+                        {{--                            <div class="col-lg-4">--}}
+                        {{--                                <div class="mb-2 text-center">Hormat Kami,</div>--}}
+                        {{--                                <div class="text-center">--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <img src="{{asset('images/dnd-ttd.png')}}"--}}
+                        {{--                                         class="print-img" alt="dnd logo">--}}
+                        {{--                                </div>--}}
+                        {{--                                <div--}}
+                        {{--                                    class="mt-2 text-center">{{Auth::user()->name}}</div>--}}
+                        {{--                                <div class="text-center">Administration</div>--}}
+                        {{--                            </div>--}}
+                        {{--                        </div>--}}
                     </div>
                 </div>
             </div>

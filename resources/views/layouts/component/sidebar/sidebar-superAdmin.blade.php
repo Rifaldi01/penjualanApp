@@ -18,37 +18,28 @@
                 <div class="menu-title">Dashboard</div>
             </a>
         </li>
-        <li class="menu-label">Items</li>
+        <li class="menu-label">Account</li>
+
         <li>
-            <a href="">
-                <div class="parent-icon">
-                    <i class='bx bx-box'></i>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='bx bx-user-plus'></i>
                 </div>
-                <div class="menu-title">Items</div>
+                <div class="menu-title">Add User</div>
             </a>
+            <ul>
+                <li>
+                    <a href="{{route('superadmin.account.create')}}">
+                        <i class='bx bx-circle '></i>
+                        Ceate Account
+                    </a>
+                    <a href="{{route('superadmin.account.index')}}">
+                        <i class='bx bx-circle '></i>
+                        List Account
+                    </a>
+                </li>
+            </ul>
         </li>
-        <li>
-            <a href="">
-                <div class="parent-icon">
-                    <i class='bx bx-collection'></i>
-                </div>
-                <div class="menu-title">Accessories</div>
-            </a>
-        </li>
-        <li>
-            <a href="">
-                <div class="parent-icon"><i class='bx bx-dollar'></i>
-                </div>
-                <div class="menu-title">Item Sale</div>
-            </a>
-        </li>
-        <li>
-            <a href="">
-                <div class="parent-icon"><i class='bx bx-shield-quarter'></i>
-                </div>
-                <div class="menu-title">Maintenance</div>
-            </a>
-        </li>
+
     </ul>
     <!--end navigation-->
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SuperAdmin\AccountController;
 use Illuminate\Support\Facades\Route;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Http\Controllers\SuperAdmin\DashboardController;
@@ -19,4 +20,9 @@ use App\Http\Controllers\SuperAdmin\DashboardController;
 Route::group(['middleware' => ['auth:web', 'role:superAdmin'], 'prefix' => 'superadmin'], function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::resource('/account', AccountController::class)->names('superadmin.account');
+
+    //account
+    Route::resource('/account', AccountController::class)->names('superadmin.account');
+    //account end
 });

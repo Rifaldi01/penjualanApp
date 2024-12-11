@@ -53,20 +53,17 @@ class User extends Authenticatable
     }
     public function isOnline()
     {
-        // Retrieve the session for this user
         $session = DB::table('sessions')
             ->where('user_id', $this->id)
             ->latest('last_activity')
             ->first();
 
         if ($session) {
-            // Treat last_activity as a Carbon instance and compare
             $lastActivity = Carbon::createFromTimestamp($session->last_activity);
-
-            // Return true if last activity was within the last 5 minutes
-            return $lastActivity->gt(now()->subMinutes(5));
+            return $lastActivity->gt(now()->subMinutes()); // Online jika aktif dalam 5 menit terakhir
         }
 
         return false;
     }
+
 }

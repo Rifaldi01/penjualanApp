@@ -24,6 +24,7 @@
                         <th>Name</th>
                         <th>Role</th>
                         <th class="text-center">Status</th>
+                        <th class="text-center" width="9%">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -41,7 +42,15 @@
                                             <span class="badge bg-danger">Offline</span>
                                         @endif
                                     </td>
-
+                                    <td>
+                                        <a href="{{route('superadmin.account.destroy', $data->id)}}"
+                                           data-confirm-delete="true"
+                                           class="btn btn-danger btn-sm bx bx-trash" title="Delete">
+                                        </a>
+                                        <a href="{{route('superadmin.account.edit', $data->id)}}"
+                                           class="btn btn-sm btn-warning bx bx-edit "
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></a>
+                                    </td>
                     </tr>
                     @endif
                     @endforeach
@@ -59,4 +68,3 @@
 @push('js')
 
 @endpush
-

@@ -66,7 +66,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
                                                 </div>
-                                                <form action="{{route('manager.sale.update', $data->id)}}" method="POST">
+                                                <form action="{{route('manager.sale.bayar', $data->id)}}" method="POST">
                                                     @csrf
                                                     @method('PUT')
                                                     <div class="modal-body">
@@ -264,6 +264,19 @@
     <script>
         $(document).ready(function () {
             $('#transaction').DataTable();
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#example').DataTable();
+
+            // Mengurutkan ulang nomor saat tabel diurutkan atau difilter
+            table.on('order.dt search.dt', function () {
+                let i = 1;
+                table.cells(null, 0, {search: 'applied', order: 'applied'}).every(function (cell) {
+                    this.data(i++);
+                });
+            }).draw();
         });
     </script>
     <script>
