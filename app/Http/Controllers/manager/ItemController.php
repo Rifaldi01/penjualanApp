@@ -23,12 +23,12 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $cust = Item::latest()->paginate();
+
         $title = 'Delete Item!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-        $items = Item::latest()->paginate();
+        $items = Item::all();
         $barcodes = [];
 
         foreach ($items as $item) {
