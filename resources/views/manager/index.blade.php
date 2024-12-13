@@ -46,11 +46,7 @@
                         <h4 class="text-uppercase">Activity Account</h4>
                     </div>
                 </div>
-                <div class="col-6">
-                    <a href="{{route('superadmin.account.create')}}" class="btn btn-dnd float-end me-3 mt-3 btn-sm shadow"
-                    ><i class="bx bx-plus"></i>
-                    </a>
-                </div>
+
             </div>
         </div>
         <div class="card-body">
