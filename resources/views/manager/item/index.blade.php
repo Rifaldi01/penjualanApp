@@ -30,7 +30,7 @@
             </div>
 
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <table id="exampleI" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
                         <th width="5%">
@@ -89,6 +89,13 @@
         document.getElementById('select_all').addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('.select_item');
             checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+        $(document).ready(function () {
+            $('#exampleI').DataTable({
+                lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
+                pageLength: 10, // Default halaman pertama
+                // Untuk tampilan responsif
+            });
         });
     </script>
 @endpush

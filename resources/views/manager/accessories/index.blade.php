@@ -86,7 +86,7 @@
                     $('#exampleI').DataTable({
                         lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
                         pageLength: 10, // Default halaman pertama
-                        responsive: true, // Untuk tampilan responsif
+                        // Untuk tampilan responsif
                     });
                 });
             </script>
