@@ -213,13 +213,7 @@ class ItemController extends Controller
     }
     public function itemin()
     {
-        $items = Item::where('divisi_id', Auth::user()->divisi_id)->with('cat')->get();
-        $itemSales = ItemSale::whereHas('sale.divisi', function ($query){
-            $query->where('divisi_id', Auth::user()->divisi_id);
-        })->with('itemCategory')->get();
-
-        // Menggabungkan kedua koleksi menjadi satu
-        $itemin = $items->merge($itemSales);
+        $itemin = ItemIn::where('divisi_id', Auth::user()->divisi_id)->with('cat')->get();
 
         return view('gudang.item.itemin', compact('itemin'));
     }
