@@ -40,6 +40,7 @@
                         <th width="4%">No</th>
                         <th>Nama Accessories</th>
                         <th>Price</th>
+                        <th>Divisi</th>
                         <th>Code Accessories</th>
                         <th>Stok</th>
                     </tr>
