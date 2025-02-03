@@ -34,10 +34,21 @@
             @isset($item)
                 @method('PUT')
             @endisset
-            <div class="mb-2">
-                <label class="col-form-label">Name Item</label>
-                <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
-                       value="{{isset($item) ? $item->name : null}}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-2">
+                        <label class="col-form-label">Name Item</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
+                               value="{{isset($item) ? $item->name : null}}">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-2">
+                        <label class="col-form-label">Invoice</label>
+                        <input type="text" name="kode_msk" class="form-control" placeholder="Enter Invoice"
+                               value="">
+                    </div>
+                </div>
             </div>
             <div class="mt-3 mb-2">
                 <label for="single-select-field" class="form-label">Category</label>
@@ -60,11 +71,6 @@
                        value="{{isset($item) ? $item->no_seri : null}}">
             </div>
             <div class="mb-2">
-                <label class="col-form-label">Price</label>
-                <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
-                    <input type="text" name="price" class="form-control" onkeyup="formatRupiahItem(this)"
-                           value="{{isset($item) ? $item->price : null}}" placeholder="0">
-                </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-dnd float-end" id="submitBtnItem">Save<i
                             class="bx bx-save"></i></button>

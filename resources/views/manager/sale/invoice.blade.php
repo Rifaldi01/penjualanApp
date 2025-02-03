@@ -12,7 +12,7 @@
                     <!-- Konten modal seperti tabel, gambar, dll. -->
                     <div class="row">
                         <div class="col-lg-6">
-                            <img src="{{asset('images/dnd-logo1.png')}}"
+                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"
                                  class="float-start print-img" alt="dnd logo">
                         </div>
                         <div class="float-start ms-3"><strong style="font-size: 15px;">DND
@@ -37,7 +37,7 @@
                             <td width="13%" class="text-start">No Invoice</td>
                             <td width="2%" class="text-center">:</td>
                             <td>
-                                <strong>{{ $data->invoiceNumber }}</strong>
+                                <strong>{{ $data->invoice}}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -82,7 +82,7 @@
                         @foreach($data->accessoriesSales as $key => $accessories)
                             <tr>
                                 <td>{{ $key + 1 }}</td>
-                                <td>{{ $accessories->accessories->name }}</td>
+                                <td>{{ $accessories->accessories->name ?? 'NULL' }}</td>
                                 <td class="text-right">{{ formatRupiah($accessories->subtotal / $accessories->qty) }}</td>
                                 <td class="text-center">{{ $accessories->qty }}</td>
                                 <td class="text-right">{{ formatRupiah($accessories->subtotal) }}</td>
@@ -124,7 +124,7 @@
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
-                                <td class="text-center" width="4%" style="border: none;">Hormat Kami,</td>
+                                <td class="text-center" style="border: none;">Hormat Kami,</td>
                             </tr>
                             <tr>
                                 <td style="border: none;"></td>
@@ -142,7 +142,7 @@
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
-                                <td class="text-center" width="4%" style="border: none;">
+                                <td class="text-center" width="20%" style="border: none;">
                                     {{Auth::user()->name}} <br>
                                     Administration
                                 </td>

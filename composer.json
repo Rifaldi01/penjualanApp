@@ -8,7 +8,7 @@
         "php": "^8.0.2",
         "barryvdh/laravel-dompdf": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
-        "intervention/image": "^3.7",
+        "intervention/image": "2.7.*",
         "laravel-notification-channels/webpush": "^9.0",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
@@ -19,7 +19,8 @@
         "picqer/php-barcode-generator": "^3.2",
         "realrashid/sweet-alert": "^7.2",
         "spatie/laravel-html": "^3.5",
-        "spatie/laravel-permission": "^6.9"
+        "spatie/laravel-permission": "^6.9",
+        "yajra/laravel-datatables-oracle": "^10.11"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -9,6 +9,9 @@ use App\Http\Controllers\manager\ItemCategoryController;
 use App\Http\Controllers\manager\CustomerController;
 use App\Http\Controllers\manager\AccesoriesController;
 use App\Http\Controllers\manager\ReportController;
+use App\Http\Controllers\Manager\PembelianController;
+use App\Http\Controllers\Manager\SupllierController;
+use App\Http\Controllers\Manager\PermintaanController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -64,4 +67,22 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('report', [ReportController::class, 'index'])->name('manager.report.index');
     Route::get('/report/filter', [ReportController::class, 'filter'])->name('manager.report.filter');
     //report end
+
+    //supplier
+    Route::resource('supplier', SupllierController::class)->names('manager.supplier');
+    //end supplier
+
+    //pembelian
+    Route::resource('pembelian', PembelianController::class)->names('manager.pembelian');
+    Route::get('/pembelian/filter/{divisiId?}', [PembelianController::class, 'filterByDivisi']);
+    //end pembelian
+
+    //permintaan
+    Route::resource('permintaan', PermintaanController::class)->names('manager.permintaan');
+    Route::put('/permintaan/{id}/approve', [PermintaanController::class, 'approve'])->name('manager.permintaan.approve');
+    Route::put('/permintaan/{id}/receive', [PermintaanController::class, 'receive'])->name('manager.permintaan.receive');
+    Route::get('/konfirmasi', [PermintaanController::class, 'konfirmasi'])->name('manager.permintaan.konfirmasi');
+    Route::get('/minta/accessories/{divisi_id}', [PermintaanController::class, 'fetchAccessories'])->name('manager.permintaan.fetchAccessories');
+
+
 });

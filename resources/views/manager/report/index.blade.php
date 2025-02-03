@@ -67,6 +67,14 @@
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
+                        <th colspan="5" class="text-center">PPN</th>
+                        <th colspan="6" class="text-center" id="ppn">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="text-center">PPH</th>
+                        <th colspan="6" class="text-center" id="pph">0</th>
+                    </tr>
+                    <tr>
                         <th colspan="5" class="text-center">Diskon</th>
                         <th colspan="6" class="text-center" id="diskon">0</th>
                     </tr>
@@ -112,6 +120,10 @@
                         $('#diskon').text(formatRupiah(totalDiskon));
                         var totalOngkir = response.ongkir;
                         $('#ongkir').text(formatRupiah(totalOngkir));
+                        var totalppn = response.ppn;
+                        $('#ppn').text(formatRupiah(totalppn));
+                        var totalpph = response.pph;
+                        $('#pph').text(formatRupiah(totalpph));
 
                         response.report.forEach(function (data, index) {
                             // Generate list of item sales as a vertical list
@@ -190,8 +202,8 @@
 
             function formatDate(dateString) {
                 const date = new Date(dateString);
-                const options = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
-                return date.toLocaleDateString('id-ID', options);
+                const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                return date.toLocaleDateString('id-ID', options).replace('Des', 'Des'); // Pastikan singkatan sesuai
             }
 
             var table = $('#filter-table').DataTable({

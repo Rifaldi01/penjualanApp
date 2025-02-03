@@ -38,13 +38,6 @@
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
-                <div class="mb-2">
-                    <label class="col-form-label">Harga</label>
-                    <div class="input-group">
-                        <span class="input-group-text" id="basic-addon1">Rp.</span>
-                        <input type="text" name="price" class="form-control" value="{{isset($acces) ? $acces->price : null}}" placeholder="Masukkan Harga" onkeyup="formatRupiahAcces(this)">
-                    </div>
-                </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-dnd float-end" id="submitBtnAcces">Simpan<i class="bx bx-save"></i> </button>
                 </div>
@@ -63,12 +56,6 @@
                 // Nonaktifkan tombol dan ubah teksnya
                 $(this).prop('disabled', true).text('Memuat...');
 
-                // Hapus titik dari input harga
-                let priceInput = $('input[name="price"]');
-                let priceValue = priceInput.val().replace(/\./g, '');
-                priceInput.val(priceValue);
-
-                // Kirim form secara manual
                 $('#myFormAcces').submit();
             });
         });

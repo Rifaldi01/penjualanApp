@@ -4,6 +4,7 @@ use App\Http\Controllers\SuperAdmin\AccountController;
 use Illuminate\Support\Facades\Route;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Http\Controllers\SuperAdmin\DashboardController;
+use App\Http\Controllers\SuperAdmin\DivisiController;
 
 
 /*
@@ -25,4 +26,8 @@ Route::group(['middleware' => ['auth:web', 'role:superAdmin'], 'prefix' => 'supe
     //account
     Route::resource('/account', AccountController::class)->names('superadmin.account');
     //account end
+
+    //divisi
+    Route::resource('/divisi', DivisiController::class)->names('superadmin.divisi');
+    //end divisi
 });

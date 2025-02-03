@@ -35,4 +35,12 @@ class Accessories extends Model
                 'accessories.code_acces'
             );
     }
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class);
+    }
+    public function accessoriesIn()
+    {
+        return $this->hasMany(AccessoriesIn::class, 'accessories_id');
+    }
 }

@@ -22,6 +22,7 @@
                     <tr>
                         <th width="2%">No</th>
                         <th>Name</th>
+                        <th>Divisi</th>
                         <th>Role</th>
                         <th class="text-center">Status</th>
                         <th class="text-center" width="9%">Action</th>
@@ -34,6 +35,13 @@
                                 @if($data->roles == !null)
                                     <td>{{$key +1}}</td>
                                     <td>{{$data->name}}</td>
+                                    <td>
+                                        @if($data->divisi)
+                                            {{$data->divisi->name}}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td>{{$role->name}}</td>
                                     <td class="text-center">
                                         @if($data->isOnline())

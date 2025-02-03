@@ -16,11 +16,12 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
+                        <th>Invoice</th>
                         <th>Kode produk</th>
-                        <th>Name</th>
-                        <th>Harga</th>
+                        <th>Nama Barang</th>
+                        <th>Harga Satuan</th>
                         <th>Qty</th>
-                        <th>Subtotal</th>
+                        <th>Total Harga</th>
                         <th>Customer</th>
                     </tr>
                     </thead>
@@ -28,6 +29,7 @@
                     @foreach ($sale as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
+                            <td>{{$data->sale->invoice}}</td>
                             <td>{{$data->accessories->code_acces}}</td>
                             <td>{{$data->accessories->name}}</td>
                             <td>{{formatRupiah($data->accessories->price)}}</td>

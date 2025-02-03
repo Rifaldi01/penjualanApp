@@ -18,17 +18,17 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="example3" class="table table-striped table-bordered" style="width:100%">
+                    @if(request()->routeIs('gudang.item.itemin'))
                     <thead>
                     <tr>
                         <th class="text-center" width="15%">Tanggal</th>
                         <th width="15%">No Seri</th>
-                        <th>Name</th>
+                        <th>Nama Item</th>
                         <th>Category</th>
                         <th>Price</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @if(request()->routeIs('gudang.item.itemin'))
                         @foreach($itemin as $item)
                             <tr>
                                 <td class="text-center">
@@ -55,8 +55,19 @@
                             </tr>
                         @endforeach
                     @else
+                        <thead>
+                        <tr>
+                            <th>No Invoice</th>
+                            <th class="text-center" width="15%">Tanggal</th>
+                            <th width="15%">No Seri</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                        </tr>
+                        </thead>
                         @foreach($itemout as $item)
                             <tr>
+                                <td>{{$item->sale->invoice}}</td>
                                 <td class="text-center">{{ tanggal($item->created_at) }}</td>
                                 <td>{{ $item->itemCategory->name}}-{{ $item->no_seri }}</td>
                                 <td><a class="text-dark">{{ $item->name }}</a></td>

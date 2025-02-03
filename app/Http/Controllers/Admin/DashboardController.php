@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -14,7 +15,7 @@ class DashboardController extends Controller
         // Ambil data penjualan
         $today = Carbon::today();
         $threeDaysLater = $today->copy()->addDays(3);
-        $sales = Sale::with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])
+        $sales = Sale::where('divisi_id', Auth::user()->divisi_id)->with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])
             ->where('deadlines', '<=', $threeDaysLater)
             ->get();
 

@@ -10,7 +10,7 @@
             <div class="invoice overflow-auto" id="prinsurat{{$data->id}}">
                 <div class="modal-body modal-surat">
                     <div class="text-center">
-                        <img src="{{asset('images/jalan.png')}}" alt="" width="24%" class="img-surat">
+                        <img src="{{asset('images/logo/'. $data->divisi->logo)}}" alt="" width="24%" class="img-surat">
                         <div class="mt-1"><strong style="font-size: 15px;">Komplek
                                 Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>
                         </div>

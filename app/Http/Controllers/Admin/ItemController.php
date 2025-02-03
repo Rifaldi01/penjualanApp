@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSale;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller
 {
@@ -17,7 +18,7 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $itemsByCategory = Item::with('cat')
+        $itemsByCategory = Item::with('cat', 'divisi')
             ->select('itemcategory_id',
                 \DB::raw('count(*) as total'),
                 \DB::raw('SUM(case when status = 0 then 1 else 0 end) as available')
@@ -98,7 +99,10 @@ class ItemController extends Controller
 
     public function sale()
     {
-        $sale = ItemSale::with('sale', 'itemCategory')->get();
+        $sale = ItemSale::whereHas('sale.divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+            ->with('sale', 'itemCategory')->get();
         return view('admin.item.sale', compact('sale'));
     }
 }

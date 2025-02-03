@@ -22,6 +22,7 @@
                     <tr>
                         <th class="text-center" width="15%">Tanggal</th>
                         <th width="15%">No Seri</th>
+                        <th width="15%">Divisi</th>
                         <th>Name</th>
                         <th>Category</th>
                         <th>Modal</th>
@@ -47,6 +48,9 @@
                                     -{{ $item->no_seri }}
                                 </td>
                                 <td>
+                                    {{ $item->divisi->name }}
+                                </td>
+                                <td>
                                     <a class="text-dark">{{ $item->name }}</a>
                                 </td>
                                 <td>
@@ -61,6 +65,9 @@
                             <tr>
                                 <td class="text-center">{{ tanggal($item->created_at) }}</td>
                                 <td>{{ $item->itemCategory->name}}-{{ $item->no_seri }}</td>
+                                <td>
+                                    {{ $item->divisi->name }}
+                                </td>
                                 <td><a class="text-dark">{{ $item->name }}</a></td>
                                 <td>{{$item->itemCategory->name}}</td>
                                 <td>{{ formatRupiah($item->capital_price) }}</td>

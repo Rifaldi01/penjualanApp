@@ -178,6 +178,56 @@
                 </li>
             </ul>
         </li>
+{{--        <li class="menu-label">Permintaan Barang</li>--}}
+{{--        <li>--}}
+{{--            @if(isset($notiff) && $notiff > 0)--}}
+{{--                <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>--}}
+{{--            @else--}}
+{{--            @endif--}}
+{{--            <a href="javascript:;" class="has-arrow">--}}
+{{--                <div class="parent-icon">--}}
+{{--                    <i class='bx bx-collection'></i>--}}
+{{--                </div>--}}
+{{--                <div class="menu-title">Request Accessories</div>--}}
+{{--            </a>--}}
+{{--            <ul>--}}
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.permintaan.index')}}">--}}
+{{--                        <i class='bx bx-arrow-to-bottom'></i>--}}
+{{--                        Minta Accessories--}}
+{{--                        @if($minta > 0)--}}
+{{--                            <span class="badge bg-danger">{{$minta}}</span>--}}
+{{--                        @else--}}
+{{--                        @endif--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.permintaan.konfirmasi')}}">--}}
+{{--                        <i class='bx bx-arrow-to-top'></i>--}}
+{{--                        Permintaan Accessories--}}
+{{--                        @if($notif > 0)--}}
+{{--                            <span class="badge bg-danger">{{$notif}}</span>--}}
+{{--                        @else--}}
+{{--                        @endif--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--            </ul>--}}
+{{--        </li>--}}
+        <li class="menu-label">PEMBELIAN BARANG</li>
+        <li>
+            <a href="{{route('manager.pembelian.index')}}">
+                <div class="parent-icon"><i class='bx bx-arrow-to-bottom'></i>
+                </div>
+                <div class="menu-title">Pembelian</div>
+            </a>
+        </li>
+        <li>
+            <a href="{{route('manager.supplier.index')}}">
+                <div class="parent-icon"><i data-feather="truck"></i>
+                </div>
+                <div class="menu-title">Supplier</div>
+            </a>
+        </li>
     </ul>
     <!--end navigation-->
 </div>

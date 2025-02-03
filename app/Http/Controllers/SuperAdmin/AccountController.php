@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Divisi;
 use App\Models\User;
 use Dotenv\Validator;
 use Illuminate\Http\Request;
@@ -16,15 +17,14 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $cust = User::latest()->paginate();
         $title = 'Delete Data!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
 
         $user = User::whereHas('roles', function ($query) {
             $query->where('name', '!=', 'superadmin');
-        })->get();
-
+        })->with('divisi')->get();
+//        return $user;
         return view('superadmin.account.index', compact('user'));
     }
 
@@ -35,6 +35,7 @@ class AccountController extends Controller
     {
         $inject = [
             'url' => route('superadmin.account.store'),
+            'divisi'=> Divisi::pluck('name', 'id')->toArray(),
         ];
 
         if ($id) {
@@ -42,6 +43,7 @@ class AccountController extends Controller
             if ($user) {
                 $inject = [
                     'url' => route('superadmin.account.update', $id),
+                    'divisi'=> Divisi::pluck('name', 'id')->toArray(),
                     'user' => $user,
                 ];
             }
@@ -65,6 +67,7 @@ class AccountController extends Controller
             'email'       => $request->input('email'),
             'phone'       => $request->input('phone'),
             'image'       => $request->input('image'),
+            'divisi_id'       => $request->input('divisi_id'),
             'password' => Hash::make('123')
 
         ]);
@@ -124,10 +127,12 @@ class AccountController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $id,
             'phone' => 'required|unique:users,phone,' . $id,
+            'divisi_id' => 'required'
         ]);
 
         $user = User::firstOrNew(['id' => $id]);
         $user->name = $request->input('name');
+        $user->divisi_id = $request->input('divisi_id');
         $user->email = $request->input('email');
         $user->phone = $request->input('phone');
         $user->image = $request->input('image');

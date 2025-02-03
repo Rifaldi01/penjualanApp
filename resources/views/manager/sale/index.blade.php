@@ -12,18 +12,19 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <table id="excel" class="table table-striped table-bordered" style="width:50%">
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th class="text-center" width="5%">Tanggal</th>
+                        <th class="text-center" >Tanggal</th>
+                        <th>Divisi</th>
+                        <th>INV</th>
                         <th>Customer</th>
-                        <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Total Price</th>
-                        <th class="text-center" width="5%">Diskon</th>
-                        <th class="text-center" width="5%">Ongkir</th>
-                        <th class="text-center" width="5%">Total Pay</th>
-                        <th width="5%">Kasir</th>
+                        <th class="text-center" >Total Item</th>
+                        <th class="text-center">Ung Mask</th>
+                        <th class="text-center" width="5%">Total Hrg</th>
+                        <th class="text-center" width="5%">Bayar</th>
+                        <th >Kasir</th>
                         <th class="text-center" width="5%">Action</th>
                     </tr>
                     </thead>
@@ -33,12 +34,13 @@
                         @else
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
-                                <td>{{dateId($data->created_at)}}</td>
+                                <td>{{tanggal($data->created_at)}}</td>
+                                <td>{{$data->divisi->name}}</td>
+                                <td>{{$data->invoice}}</td>
                                 <td>{{$data->customer->name}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
+                                <td>{{formatRupiah($data->nominal_in)}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
-                                <td>{{formatRupiah($data->diskon)}}</td>
-                                <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
                                 <td>{{$data->user->name}}</td>
                                 <td>
@@ -163,9 +165,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="{{route('manager.sale.edit', $data->id)}}"
-                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
-                                       data-bs-placement="top" title="Edit Transaksi"></a>
+{{--                                    <a href="{{route('manager.sale.edit', $data->id)}}"--}}
+{{--                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"--}}
+{{--                                       data-bs-placement="top" title="Edit Transaksi"></a>--}}
                                 </td>
                             </tr>
                         @endif
@@ -192,12 +194,12 @@
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
+                        <th>Divisi</th>
+                        <th>INV</th>
                         <th>Customer</th>
                         <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Total Price</th>
-                        <th class="text-center" width="5%">Diskon</th>
-                        <th class="text-center" width="5%">Ongkir</th>
-                        <th class="text-center" width="5%">Total Pay</th>
+                        <th class="text-center" width="5%">Toatl Hrg</th>
+                        <th class="text-center" width="5%">Bayar</th>
                         <th width="5%">Kasir</th>
                         <th class="text-center" width="5%">Action</th>
                     </tr>
@@ -207,12 +209,12 @@
                         @if($data->nominal_in == $data->pay)
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
-                                <td>{{dateId($data->created_at)}}</td>
+                                <td>{{tanggal($data->created_at)}}</td>
+                                <td>{{$data->divisi->name}}</td>
+                                <td>{{$data->invoice}}</td>
                                 <td>{{$data->customer->name}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
-                                <td>{{formatRupiah($data->diskon)}}</td>
-                                <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
                                 <td>{{$data->user->name}}</td>
                                 <td>
@@ -227,10 +229,11 @@
                                             data-bs-placement="top" title="Print Invoice">
                                     </button>
                                     @include('manager.sale.invoice')
-                                    <a href="{{route('manager.sale.edit', $data->id)}}"
-                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
-                                       data-bs-placement="top" title="Edit Transaksi"></a>
+{{--                                    <a href="{{route('manager.sale.edit', $data->id)}}"--}}
+{{--                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"--}}
+{{--                                       data-bs-placement="top" title="Edit Transaksi"></a>--}}
                                 </td>
+
                             </tr>
                         @else
                         @endif
@@ -242,13 +245,23 @@
     </div>
 @endsection
 
-@push('head') @endpush
+@push('head')
+    <style>
+        table.dataTable {
+            font-size: 12.85px /* Atur ukuran font */
+        }
+
+
+    </style>
+
+@endpush
 @push('js')
     <script>
         $(document).ready(function () {
             var table = $('#excel').DataTable({
                 lengthChange: false,
-                buttons: ['excel']
+                buttons: ['excel'],
+
             });
 
             table.buttons().container()
@@ -264,19 +277,6 @@
     <script>
         $(document).ready(function () {
             $('#transaction').DataTable();
-        });
-    </script>
-    <script>
-        $(document).ready(function () {
-            var table = $('#example').DataTable();
-
-            // Mengurutkan ulang nomor saat tabel diurutkan atau difilter
-            table.on('order.dt search.dt', function () {
-                let i = 1;
-                table.cells(null, 0, {search: 'applied', order: 'applied'}).every(function (cell) {
-                    this.data(i++);
-                });
-            }).draw();
         });
     </script>
     <script>
@@ -381,4 +381,5 @@
     </script>
 
 @endpush
+
 

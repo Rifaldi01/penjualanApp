@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'image',
+        'divisi_id',
         'last_activity',
     ];
 
@@ -64,6 +65,11 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class, 'divisi_id', 'id');
     }
 
 }

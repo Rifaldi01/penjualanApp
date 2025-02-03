@@ -18,4 +18,8 @@ class ItemSale extends Model
     {
         return $this->belongsTo(ItemCategory::class, 'itemcategory_id', 'id');
     }
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class);
+    }
 }

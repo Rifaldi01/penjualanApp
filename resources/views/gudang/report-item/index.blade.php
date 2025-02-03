@@ -17,6 +17,7 @@
                     <thead>
                     <tr>
                         <th width="3%">No</th>
+                        <th>No Invoice</th>
                         <th>No Seri</th>
                         <th>Name</th>
                         <th>Category</th>
@@ -28,6 +29,7 @@
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{ $key + 1 }}</td>
+                            <td>{{$data->sale->invoice}}</td>
                             <td>{{ $data->itemCategory->name }}-{{ $data->no_seri }}</td>
                             <td>{{ $data->name }}</td>
                             <td>{{ $data->itemCategory->name }}</td>
@@ -38,20 +40,20 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th colspan="6" class="text-center bg-success border-bottom">SERING TERJUAL</th>
+                        <th colspan="7" class="text-center bg-success border-bottom">SERING TERJUAL</th>
                     </tr>
                     @foreach ($mostSoldCategories as $category => $count)
                         <tr>
-                            <th colspan="3" class="text-center border-bottom">{{ $category }}</th>
+                            <th colspan="4" class="text-center border-bottom">{{ $category }}</th>
                             <th colspan="3" class="text-center border-bottom">{{ $count }} kali</th>
                         </tr>
                     @endforeach
                     <tr>
-                        <th colspan="6" class="text-center bg-warning border-bottom">JARANG TERJUAL</th>
+                        <th colspan="7" class="text-center bg-warning border-bottom">JARANG TERJUAL</th>
                     </tr>
                     @foreach ($leastSoldCategories as $category => $count)
                         <tr>
-                            <th colspan="3" class="text-center border-bottom">{{ $category }}</th>
+                            <th colspan="4" class="text-center border-bottom">{{ $category }}</th>
                             <th colspan="3" class="text-center border-bottom">{{ $count }} kali</th>
                         </tr>
                     @endforeach

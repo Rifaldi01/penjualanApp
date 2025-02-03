@@ -16,9 +16,10 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('itemcategory_id');
+            $table->foreignId('divisi_id');
             $table->string('name');
-            $table->string('price');
-            $table->string('capital_price')->nullable();
+            $table->string('price')->default(0);
+            $table->string('capital_price')->default(0);
             $table->string('no_seri')->unique();
             $table->integer('status')->default('0');
             $table->timestamps();

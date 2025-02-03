@@ -98,6 +98,21 @@
                 <div class="menu-title">Report</div>
             </a>
         </li>
+        <li class="menu-label">PEMBELIAN BARANG</li>
+        <li>
+            <a href="{{route('admin.pembelian.index')}}">
+                <div class="parent-icon"><i class='bx bx-arrow-to-bottom'></i>
+                </div>
+                <div class="menu-title">Pembelian</div>
+            </a>
+        </li>
+        <li>
+            <a href="{{route('admin.supplier.index')}}">
+                <div class="parent-icon"><i data-feather="truck"></i>
+                </div>
+                <div class="menu-title">Supplier</div>
+            </a>
+        </li>
     </ul>
     <!--end navigation-->
 </div>

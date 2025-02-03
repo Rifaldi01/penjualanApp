@@ -16,13 +16,15 @@
                     @endif
                     <label for="LastName" class="form-label">Nama</label>
                     <input type="text" name="name" class="form-control" id="LastName" placeholder=" Nama" value="{{isset($user) ? $user->name : null }}">
+                    <label for="LastName" class="form-label mt-3">Divisi</label>
+                    {{ html()->select('divisi_id', $divisi, isset($user) ? $user->divisi_id : null )->class('form-control')->id('single-select-field')->placeholder("--Pilih Divisi--") }}
                     <label for="LastName" class="form-label mt-3">Email</label>
                     <input type="email" name="email" class="form-control" id="LastName" placeholder="example@gmail.com" value="{{isset($user) ? $user->email : null }}" >
                     <label for="LastName" class="form-label mt-3">Phone</label>
                     <input type="number" name="phone" class="form-control" id="LastName" placeholder="08XXXXXXXXXX" value="{{isset($user) ? $user->phone : null }}" >
                     <div class="mt-3">
                         <label for="single-select-field" class="form-label">Roles</label>
-                        <select class="form-select" id="single-select-field" required name="role" data-placeholder="Choose one thing">
+                        <select class="form-select" id="single-select-optgroup-field" required name="role" data-placeholder="Pilih Role">
                             <option value="">---Select---</option>
                             @foreach($role as $roles)
                                 @if(isset($user) && $user->roles->contains('name', $roles->name))

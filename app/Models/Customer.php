@@ -13,4 +13,8 @@ class Customer extends Model
     {
         return $this->hasMany(Sale::class);
     }
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class);
+    }
 }

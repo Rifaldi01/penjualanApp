@@ -10,7 +10,7 @@
             <div class="invoice overflow-auto" id="prinsurat{{$data->id}}">
                 <div class="modal-body modal-surat">
                     <div class="text-center">
-                        <img src="{{asset('images/jalan.png')}}" alt="" width="24%" class="img-surat">
+                        <img src="{{asset('images/logo/'. $data->divisi->logo)}}" alt="" width="24%" class="img-surat">
                         <div class="mt-1"><strong style="font-size: 15px;">Komplek
                                 Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>
                         </div>
@@ -78,7 +78,7 @@
                             @foreach($data->accessoriesSales as $key => $accessories)
                                 <tr>
                                     <td style="border-left-width:1px;">{{ $key + 1 }}</td>
-                                    <td>{{ $accessories->accessories->name }}</td>
+                                    <td>{{ $accessories->accessories->name ?? 'NULL' }}</td>
                                     <td class="text-center">{{ $accessories->qty }}</td>
                                     <td class="text-right">-</td>
                                 </tr>

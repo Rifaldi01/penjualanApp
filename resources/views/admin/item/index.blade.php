@@ -16,7 +16,7 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Name</th>
+                        <th>Name Item</th>
                         <th>Stok</th>
                     </tr>
                     </thead>

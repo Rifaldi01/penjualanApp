@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Gudang;
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
 use App\Models\AccessoriesIn;
+use App\Models\AccessoriesRejecte;
 use App\Models\AccessoriesSale;
+use App\Models\Divisi;
 use App\Models\Item;
+use App\Models\Pembelian;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Milon\Barcode\DNS1D;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Picqer\Barcode\BarcodeGeneratorHTML;
@@ -29,7 +33,11 @@ class AccessoriesController extends Controller
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
-        $acces = Accessories::all(); // Mengambil data accessories terbaru dengan pagination
+        $acces = Accessories::whereHas('divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+            ->with('divisi')
+            ->get();// Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
         foreach ($acces as $data) { // Loop melalui setiap accessories
@@ -48,12 +56,14 @@ class AccessoriesController extends Controller
     public function create($id = null)
     {
         $inject = [
-            'url' => route('gudang.acces.store')
+            'url' => route('gudang.acces.store'),
+            'divisi' => Divisi::pluck('name', 'id')->toArray(),
         ];
         if ($id){
             $acces = Accessories::whereId($id)->first();
             $inject = [
                 'url' => route('gudang.acces.update', $id),
+                'divisi' => Divisi::pluck('name', 'id')->toArray(),
                 'acces' => $acces
             ];
         }
@@ -122,10 +132,8 @@ class AccessoriesController extends Controller
     {
         $request->validate([
             'name' => 'required|',
-            'price' => 'required'
         ],[
             'name.required' => 'Nama Accessories Wajib Diisi',
-            'price.required' => 'Price Accessories Wajib Diisi',
         ]);
 
         if ($id === null) {
@@ -143,14 +151,15 @@ class AccessoriesController extends Controller
         }
 
         $acces = Accessories::firstOrNew(['id' => $id]);
-        $acces->name = $request->input('name');
-        $acces->price = $request->input('price');
+        $acces->name          = $request->input('name');
+        $acces->price         = 0;
+        $acces->divisi_id     = Auth::user()->divisi_id;
         $acces->capital_price = 0;
         if ($id === null) {
             $acces->code_acces = $codeAcces;
         }
-
         $acces->save();
+
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('gudang.acces.index');
     }
@@ -164,7 +173,7 @@ class AccessoriesController extends Controller
     public function checkCode(Request $request)
     {
         $code = $request->get('code_access');
-        $accessory = Accessories::where('code_acces', $code)->first();
+        $accessory = Accessories::where('divisi_id', Auth::user()->divisi_id)->where('code_acces', $code)->first();
 
         if ($accessory) {
             return response()->json(['exists' => true, 'data' => $accessory]);
@@ -175,55 +184,63 @@ class AccessoriesController extends Controller
 
     public function updateMultiple(Request $request)
     {
-        // Validasi permintaan yang masuk
         $request->validate([
             'accessories' => 'required|array',
             'accessories.*.code_acces' => 'required|string',
             'accessories.*.stok' => 'required|integer|min:0',
+            'accessories.*.kode_msk' => 'nullable|string',
         ]);
 
         $accessoriesData = $request->input('accessories');
 
-        // Loop melalui setiap aksesori dan perbarui stoknya
         foreach ($accessoriesData as $accessoryData) {
-            // Temukan aksesori berdasarkan kode
             $accessory = Accessories::where('code_acces', $accessoryData['code_acces'])->first();
 
             if ($accessory) {
-                // Simpan stok sebelumnya
-                $previousStock = $accessory->stok;
-
                 // Perbarui stok
-                $accessory->stok = $previousStock + $accessoryData['stok'];
+                $accessory->stok += $accessoryData['stok'];
                 $accessory->save();
 
-                // Cek apakah ada entri di accessories_ins dengan accessories_id yang sama pada tanggal yang sama
+                // Update atau buat entri di AccessoriesIn
                 $today = now()->format('Y-m-d');
                 $existingAccessoriesIn = AccessoriesIn::where('accessories_id', $accessory->id)
                     ->whereDate('date_in', $today)
                     ->first();
 
                 if ($existingAccessoriesIn) {
-                    // Jika sudah ada, perbarui qty saja
                     $existingAccessoriesIn->qty += $accessoryData['stok'];
                     $existingAccessoriesIn->save();
                 } else {
-                    // Jika belum ada, buat entri baru di tabel accessories_ins
                     AccessoriesIn::create([
                         'accessories_id' => $accessory->id,
                         'qty' => $accessoryData['stok'],
+                        'kode_msk' => $accessoryData['kode_msk'] ?? null,
                         'date_in' => now(),
                     ]);
                 }
+
+                // Cek apakah kode invoice sudah ada
+                $invoice = $accessoryData['kode_msk'];
+                $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+
+                // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+                if (!$existingPembelian && $invoice) {
+                    Pembelian::create([
+                        'divisi_id' => Auth::user()->divisi_id,
+                        'invoice' => $invoice,
+                        'status' => '1', // status bisa disesuaikan jika perlu
+                    ]);
+                }
+
             } else {
-                // Jika aksesori tidak ditemukan, kembalikan respons kesalahan
                 return response()->json(['success' => false, 'message' => 'Accessory not found for code: ' . $accessoryData['code_acces']], 404);
             }
         }
 
-        // Kembalikan respons sukses
         return response()->json(['success' => true, 'message' => 'Accessories updated successfully!']);
     }
+
+
 
 
     public function download(Accessories $acces)
@@ -246,14 +263,69 @@ class AccessoriesController extends Controller
     }
     public function accesin()
     {
-        $accesin = AccessoriesIn::with('accessories')->get();
+        $accesin = AccessoriesIn::whereHas('accessories.divisi', function ($query) {
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+            ->with(['accessories' => function ($query) {
+                $query->select('id', 'price', 'name'); // Pilih kolom yang relevan
+            }])
+            ->get()
+            ->map(function ($item) {
+                // Tambahkan total_price berdasarkan price dan qty
+                $item->total_price = $item->accessories->price * $item->qty;
+                return $item;
+            });
+
         return view('gudang.accessories.accesin', compact('accesin'));
     }
-    public function accesout()
+
+    public function accesout(Request $request)
     {
-        $accesout = AccessoriesSale::with('accessories')->get();
-        return view('gudang.accessories.accesin', compact('accesout'));
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+
+        $accesout = AccessoriesSale::whereHas('sale.divisi', function ($query) {
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+            ->with(['accessories', 'accessories.accessoriesIn', 'sale'])
+            ->get()
+            ->map(function ($accessorySale) {
+                $accessorySale->total_price = $accessorySale->accessories->price * $accessorySale->qty;
+                return $accessorySale;
+            });
+
+        if ($bulan) {
+            $accesout = $accesout->filter(function ($acces) use ($bulan) {
+                return \Carbon\Carbon::parse($acces->acces_out)->format('m') == $bulan;
+            });
+        }
+
+        if ($tahun) {
+            $accesout = $accesout->filter(function ($acces) use ($tahun) {
+                return \Carbon\Carbon::parse($acces->acces_out)->format('Y') == $tahun;
+            });
+        }
+
+        $result = $accesout->groupBy('accessories_id')->map(function ($group) {
+            $stok_awal = $group->first()->accessories->accessoriesIn->sum('qty');
+            $total_keluar = $group->sum('qty');
+            $stok_sisa = $stok_awal - $total_keluar;
+
+            return [
+                'stok_awal' => $stok_awal,
+                'total_keluar' => $total_keluar,
+                'stok_sisa' => $stok_sisa,
+                'data' => $group
+            ];
+        });
+
+        if ($request->ajax()) {
+            return response()->json($result);
+        }
+
+        return view('gudang.accessories.accesin', compact('bulan', 'tahun'));
     }
+
     public function print(Request $request)
     {
         // Ambil ID accessories yang dipilih dan jumlah barcode
@@ -306,8 +378,7 @@ class AccessoriesController extends Controller
             $quantity = $barcodeQuantities[$accessory->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$accessory->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128);
-            }
+                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128,2 , 60, 'black', false);            }
         }
 
         // Jika ada barcode tidak valid, tampilkan pesan error
@@ -328,6 +399,64 @@ class AccessoriesController extends Controller
         $dompdf->render();
 
         return $dompdf->stream('barcode.pdf', ['Attachment' => false]);
+    }
+    public function listReject()
+    {
+        $reject = AccessoriesRejecte::all();
+        return view('gudang.accesreject.index', compact('reject'));
+    }public function kembali()
+    {
+        return view('gudang.accesreject.create');
+    }
+    public function reject(Request $request, $id = null)
+    {
+        // Mengecek apakah 'code_acces' di-input-kan secara manual
+        if (empty($request->input('code_acces'))) {
+            // Jika kosong, buat kode akses baru secara otomatis
+            $currentDate = date('md'); // contoh: 240822 untuk 22 Agustus 2024
+
+            // Dapatkan jumlah accessories yang diinput pada hari ini
+            $countToday = AccessoriesRejecte::whereDate('created_at', date('Y-m-d'))->count();
+
+            // Nomor urut dengan padding tiga digit
+            $newCode = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+
+            // Format kode akses baru
+            $codeAcces = 'P-' . $newCode . $currentDate; // contoh output: P-240822001
+        } else {
+            // Jika kode akses di-inputkan secara manual
+            $codeAcces = $request->input('code_acces');
+        }
+
+        // Buat objek AccessoriesRejecte baru
+        $acces = new AccessoriesRejecte();
+        $acces->divisi_id = Auth::user()->divisi_id;
+        $acces->name = $request->input('name');
+        $acces->price = $request->input('price');
+        $acces->capital_price = $request->input('capital_price');
+        $acces->code_acces = $codeAcces;  // Jika tidak ada ID, akan otomatis menggunakan kode yang dibuat
+        $acces->stok = $request->input('stok');
+
+        // Simpan data ke database
+        $acces->save();
+
+        // Mengecek apakah kode akses yang sama sudah ada di tabel Accessories
+        $existingAccessory = Accessories::where('code_acces', $codeAcces)->first();
+
+        if ($existingAccessory) {
+            // Jika ditemukan, kurangi stok accessories yang sesuai dengan jumlah yang diinputkan
+            $existingAccessory->stok -= $request->input('stok');
+
+            // Pastikan stok tidak menjadi negatif
+            if ($existingAccessory->stok < 0) {
+                $existingAccessory->stok = 0; // Jika stok kurang dari 0, set ke 0
+            }
+
+            // Simpan perubahan stok ke dalam database
+            $existingAccessory->save();
+        }
+
+        return back()->with('success', 'Accessories Reject Ditambah dan Stok Accessories Dikurangi');
     }
 
 }

@@ -16,6 +16,7 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
+                        <th>No Invoice</th>
                         <th>Kode produk</th>
                         <th>Name</th>
                         <th>Harga</th>
@@ -28,6 +29,7 @@
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
+                            <td>{{$data->sale->invoice}}</td>
                             <td>{{$data->accessories->code_acces}}</td>
                             <td>{{$data->accessories->name}}</td>
                             <td>{{formatRupiah($data->accessories->price)}}</td>

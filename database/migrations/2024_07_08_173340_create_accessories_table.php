@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::create('accessories', function (Blueprint $table) {
             $table->id();
+            $table->integer('divisi_id');
             $table->string('name');
-            $table->string('price');
-            $table->string('capital_price')->nullable();
+            $table->string('price')->default(0);
+            $table->string('capital_price')->default(0);
             $table->string('code_acces');
             $table->bigInteger('stok')->default(0);
             $table->timestamps();

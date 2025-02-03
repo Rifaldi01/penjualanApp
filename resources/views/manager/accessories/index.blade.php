@@ -34,11 +34,12 @@
                                 <th width="5%">
                                     <input type="checkbox" id="select_all">
                                 </th>
-                                <th width="2%">Code Access</th>
+                                <th width="2%">Code </th>
                                 <th>Name</th>
+                                <th>Divisi</th>
                                 <th>Modal</th>
                                 <th>Price</th>
-                                <th class="text-center">Jumlah Barcode</th>
+                                <th class="text-center">Jmlh Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
                                 <th class="text-center" width="10%">Action</th>
                             </tr>
@@ -51,7 +52,8 @@
                                     </td>
                                     <td>{{ $data->code_acces }}</td>
                                     <td>{{ $data->name }}</td>
-                                    <td>{{ formatRupiah($data->capital_price) }},-</td>
+                                    <td>{{ $data->divisi->name }}</td>
+                                    <td>{{ is_numeric($data->capital_price) ? formatRupiah($data->capital_price, 0, '.', '.') : '0' }},-</td>
                                     <td>{{ formatRupiah($data->price) }},-</td>
                                     <td class="text-center">
                                         <input type="number" name="barcode_quantity[{{ $data->id }}]" placeholder="Jumlah Barcode" class="form-control" min="1">                                    </td>

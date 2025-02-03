@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('sale_id');
             $table->integer('bank_id')->nullable();
             $table->string('pay_debts');
+            $table->string('penerima')->nullable();
             $table->date('date_pay');
             $table->string('description')->nullable();
             $table->timestamps();

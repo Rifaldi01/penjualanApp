@@ -12,7 +12,7 @@
                     <!-- Konten modal seperti tabel, gambar, dll. -->
                     <div class="row">
                         <div class="col-lg-6">
-                            <img src="{{asset('images/dnd-logo1.png')}}"
+                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"
                                  class="float-start print-img" alt="dnd logo">
                         </div>
                         <div class="float-start ms-3"><strong style="font-size: 15px;">DND
@@ -37,7 +37,7 @@
                             <td width="13%" class="text-start">No Invoice</td>
                             <td width="2%" class="text-center">:</td>
                             <td>
-                                <strong>{{ $data->invoiceNumber }}</strong>
+                                <strong>{{ $data->invoice }}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -52,9 +52,9 @@
                             <td>
                                 <strong>{{$data->customer->company}}</strong>
                             </td>
-                            <td class="text-start">Admin</td>
+                            <td class="text-start">No. Rekening</td>
                             <td width="1%" class="text-end">:</td>
-                            <td width="20%">{{Auth::user()->name}}</td>
+                            <td width="20%">{{$data->customer->divisi->no_rek}}</td>
                         </tr>
                     </table>
                     <hr>
@@ -119,20 +119,51 @@
                         </div>
                     </div>
                     <div class="mt-5">
-                        <div class="row">
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-4">
-                                <div class="mb-2 text-center">Hormat Kami,</div>
-                                <div class="text-center">
-                                    <br>
-                                    <br>
-                                </div>
-                                <div
-                                    class="mt-2 text-center">{{Auth::user()->name}}</div>
-                                <div class="text-center">Gudang</div>
-                            </div>
-                        </div>
+                        <table class="table">
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td class="text-center" style="border: none;">Hormat Kami,</td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td class="text-center" width="20%" style="border: none;">
+                                    {{Auth::user()->name}} <br>
+                                </td>
+                            </tr>
+                        </table>
+                        {{--                        <div class="row">--}}
+                        {{--                            <div class="col-lg-4"></div>--}}
+                        {{--                            <div class="col-lg-4"></div>--}}
+                        {{--                            <div class="col-lg-4">--}}
+                        {{--                                <div class="mb-2 text-center">Hormat Kami,</div>--}}
+                        {{--                                <div class="text-center">--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <br>--}}
+                        {{--                                    <img src="{{asset('images/dnd-ttd.png')}}"--}}
+                        {{--                                         class="print-img" alt="dnd logo">--}}
+                        {{--                                </div>--}}
+                        {{--                                <div--}}
+                        {{--                                    class="mt-2 text-center">{{Auth::user()->name}}</div>--}}
+                        {{--                                <div class="text-center">Administration</div>--}}
+                        {{--                            </div>--}}
+                        {{--                        </div>--}}
                     </div>
                 </div>
             </div>

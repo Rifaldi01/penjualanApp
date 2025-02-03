@@ -18,4 +18,8 @@ class AccessoriesSale extends Model
     {
         return $this->belongsTo(Accessories::class, 'accessories_id', 'id');
     }
+    public function accessoriesIn()
+    {
+        return $this->hasMany(AccessoriesIn::class, 'accessories_id');
+    }
 }

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Gudang;
 
 use App\Http\Controllers\Controller;
+use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemCategory;
+use App\Models\ItemIn;
 use App\Models\ItemSale;
+use App\Models\Pembelian;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Milon\Barcode\DNS1D;
 use Picqer\Barcode\BarcodeGeneratorHTML;
 use Picqer\Barcode\BarcodeGeneratorPNG;
@@ -27,7 +31,10 @@ class ItemController extends Controller
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-        $items = Item::all();
+        $items = Item::whereHas('divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+        ->with('divisi')->get();
         $barcodes = [];
 
         foreach ($items as $item) {
@@ -47,11 +54,13 @@ class ItemController extends Controller
     {
         $inject = [
             'url' => route('gudang.item.store'),
+            'divisi' => Divisi::pluck('name', 'id')->toArray(),
         ];
         if ($id){
             $item = Item::whereId($id)->first();
             $inject = [
                 'url' => route('gudang.item.update', $id),
+                'divisi' => Divisi::pluck('name', 'id')->toArray(),
                 'item' => $item
             ];
         }
@@ -119,26 +128,50 @@ class ItemController extends Controller
     private function save(Request $request, $id = null)
     {
         $validate = $request->validate([
-            'name'=> 'required',
-            'itemcategory_id'=> 'required',
-            'no_seri'=> $id ? 'required' : 'required|unique:items',
-            'price' => 'required'
-        ],[
+            'name' => 'required',
+            'itemcategory_id' => 'required',
+            'no_seri' => $id ? 'required' : 'required|unique:items',
+        ], [
             'name.required' => 'Nama Tidak Boleh Kosong',
             'itemcategory_id.required' => 'Pilih Category',
             'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
-            'price.required' => 'Harga Tidak boleh Kosong',
         ]);
+
+        // Simpan atau update data di tabel `items`
         $item = Item::firstOrNew(['id' => $id]);
-        $item->itemcategory_id  = $request->input('itemcategory_id');
-        $item->name    = $request->input('name');
+        $item->itemcategory_id = $request->input('itemcategory_id');
+        $item->name = $request->input('name');
         $item->no_seri = $request->input('no_seri');
-        $item->price = $request->input('price');
+        $item->divisi_id = Auth::user()->divisi_id;
         $item->save();
-        Alert::success('Success', 'Upload Data Success');
+
+        // Simpan data ke tabel `item_ins`
+        ItemIn::create([
+            'itemcategory_id' => $item->itemcategory_id,
+            'divisi_id' => $item->divisi_id,
+            'name' => $item->name,
+            'no_seri' => $item->no_seri,
+            'kode_msk' => $request->input('kode_msk'),
+        ]);
+
+        // Cek apakah invoice sudah ada di tabel `pembelian`
+        $invoice = $request->input('kode_msk');
+        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+
+        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+        if (!$existingPembelian) {
+            Pembelian::create([
+                'divisi_id' => $item->divisi_id,
+                'invoice' => $invoice,
+                'status' => '1',
+            ]);
+        }
+
+        Alert::success('Success', 'Data berhasil disimpan');
         return redirect()->route('gudang.item.index');
     }
+
 
     public function download(Item $item)
     {
@@ -180,8 +213,10 @@ class ItemController extends Controller
     }
     public function itemin()
     {
-        $items = Item::with('cat')->get();
-        $itemSales = ItemSale::with('itemCategory')->get();
+        $items = Item::where('divisi_id', Auth::user()->divisi_id)->with('cat')->get();
+        $itemSales = ItemSale::whereHas('sale.divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })->with('itemCategory')->get();
 
         // Menggabungkan kedua koleksi menjadi satu
         $itemin = $items->merge($itemSales);
@@ -190,7 +225,10 @@ class ItemController extends Controller
     }
     public function itemout()
     {
-        $itemout = ItemSale::with('itemCategory')->get();
+        $itemout = ItemSale::whereHas('sale.divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })
+            ->with('itemCategory')->get();
         return view('gudang.item.itemin', compact('itemout'));
     }
     public function print(Request $request)
@@ -261,6 +299,31 @@ class ItemController extends Controller
         $dompdf->render();
 
         return $dompdf->stream('barcode-item.pdf', ['Attachment' => false]);
+    }
+    public function reject($id)
+    {
+        // Update hanya item dengan ID yang diberikan dan status 0
+        $item = Item::where('id', $id)->where('status', 0)->first();
+
+        if ($item) {
+            $item->update(['status' => 1]);
+            return back()->with('success', 'Item berhasil direject.');
+        }
+
+        return back()->with('error', 'Item tidak ditemukan atau sudah direject.');
+    }
+
+    public function redy($id)
+    {
+        // Update hanya item dengan ID yang diberikan dan status 0
+        $item = Item::where('id', $id)->where('status', 1)->first();
+
+        if ($item) {
+            $item->update(['status' => 0]);
+            return back()->with('success', 'Item sudah redy.');
+        }
+
+        return back()->with('error', 'Item tidak ditemukan atau sudah direject.');
     }
 
 }

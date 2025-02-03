@@ -35,7 +35,7 @@
                                     <input type="checkbox" id="select_all">
                                 </th>
                                 <th width="2%">Code Access</th>
-                                <th>Name</th>
+                                <th>Nama Accessories</th>
                                 <th>Price</th>
                                 <th class="text-center">Jumlah Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
@@ -72,7 +72,6 @@
             </div>
     </div>
 @endsection
-
         @push('js')
             <script>
                 // Checkbox untuk memilih semua accessories

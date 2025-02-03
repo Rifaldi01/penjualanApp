@@ -73,6 +73,8 @@
 
         @media (max-width: 768px) {
             td {
+                width: 4.8cm;
+                height: 1.5cm;
                 padding: 3px;
                 font-size: 0.8em;
             }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\CustomerImport;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -18,11 +19,12 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $cust = Customer::latest()->paginate();
         $title = 'Delete Data!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
-        $cust = Customer::all();
+        $cust = Customer::whereHas('divisi', function ($query){
+            $query->where('divisi_id', Auth::user()->divisi_id);
+        })->get();
         return view('admin.customer.index', compact('cust'));
     }
 
@@ -127,6 +129,7 @@ class CustomerController extends Controller
         $cust->phone = $request->input('phone');
         $cust->company = $request->input('company');
         $cust->addres = $request->input('addres');
+        $cust->divisi_id = Auth::user()->divisi_id;
         $cust->save();
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('admin.customer.index');

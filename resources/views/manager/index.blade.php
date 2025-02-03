@@ -1,5 +1,51 @@
 @extends('layouts.master')
 @section('content')
+    <h3>Divisi</h3>
+    <hr>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
+        <div class="col">
+            <div class="card radius-10 border-start border-0 border-4 border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-secondary">Total Divisi</p>
+                            <h4 class="my-1 text-primary">{{$totaldivisi}}</h4>
+                        </div>
+                        <div class="widgets-icons-2 rounded-circle bg-gradient-deepblue text-white ms-auto"><i
+                                class='lni lni-apartment'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @foreach ($divisi as $data)
+            <div class="col">
+                <div class="card radius-10 border-start border-0 border-4 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <p class="mb-0 text-secondary">{{$data->name}}</p>
+
+                                    @if($data->status == 0)
+                                    <h4 class="my-1 text-primary">
+                                        <i class="bx bx-check-circle"></i>
+                                    </h4>
+                                    @else
+                                    <h4 class="my-1 text-danger">
+                                        <i class="bx bx-x-circle"></i>
+                                    </h4>
+                                    @endif
+                            </div>
+                            <div class="widgets-icons-2 rounded-circle bg-gradient-deepblue text-white ms-auto"><i
+                                    class='lni lni-apartment'></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    <hr>
     <h3>List Stok Item</h3>
     <hr>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">

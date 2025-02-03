@@ -59,18 +59,18 @@ function tanggal($date)
     // Definisikan nama-nama hari dan bulan dalam bahasa Indonesia
 
     $namaBulan = [
-        'January' => 'Januari',
-        'February' => 'Februari',
-        'March' => 'Maret',
-        'April' => 'April',
+        'January' => 'Jan',
+        'February' => 'Feb',
+        'March' => 'Mar',
+        'April' => 'Apr',
         'May' => 'Mei',
-        'June' => 'Juni',
-        'July' => 'Juli',
-        'August' => 'Agustus',
-        'September' => 'September',
-        'October' => 'Oktober',
-        'November' => 'November',
-        'December' => 'Desember'
+        'June' => 'Jun',
+        'July' => 'JUl',
+        'August' => 'Ags',
+        'September' => 'Sep',
+        'October' => 'Okt',
+        'November' => 'Nov',
+        'December' => 'Des'
     ];
 
     $bulan = $namaBulan[$tanggal->format('F')];

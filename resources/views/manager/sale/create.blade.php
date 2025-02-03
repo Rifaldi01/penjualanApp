@@ -2,10 +2,34 @@
 
 @section('content')
     <div class="card">
-        <div class="card-head">
+        <div class="card-header">
             <div class="container mt-3">
-                <h3>New Transaction</h3>
-                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h4>New Transaction</h4>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="float-end">
+                            <select name="kode" id="invoice" class="form-control">
+                                <option value="">Pilih Invoice</option>
+                                @foreach($divisi as $data)
+                                    <option value="{{ $data->inv_format }}">{{ $data->inv_format }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="float-end">
+                            <select name="divisi_id" id="single-select-optgroup-field"
+                                    data-placeholder="--Pilih Divisi--" class="form-control accessory-select">
+                                <option value=""></option>
+                            @foreach($divisi as $data)
+                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -41,6 +65,16 @@
                     <div class="col-lg-8">
                         <div class="bg-primary">
                             <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
+                        </div>
+                        <div class=" col-lg-4 float-end ms-2">
+                            <div class="mt-2">
+                                <label for="">PPN</label>
+                                <input type="number" name="ppn" class="form-control" id="ppn">
+                            </div>
+                            <div class="mt-2">
+                                <label for="">PPH</label>
+                                <input type="text" class="form-control" name="pph" id="pph">
+                            </div>
                         </div>
                         <div class=" col-lg-4 float-end">
                             <div class="mt-2">
@@ -112,6 +146,14 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        $(document).ready(function () {
+            $('#invoice').select2({
+                theme:'bootstrap-5',
+                placeholder: "--Pilih Invoice--",
+                width: '100%'
+            });
+        });
+
         $(document).ready(function () {
             let table = $('.table-sale').DataTable({
                 processing: true,
@@ -320,10 +362,14 @@
                     data: {
                         _token: '{{ csrf_token() }}',
                         customer_id: $('select[name="customer_id"]').val(),
+                        divisi_id: $('select[name="divisi_id"]').val(),
+                        kode: $('select[name="kode"]').val(),
                         total_item: $('#total_item').val(),
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
+                        ppn: $('#ppn').val(),
+                        pph: $('#pph').val(),
                         nominal_in: $('#nominal_in').val(),
                         deadlines: $('#deadlines').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),

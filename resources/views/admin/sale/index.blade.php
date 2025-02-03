@@ -17,10 +17,12 @@
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
+                        <th class="text-center" width="5%">Invoice</th>
                         <th>Customer</th>
                         <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Nominal In</th>
+                        <th class="text-center" width="5%">Uang Msk</th>
                         <th class="text-center" width="5%">Total Price</th>
+                        <th class="text-center" width="5%">Ppn</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
                         <th class="text-center" width="5%">Total Pay</th>
@@ -34,11 +36,13 @@
                         @else
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
-                                <td>{{dateId($data->created_at)}}</td>
+                                <td>{{tanggal($data->created_at)}}</td>
+                                <td>{{$data->invoice}}</td>
                                 <td>{{$data->customer->name}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->nominal_in)}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
+                                <td>{{formatRupiah($data->ppn)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
@@ -74,13 +78,13 @@
                                                     <div class="modal-body">
                                                         <div class="row mb-3">
                                                             <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                    class="text-danger">*</i> Nominal In</label>
+                                                                    class="text-danger">*</i> Uang Masuk</label>
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
-                                                                    <input type="hidden" id="nominal_in_value"
+                                                                    <input type="hidden" id="nominal_in_value_{{$data->id}}"
                                                                            value="{{ $data->nominal_in }}">
                                                                     <input type="text" class="form-control"
-                                                                           id="nominal_in" name="nominal_in"
+                                                                           id="nominal_in_{{$data->id}}" name="nominal_in"
                                                                            value="{{ formatRupiah($data->nominal_in) }}"
                                                                            readonly>
                                                                     <span
@@ -95,7 +99,7 @@
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
                                                                     <input type="text" class="form-control"
-                                                                           name="pay_debts" id="pay_debts"
+                                                                           name="pay_debts" id="pay_debts_{{$data->id}}"
                                                                            onkeyup="formatRupiah2(this)">
                                                                     <span
                                                                         class="position-absolute top-50 translate-middle-y"><i
@@ -116,7 +120,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="row mb-3" id="bankField">
+                                                        <div class="row mb-3" id="bankField_{{$data->id}}">
                                                             <label for="input42"
                                                                    class="col-sm-3 col-form-label">Bank</label>
                                                             <div class="col-sm-9">
@@ -137,13 +141,24 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <div class="row mb-3" id="penerimaField_{{$data->id}}">
+                                                            <label for="input42" class="col-sm-3 col-form-label">Penerima</label>
+                                                            <div class="col-sm-9">
+                                                                <div class="position-relative input-icon">
+                                                                    <input type="text" class="form-control"
+                                                                           name="penerima" id="penerima_{{$data->id}}">
+                                                                    <span class="position-absolute top-50 translate-middle-y"><i
+                                                                            class='bx bx-user'></i></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="row mb-3">
                                                             <label for="input42" class="col-sm-3 col-form-label"><i
                                                                     class="text-danger"></i> </label>
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
                                                                     <input type="checkbox" class="form-check"
-                                                                           id="lainya">
+                                                                           id="lainya_{{$data->id}}">
                                                                     <span class="position-absolute top-50 translate-middle-y ms-1"> Lainya</span>
                                                                 </div>
                                                             </div>
@@ -152,7 +167,7 @@
                                                             <label for="input42"
                                                                    class="col-sm-3 col-form-label"></label>
                                                             <div class="col-sm-9">
-                                                                <textarea id="description" type="text"
+                                                                <textarea id="description_{{$data->id}}" type="text"
                                                                           class="form-control" name="description"
                                                                           placeholder="Isi Lainya pembayaran melalui apa?"></textarea>
                                                             </div>
@@ -165,6 +180,13 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
+                                            data-id="{{ $data->id }}"
+                                            data-bs-tool="tooltip"
+                                            data-bs-placement="top"
+                                            title="Batalkan">
+                                    </button>
                                 </td>
                             </tr>
                         @endif
@@ -191,9 +213,11 @@
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
+                        <th class="text-center" width="5%">Invoice</th>
                         <th>Customer</th>
                         <th class="text-center" width="5%">Total Item</th>
                         <th class="text-center" width="5%">Total Price</th>
+                        <th class="text-center" width="5%">Ppn</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
                         <th class="text-center" width="5%">Total Pay</th>
@@ -206,10 +230,12 @@
                         @if($data->nominal_in == $data->pay)
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
-                                <td>{{dateId($data->created_at)}}</td>
+                                <td>{{tanggal($data->created_at)}}</td>
+                                <td>{{$data->invoice}}</td>
                                 <td>{{$data->customer->name}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
+                                <td>{{formatRupiah($data->ppn)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
@@ -238,8 +264,56 @@
     </div>
 @endsection
 
-@push('head') @endpush
+@push('head')
+    <style>
+        table.dataTable {
+            font-size: 11px /* Atur ukuran font */
+        }
+    </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 @push('js')
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.delete-sale', function () {
+                const saleId = $(this).data('id'); // ID dari data yang akan dihapus
+
+                Swal.fire({
+                    title: 'Batalkan Transaksi?',
+                    text: "Transaksi Yang Dibatakan Tidak Akan Dapat Dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Batalkan!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route("admin.sale.destroy", ":id") }}'.replace(':id', saleId), // Gunakan route() dengan mengganti placeholder :id
+                            method: 'DELETE',
+                            data: {
+                                _token: '{{ csrf_token() }}', // Kirim token CSRF
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    // Hapus elemen baris dari DOM
+                                    $(`button[data-id="${saleId}"]`).closest('tr').remove();
+                                    Swal.fire('Berhasil!', 'Transaksi Berhasil Dibatalkan', 'success');
+                                } else {
+                                    Swal.fire('Failed!', response.message || 'Failed to delete sale.', 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                Swal.fire('Error!', xhr.responseJSON?.message || 'An error occurred while processing your request.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             var table = $('#excel').DataTable({
@@ -305,28 +379,23 @@
 
     <script>
         $(document).ready(function () {
-            // Fungsi untuk menghitung total nominal_in
-            function calculateTotal() {
-                // Ambil nilai nominal_in yang sudah dalam angka asli
-                let nominal_in = parseFloat($('#nominal_in_value').val()) || 0;
+            function calculateTotal(id) {
+                let nominal_in = parseFloat($(`#nominal_in_value_${id}`).val()) || 0;
+                let pay_debts = parseFloat($(`#pay_debts_${id}`).val().replace(/[^0-9]/g, '')) || 0;
 
-                // Ambil nilai pay_debts dan pastikan nilai default jika kosong atau 0
-                let pay_debts = parseFloat($('#pay_debts').val().replace(/[^0-9]/g, '')) || 0;
-
-                // Penjumlahan nominal_in dan pay_debts
                 let total = nominal_in + pay_debts;
-
-                // Update nilai nominal_in dengan format Rupiah yang benar
-                $('#nominal_in').val('Rp. ' + total.toLocaleString('id-ID'));
+                $(`#nominal_in_${id}`).val('Rp. ' + total.toLocaleString('id-ID'));
             }
 
-            // Event listener untuk input pay_debts
-            $('#pay_debts').on('input', function () {
-                calculateTotal();  // Menghitung ulang total ketika pay_debts diubah
+            $('[id^=pay_debts_]').on('input', function () {
+                let id = $(this).attr('id').split('_')[2];
+                calculateTotal(id);
             });
 
-            // Inisialisasi nilai nominal_in saat halaman dimuat
-            calculateTotal();
+            $('[id^=nominal_in_value_]').each(function () {
+                let id = $(this).attr('id').split('_')[2];
+                calculateTotal(id);
+            });
         });
     </script>
     <script>
@@ -352,28 +421,31 @@
             rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
             element.value = rupiah;
 
-            function toggleValidation() {
-                if ($('#lainya').is(':checked')) {
+            function toggleValidation(id) {
+                if ($(`#lainya_${id}`).is(':checked')) {
                     // Jika checkbox lainya dicentang:
-                    $('#description').prop('required', true); // Description wajib diisi
-                    $('#bankField').hide(); // Sembunyikan bank field
-                    $('#single-select-field').prop('required', false); // Bank tidak wajib
-                    $('#bankError').hide(); // Sembunyikan pesan error bank
+                    $(`#description_${id}`).prop('required', true); // Description wajib diisi
+                    $(`#bankField_${id}`).hide(); // Sembunyikan bank field
+                    $(`#single-select-field_${id}`).prop('required', false); // Bank tidak wajib
                 } else {
                     // Jika checkbox lainya tidak dicentang:
-                    $('#description').prop('required', false); // Description tidak wajib
-                    $('#bankField').show(); // Tampilkan bank field
-                    $('#single-select-field').prop('required', true); // Bank wajib diisi
+                    $(`#description_${id}`).prop('required', false); // Description tidak wajib
+                    $(`#bankField_${id}`).show(); // Tampilkan bank field
+                    $(`#single-select-field_${id}`).prop('required', true); // Bank wajib diisi
                 }
             }
 
             // Event listener untuk checkbox lainya
-            $('#lainya').on('change', function () {
-                toggleValidation();
+            $("[id^='lainya_']").on('change', function () {
+                var id = $(this).attr('id').split('_')[1]; // Ambil ID dinamis
+                toggleValidation(id);
             });
 
             // Inisialisasi validasi saat halaman dimuat
-            toggleValidation();
+            $("[id^='lainya_']").each(function () {
+                var id = $(this).attr('id').split('_')[1]; // Ambil ID dinamis
+                toggleValidation(id);
+            });
         }
     </script>
 

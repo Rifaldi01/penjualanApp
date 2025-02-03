@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\AccessoriesController;
 use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Admin\ReportController;
-
+use App\Http\Controllers\Admin\SupllierController;
+use App\Http\Controllers\Admin\PembelianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
 
     //accessories
     Route::get('/accessories', [AccessoriesController::class, 'index'])->name('admin.acces.index');
+    Route::get('/accessories/filter/{divisiId?}', [AccessoriesController::class, 'filterByDivisi']);
     Route::get('/acces-sale', [AccessoriesController::class, 'sale'])->name('admin.acces.sale');
 
     //accessories end
@@ -49,7 +51,14 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
     Route::get('/report/filter', [ReportController::class, 'filter'])->name('report.filter');
     //report end
 
-    //print
-    Route::get('/transaksi/nota-kecil', [SaleController::class, 'notaKecil'])->name('transaksi.nota_kecil');
-    //end print
+    //supplier
+    Route::resource('supplier', SupllierController::class)->names('admin.supplier');
+    //end supplier
+
+    //pembelian
+    Route::resource('pembelian', PembelianController::class)->names('admin.pembelian');
+    Route::get('/pembelian/get-items-by-invoice/{kode_msk}', [PembelianController::class, 'loadItemsByInvoice']);
+    //end pembelian
+
+
 });

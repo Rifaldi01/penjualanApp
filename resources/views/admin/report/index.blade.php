@@ -43,6 +43,7 @@
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
+                        <th class="text-center" width="5%">Tgl Invoice</th>
                         <th>Customer</th>
                         <th>Item</th>
                         <th>Accessories</th>
@@ -59,19 +60,27 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th colspan="5" class="text-center">Total Income</th>
+                        <th colspan="6" class="text-center">Total Income</th>
                         <th colspan="6" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
-                        <th colspan="5" class="text-center">Profit</th>
+                        <th colspan="6" class="text-center">Profit</th>
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
-                        <th colspan="5" class="text-center">Diskon</th>
+                        <th colspan="6" class="text-center">PPN</th>
+                        <th colspan="6" class="text-center" id="ppn">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">PPH</th>
+                        <th colspan="6" class="text-center" id="pph">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Diskon</th>
                         <th colspan="6" class="text-center" id="diskon">0</th>
                     </tr>
                     <tr>
-                        <th colspan="5" class="text-center">Ongkir</th>
+                        <th colspan="6" class="text-center">Ongkir</th>
                         <th colspan="6" class="text-center" id="ongkir">0</th>
                     </tr>
                     </tfoot>
@@ -112,6 +121,10 @@
                         $('#diskon').text(formatRupiah(totalDiskon));
                         var totalOngkir = response.ongkir;
                         $('#ongkir').text(formatRupiah(totalOngkir));
+                        var totalppn = response.ppn;
+                        $('#ppn').text(formatRupiah(totalppn));
+                        var totalpph = response.pph;
+                        $('#pph').text(formatRupiah(totalpph));
 
                         response.report.forEach(function (data, index) {
                             // Generate list of item sales as a vertical list
@@ -149,6 +162,7 @@
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>${formatDate(data.created_at)}</td>
+                                <td>${data.invoice}</td>
                                 <td>${data.customer ? data.customer.name : 'N/A'}</td>
                                 <td>${itemSalesList}</td>
                                 <td>${accessoriesList}</td>
@@ -190,8 +204,8 @@
 
             function formatDate(dateString) {
                 const date = new Date(dateString);
-                const options = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
-                return date.toLocaleDateString('id-ID', options);
+                const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                return date.toLocaleDateString('id-ID', options).replace('Des', 'Des'); // Pastikan singkatan sesuai
             }
 
             var table = $('#filter-table').DataTable({
@@ -262,17 +276,19 @@
 
                             doc.styles = {
                                 table: {
-                                    margin: [0, 5, 0, 15]
+                                    margin: [5, 5, 5, 5],  // Mengurangi margin agar tabel lebih kecil
+                                    fontSize: 7  // Mengurangi ukuran font tabel untuk menghemat ruang
                                 },
                                 tableHeader: {
                                     bold: true,
-                                    fontSize: 12,
+                                    fontSize: 8,  // Ukuran font lebih kecil untuk header
                                     fillColor: '#f2f2f2'
                                 },
                                 tableCell: {
-                                    fontSize: 10
+                                    fontSize: 6  // Ukuran font lebih kecil untuk sel tabel
                                 }
                             };
+
                         }
                     },
                     {

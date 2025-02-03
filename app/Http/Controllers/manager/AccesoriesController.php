@@ -173,55 +173,48 @@ class AccesoriesController extends Controller
 
     public function updateMultiple(Request $request)
     {
-        // Validasi permintaan yang masuk
         $request->validate([
             'accessories' => 'required|array',
             'accessories.*.code_acces' => 'required|string',
             'accessories.*.stok' => 'required|integer|min:0',
+            'accessories.*.kode_msk' => 'nullable|string',
         ]);
 
         $accessoriesData = $request->input('accessories');
 
-        // Loop melalui setiap aksesori dan perbarui stoknya
         foreach ($accessoriesData as $accessoryData) {
-            // Temukan aksesori berdasarkan kode
             $accessory = Accessories::where('code_acces', $accessoryData['code_acces'])->first();
 
             if ($accessory) {
-                // Simpan stok sebelumnya
-                $previousStock = $accessory->stok;
-
                 // Perbarui stok
-                $accessory->stok = $previousStock + $accessoryData['stok'];
+                $accessory->stok += $accessoryData['stok'];
                 $accessory->save();
 
-                // Cek apakah ada entri di accessories_ins dengan accessories_id yang sama pada tanggal yang sama
+                // Update atau buat entri di AccessoriesIn
                 $today = now()->format('Y-m-d');
                 $existingAccessoriesIn = AccessoriesIn::where('accessories_id', $accessory->id)
                     ->whereDate('date_in', $today)
                     ->first();
 
                 if ($existingAccessoriesIn) {
-                    // Jika sudah ada, perbarui qty saja
                     $existingAccessoriesIn->qty += $accessoryData['stok'];
                     $existingAccessoriesIn->save();
                 } else {
-                    // Jika belum ada, buat entri baru di tabel accessories_ins
                     AccessoriesIn::create([
                         'accessories_id' => $accessory->id,
                         'qty' => $accessoryData['stok'],
+                        'kode_msk' => $accessoryData['kode_msk'] ?? null,
                         'date_in' => now(),
                     ]);
                 }
             } else {
-                // Jika aksesori tidak ditemukan, kembalikan respons kesalahan
                 return response()->json(['success' => false, 'message' => 'Accessory not found for code: ' . $accessoryData['code_acces']], 404);
             }
         }
 
-        // Kembalikan respons sukses
         return response()->json(['success' => true, 'message' => 'Accessories updated successfully!']);
     }
+
     public function download(Accessories $acces)
     {
         $generator = new BarcodeGeneratorPNG();
@@ -242,12 +235,49 @@ class AccesoriesController extends Controller
     }
     public function accesin()
     {
-        $accesin = AccessoriesIn::with('accessories')->get();
+        $accesin = AccessoriesIn::with('accessories.divisi')->get();
         return view('manager.accessories.accesin', compact('accesin'));
     }
-    public function accesout()
+    public function accesout(Request $request)
     {
-        $accesout = AccessoriesSale::with('accessories')->get();
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+
+        $accesout = AccessoriesSale::with(['accessories.divisi', 'accessories.accessoriesIn', 'sale'])
+            ->get()
+            ->map(function ($accessorySale) {
+                $accessorySale->total_price = $accessorySale->accessories->price * $accessorySale->qty;
+                return $accessorySale;
+            });
+
+        if ($bulan) {
+            $accesout = $accesout->filter(function ($acces) use ($bulan) {
+                return \Carbon\Carbon::parse($acces->acces_out)->format('m') == $bulan;
+            });
+        }
+
+        if ($tahun) {
+            $accesout = $accesout->filter(function ($acces) use ($tahun) {
+                return \Carbon\Carbon::parse($acces->acces_out)->format('Y') == $tahun;
+            });
+        }
+
+        $result = $accesout->groupBy('accessories_id')->map(function ($group) {
+            $stok_awal = $group->first()->accessories->accessoriesIn->sum('qty');
+            $total_keluar = $group->sum('qty');
+            $stok_sisa = $stok_awal - $total_keluar;
+
+            return [
+                'stok_awal' => $stok_awal,
+                'total_keluar' => $total_keluar,
+                'stok_sisa' => $stok_sisa,
+                'data' => $group
+            ];
+        });
+
+        if ($request->ajax()) {
+            return response()->json($result);
+        }
         return view('manager.accessories.accesin', compact('accesout'));
     }
     public function print(Request $request)

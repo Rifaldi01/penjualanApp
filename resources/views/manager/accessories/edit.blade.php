@@ -30,6 +30,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Stok</th>
+                    <th scope="col">Kode/Invoice</th>
                     <th scope="col">Action</th>
                 </tr>
                 </thead>
@@ -65,6 +66,9 @@
                             return formatRupiah(data);
                         }
                     },
+                    { data: 'stok', render: function(data, type, row) {
+                            return '<input type="number" name="stok[]" class="form-control stok-input" value="' + data + '" />';
+                        }},
                     { data: 'stok', render: function(data, type, row) {
                             return '<input type="number" name="stok[]" class="form-control stok-input" value="' + data + '" />';
                         }},
@@ -151,6 +155,7 @@
                 table.rows().every(function () {
                     let data = this.data();
                     data.stok = $(this.node()).find('input.stok-input').val();
+                    data.kode_msk = $(this.node()).find('input.kode_msk-input').val();
                     accessoriesData.push(data);
                 });
 

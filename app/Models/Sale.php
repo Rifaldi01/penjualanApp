@@ -41,4 +41,8 @@ class Sale extends Model
     {
         return $this->belongsTo(Bank::class);
     }
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class);
+    }
 }

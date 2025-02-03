@@ -22,7 +22,8 @@
                     <tr>
                         <th width="4%">No</th>
                         <th>No Seri</th>
-                        <th>Name</th>
+                        <th>Name Item</th>
+                        <th></th>
                         <th>Price</th>
                     </tr>
                     </thead>
@@ -32,6 +33,7 @@
                             <th>{{$key +1}}</th>
                             <td>{{$data->no_seri}}</td>
                             <td>{{$data->name}}</td>
+                            <td>{{$data->divisi->name}}</td>
                             <td>{{formatRupiah($data->price)}}</td>
                         </tr>
                     @endforeach

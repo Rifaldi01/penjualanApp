@@ -66,7 +66,8 @@
                    @foreach($sales as $key => $data)
                            <tr>
                                <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
-                               <td>{{dateId($data->created_at)}}</td>
+                               <td>{{tanggal($data->created_at)}}</td>
+                               <td>{{$data->invoice}}</td>
                                <td>{{$data->customer->name}}</td>
                                <td class="text-center">{{$data->total_item}}</td>
                                <td>{{formatRupiah($data->total_price)}}</td>

@@ -24,17 +24,36 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-user-plus'></i>
                 </div>
-                <div class="menu-title">Add User</div>
+                <div class="menu-title">User</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('superadmin.account.create')}}">
                         <i class='bx bx-circle '></i>
-                        Ceate Account
+                        Tambah Account
                     </a>
                     <a href="{{route('superadmin.account.index')}}">
                         <i class='bx bx-circle '></i>
-                        List Account
+                        Daftar Account
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='lni lni-apartment'></i>
+                </div>
+                <div class="menu-title">Divisi</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="{{route('superadmin.divisi.create')}}">
+                        <i class='bx bx-circle '></i>
+                        Tambah Divisi
+                    </a>
+                    <a href="{{route('superadmin.divisi.index')}}">
+                        <i class='bx bx-circle '></i>
+                        Daftar Divisi
                     </a>
                 </li>
             </ul>

@@ -16,6 +16,7 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
+                        <th>Invoice</th>
                         <th>No Seri</th>
                         <th>Name</th>
                         <th>Category</th>
@@ -27,6 +28,7 @@
                     @foreach ($sale as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
+                            <td>{{$data->sale->invoice}}</td>
                             <td>{{$data->itemCategory->name}}-{{$data->no_seri}}</td>
                             <td>{{$data->name}}</td>
                             <td>{{$data->itemCategory->name}}</td>

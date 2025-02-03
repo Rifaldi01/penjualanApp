@@ -182,8 +182,8 @@ class ItemController extends Controller
     }
     public function itemin()
     {
-        $items = Item::with('cat')->get();
-        $itemSales = ItemSale::with('itemCategory')->get();
+        $items = Item::with('cat', 'divisi')->get();
+        $itemSales = ItemSale::with('itemCategory', 'divisi')->get();
 
         // Menggabungkan kedua koleksi menjadi satu
         $itemin = $items->merge($itemSales);

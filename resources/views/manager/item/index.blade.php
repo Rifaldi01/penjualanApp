@@ -37,6 +37,7 @@
                             <input type="checkbox" id="select_all">
                         </th>
                         <th width="2%">No</th>
+                        <th>Divisi</th>
                         <th>Name</th>
                         <th>No Seri</th>
                         <th>Modal</th>
@@ -52,6 +53,9 @@
                                 <input type="checkbox" name="items[]" value="{{ $item->id }}" class="select_item" form="printBarcodeForm">
                             </td>
                             <td>{{$key + 1}}</td>
+                            <td>
+                                {{ $item->divisi->name }}
+                            </td>
                             <td>
                                 <a class="text-dark">{{$item->name}}</a>
                             </td>

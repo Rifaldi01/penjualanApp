@@ -42,10 +42,20 @@
                     <div class="bg-primary">
                         <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
                     </div>
+                    <div class=" col-lg-4 float-end ms-2">
+                        <div class="mt-2">
+                            <label for="">PPN</label>
+                            <input type="text" name="ppn" class="form-control" id="ppn" onkeyup="formatRupiah(this)" value="0">
+                        </div>
+                        <div class="mt-2">
+                            <label for="">PPH</label>
+                            <input type="text" class="form-control" name="pph" id="pph" value="0">
+                        </div>
+                    </div>
                     <div class=" col-lg-4 float-end">
                         <div class="mt-2">
                             <label for="">Nominal In</label>
-                            <input type="number" name="nominal_in" class="form-control" id="nominal_in">
+                            <input type="text" name="nominal_in" class="form-control" id="nominal_in" onkeyup="formatRupiah(this)">
                         </div>
                         <div class="mt-2">
                             <label for="">Pay Plan</label>
@@ -182,6 +192,12 @@
                 }
                 bayar = total - diskon;
 
+                let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(ppn)) {
+                    ppn = 0;
+                }
+                bayar += ppn;
+
                 let ongkir = parseFloat($('#ongkir').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ongkir)) {
                     ongkir = 0;
@@ -217,6 +233,9 @@
             });
 
             $('#ongkir').on('input', function () {
+                calculateTotal();
+            });
+            $('#ppn').on('input', function () {
                 calculateTotal();
             });
 
@@ -324,7 +343,9 @@
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
-                        nominal_in: $('#nominal_in').val(),
+                        nominal_in: Math.floor(parseFloat($('#nominal_in').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        pph: $('#pph').val(),
                         deadlines: $('#deadlines').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,

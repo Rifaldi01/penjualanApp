@@ -29,6 +29,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Stok</th>
+                    <th scope="col">Kode/Invoice</th>
                     <th scope="col">Action</th>
                 </tr>
                 </thead>
@@ -62,6 +63,9 @@
                     },
                     { data: 'stok', render: function(data, type, row) {
                             return '<input type="number" name="stok[]" class="form-control stok-input" value="' + data + '" />';
+                        }},
+                    { data: 'kode_msk', render: function(data, type, row) {
+                            return '<input type="text" name="kode_msk[]" class="form-control kode_msk-input" placeholder="kode/invoice" />';
                         }},
                     { data: null, searchable: false, sortable: false, render: function(data, type, row) {
                             return '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="bx bx-trash"></i></button>';
@@ -146,8 +150,10 @@
                 table.rows().every(function () {
                     let data = this.data();
                     data.stok = $(this.node()).find('input.stok-input').val();
+                    data.kode_msk = $(this.node()).find('input.kode_msk-input').val();
                     accessoriesData.push(data);
                 });
+
 
                 $.ajax({
                     url: '{{ route('gudang.acces.updatemultiple') }}',
