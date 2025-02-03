@@ -61,8 +61,9 @@
                                                data-bs-target="#exampleExtraLargeModal{{$permintaan->id}}" data-bs-tool="tooltip"
                                                data-bs-placement="top" title="Print Surat Jalan">
                                        </button>
-                                       @include('gudang.permintaan.surat-penerimaan')
+
                                @endif
+                                   @include('gudang.permintaan.surat-penerimaan')
 
                            </td>
                        </tr>
