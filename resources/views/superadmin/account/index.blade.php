@@ -22,6 +22,7 @@
                     <tr>
                         <th width="2%">No</th>
                         <th>Name</th>
+                        <th>Email</th>
                         <th>Divisi</th>
                         <th>Role</th>
                         <th class="text-center">Status</th>
@@ -35,6 +36,7 @@
                                 @if($data->roles == !null)
                                     <td>{{$key +1}}</td>
                                     <td>{{$data->name}}</td>
+                                    <td>{{$data->email}}</td>
                                     <td>
                                         @if($data->divisi)
                                             {{$data->divisi->name}}
