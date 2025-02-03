@@ -32,14 +32,7 @@
                         @foreach($itemin as $item)
                             <tr>
                                 <td class="text-center">
-                                    {{-- Cek apakah objek item adalah instance dari ItemSale --}}
-                                    @if($item instanceof \App\Models\ItemSale)
-                                        {{ tanggal($item->date_in) }}
-                                    @elseif($item instanceof \App\Models\Item)
-                                        {{ tanggal($item->created_at) }}
-                                    @else
-                                        -
-                                    @endif
+                                    {{ tanggal($item->created_at) }}
                                 </td>
                                 <td>
                                     {{ isset($item->itemCategory) ? $item->itemCategory->name : $item->cat->name }}
