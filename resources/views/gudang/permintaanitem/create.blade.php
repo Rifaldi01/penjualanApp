@@ -145,7 +145,7 @@
 
         // Fungsi untuk mengambil aksesori dari divisi asal
         function fetchAccessories(divisiId) {
-            fetch(`/penjualan.dnd-survey.com/gudang/minta/item/${divisiId}`)
+            fetch(`/gudang/minta/item/${divisiId}`)
                 .then(response => response.json())
                 .then(data => {
                     accessoriesData = data;  // Menyimpan data aksesori
