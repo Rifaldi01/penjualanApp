@@ -378,7 +378,7 @@ class AccessoriesController extends Controller
             $quantity = $barcodeQuantities[$accessory->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$accessory->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128,2 , 60, 'black', false);            }
+                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128,2 , 25, 'black', false);            }
         }
 
         // Jika ada barcode tidak valid, tampilkan pesan error
