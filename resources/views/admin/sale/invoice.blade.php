@@ -15,8 +15,7 @@
                             <img src="{{asset('images/logo/'. $data->divisi->logo)}}"
                                  class="float-start print-img" alt="dnd logo">
                         </div>
-                        <div class="float-start ms-3"><strong style="font-size: 15px;">DND
-                                SURVEY</strong></div>
+                        <div class="float-start ms-3"><strong style="font-size: 15px;">{{$data->divisi->name}}</strong></div>
                         <div class="float-start ms-3"><strong style="font-size: 15px;">Komplek
                                 Sukamenak Indah
                                 Blok Q90 Kopo Sayati </strong></div>
