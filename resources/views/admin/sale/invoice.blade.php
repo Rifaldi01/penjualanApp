@@ -12,7 +12,7 @@
                     <!-- Konten modal seperti tabel, gambar, dll. -->
                     <table>
                         <tr>
-                            <td rowspan="4" style="border: none;">
+                            <td rowspan="4" style="border: none;" width="">
                                 <img src="{{asset('images/logo/'. $data->divisi->logo)}}"
                                                  class="float-start print-img" alt="dnd logo">
                             </td>

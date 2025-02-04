@@ -41,7 +41,7 @@
                             <td>{{$data->inv_format}}</td>
                             <th>Active/tidak</th>
                             <td>
-                                <a href="" class="btn btn-sm btn-warning bx bx-edit"></a>
+                                <a href="{{route('superadmin.divisi.edit')}}" class="btn btn-sm btn-warning bx bx-edit"></a>
                             </td>
                         </tr>
                     @endforeach
