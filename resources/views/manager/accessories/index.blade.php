@@ -37,8 +37,8 @@
                                 <th width="2%">Code </th>
                                 <th>Name</th>
                                 <th>Divisi</th>
-                                <th>Modal</th>
-                                <th>Price</th>
+                                <th>Price Cost</th>
+                                <th>Sale Price</th>
                                 <th class="text-center">Jmlh Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
                                 <th class="text-center" width="10%">Action</th>
