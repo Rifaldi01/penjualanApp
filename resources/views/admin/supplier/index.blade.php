@@ -15,7 +15,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" id="supplier">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -182,6 +182,9 @@
                         $.ajax({
                             type: "DELETE",
                             url: "{{ route('admin.supplier.destroy', ':id') }}".replace(':id', id),
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
                             success: function (data) {
                                 loadSuppliers();
                                 Swal.fire({
@@ -202,6 +205,8 @@
                         });
                     }
                 });
+            });
+            $('#supplier').DataTable({
             });
         });
     </script>
