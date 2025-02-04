@@ -21,15 +21,7 @@ class SupllierController extends Controller
     {
         if ($request->ajax()) {
             $suppliers = Supplier::where('divisi_id', Auth::user()->divisi_id)->get();
-            return DataTables::of($suppliers)
-                ->addIndexColumn()
-                ->addColumn('action', function($row){
-                    $btn = '<a href="javascript:void(0)" class="editSupplier btn btn-warning btn-sm bx bx-edit" data-id="'.$row->id.'"></a>';
-                    $btn .= ' <a href="javascript:void(0)" class="deleteSupplier btn btn-danger btn-sm bx bx-trash" data-id="'.$row->id.'"></a>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+            return response()->json($suppliers);
         }
 
         return view('admin.supplier.index');
