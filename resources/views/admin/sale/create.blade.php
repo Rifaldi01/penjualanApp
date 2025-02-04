@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
-                            <label for="ongkir" class="col-lg-4 control-label">Ongkir</label>
+                            <label for="ongkir" class="col-lg-4 control-label">Ongkir Konsumen</label>
                             <div class="col-lg-8">
                                 <input type="number" name="ongkir" id="ongkir" class="form-control" value="0">
                             </div>
