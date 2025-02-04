@@ -12,43 +12,43 @@
                     <!-- Konten modal seperti tabel, gambar, dll. -->
                     <table>
                         <tr>
-                            <td rowspan="4" style="border: none; width: 100px; vertical-align: middle;">
+                            <td rowspan="4" style="border: none; width: 120px; vertical-align: middle;">
                                 <img src="{{ asset('images/logo/' . $data->divisi->logo) }}"
-                                     class="float-start print-img"
+                                     class="print-img"
                                      alt="dnd logo"
-                                     style="max-width: 100px; height: auto; display: block;">
+                                     style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
-                            <td style="border: none; padding-left: 10px;">
+                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 10px;">
+                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Sukamenak, Margahayu, Kabupaten Bandung 40228</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 10px;">
+                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Phone: (022) 5442 0354 | Mobile: 0821-2990-0025</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 10px;">
+                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Website: dndsurvey.id | Email: dndsurvey90@gmail.com</strong>
                             </td>
                         </tr>
                     </table>
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"
-                                 class="float-start print-img" alt="dnd logo">
-                        </div>
-                        <div class="float-start ms-3"><strong style="font-size: 15px;">{{$data->divisi->name}}</strong></div>
-                        <div class="float-start ms-3"></div>
-                        <div class="float-start ms-3"></div>
-                        <div class="float-start ms-3"></div>
-                        <div class="float-start ms-3"></div>
+                    {{--                    <div class="row">--}}
+{{--                        <div class="col-lg-6">--}}
+{{--                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"--}}
+{{--                                 class="float-start print-img" alt="dnd logo">--}}
+{{--                        </div>--}}
+{{--                        <div class="float-start ms-3"><strong style="font-size: 15px;">{{$data->divisi->name}}</strong></div>--}}
+{{--                        <div class="float-start ms-3"></div>--}}
+{{--                        <div class="float-start ms-3"></div>--}}
+{{--                        <div class="float-start ms-3"></div>--}}
+{{--                        <div class="float-start ms-3"></div>--}}
                     </div>
                     <hr>
                     <table class="table-style">
