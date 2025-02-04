@@ -18,22 +18,22 @@
                                      alt="dnd logo"
                                      style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
-                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
+                            <td style="border: none; padding-left: 10px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
+                            <td style="border: none; padding-left: 10px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Sukamenak, Margahayu, Kabupaten Bandung 40228</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
+                            <td style="border: none; padding-left: 10px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Phone: (022) 5442 0354 | Mobile: 0821-2990-0025</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding-left: 5px; white-space: nowrap;">
+                            <td style="border: none; padding-left: 10px; white-space: nowrap;">
                                 <strong style="font-size: 15px;">Website: dndsurvey.id | Email: dndsurvey90@gmail.com</strong>
                             </td>
                         </tr>
