@@ -39,7 +39,7 @@
                         </tr>
                     </table>
 
-                    {{--                    <div class="row">--}}
+                    <div class="row">
 {{--                        <div class="col-lg-6">--}}
 {{--                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"--}}
 {{--                                 class="float-start print-img" alt="dnd logo">--}}
