@@ -41,7 +41,7 @@
                         <th>Name</th>
                         <th>No Seri</th>
                         <th>Modal</th>
-                        <th>Price</th>
+                        <th>Sale Price</th>
                         <th class="text-center" width="5%">Jumalah Barcode</th>
                         <th class="text-center" width="15%">Action</th>
                     </tr>
