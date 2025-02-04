@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-use DataTables;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Auth;
 
 class SupllierController extends Controller
@@ -21,7 +21,7 @@ class SupllierController extends Controller
     {
         if ($request->ajax()) {
             $suppliers = Supplier::where('divisi_id', Auth::user()->divisi_id)->get();
-            return Datatables::of($suppliers)
+            return DataTables::of($suppliers)
                 ->addIndexColumn()
                 ->addColumn('action', function($row){
                     $btn = '<a href="javascript:void(0)" class="editSupplier btn btn-warning btn-sm bx bx-edit" data-id="'.$row->id.'"></a>';
