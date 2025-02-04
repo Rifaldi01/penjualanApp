@@ -85,7 +85,7 @@
                 }
 
                 // Fetch data accessories berdasarkan divisi
-                fetch(`/penjualanApp/public/admin/accessories/filter/${divisiId}`)
+                fetch(`/admin/accessories/filter/${divisiId}`)
                     .then(response => response.json())
                     .then(data => {
                         const tbody = document.querySelector('#accessoriesTable tbody');
