@@ -5,7 +5,9 @@
         <div class="container mt-3">
             <div class="card-head">
                 <div class="row">
-                    <div class="col-sm-6"> <h4>Supplier Management</h4></div>
+                    <div class="col-sm-6">
+                        <h4>Supplier Management</h4>
+                    </div>
                     <div class="col-sm-6">
                         <div class="float-end me-2">
                             <button class="btn btn-dnd btn-sm mb-3 bx bx-plus" id="createNewSupplier"></button>
@@ -13,7 +15,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered table-striped" id="supplierTable">
+            <table class="table table-bordered table-striped">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -24,10 +26,11 @@
                     <th>Actions</th>
                 </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody id="supplierTableBody"></tbody>
             </table>
         </div>
     </div>
+
     <!-- Modal -->
     <div class="modal fade" id="ajaxModal" aria-hidden="true">
         <div class="modal-dialog">
@@ -69,20 +72,36 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            var table = $('#supplierTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('admin.supplier.index') }}",
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'kode', name: 'kode' },
-                    { data: 'name', name: 'name' },
-                    { data: 'alamat', name: 'alamat' },
-                    { data: 'telepon', name: 'telepon' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false },
-                ],
-            });
+            loadSuppliers(); // Memuat data supplier saat halaman dibuka
 
+            function loadSuppliers() {
+                $.ajax({
+                    url: "{{ route('admin.supplier.index') }}",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(response) {
+                        let suppliers = response;
+                        let rows = "";
+                        $.each(suppliers, function(index, supplier) {
+                            rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${supplier.kode}</td>
+                            <td>${supplier.name}</td>
+                            <td>${supplier.alamat}</td>
+                            <td>${supplier.telepon}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
+                                <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        });
+                        $("#supplierTableBody").html(rows);
+                    }
+                });
+            }
+
+            // Tambah Supplier
             $('#createNewSupplier').click(function () {
                 $('#supplierForm').trigger("reset");
                 $('#modalHeading').html("Add Supplier");
@@ -90,8 +109,9 @@
                 $('#id').val('');
             });
 
+            // Edit Supplier
             $('body').on('click', '.editSupplier', function () {
-                const id = $(this).data('id');
+                let id = $(this).data('id');
                 $.get("{{ route('admin.supplier.index') }}/" + id + "/edit", function (data) {
                     $('#modalHeading').html("Edit Supplier");
                     $('#ajaxModal').modal('show');
@@ -103,10 +123,11 @@
                 });
             });
 
+            // Simpan Supplier
             $('#saveBtn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Saving...');
-                const id = $('#id').val();
+                let id = $('#id').val();
                 let url = "{{ route('admin.supplier.store') }}";
                 let type = "POST";
 
@@ -123,7 +144,7 @@
                     success: function (data) {
                         $('#supplierForm').trigger("reset");
                         $('#ajaxModal').modal('hide');
-                        table.draw();
+                        loadSuppliers();
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -144,8 +165,9 @@
                 });
             });
 
+            // Hapus Supplier
             $('body').on('click', '.deleteSupplier', function () {
-                const id = $(this).data('id');
+                let id = $(this).data('id');
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Data ini akan dihapus secara permanen!",
@@ -161,7 +183,7 @@
                             type: "DELETE",
                             url: "{{ route('admin.supplier.destroy', ':id') }}".replace(':id', id),
                             success: function (data) {
-                                table.draw();
+                                loadSuppliers();
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
@@ -182,6 +204,5 @@
                 });
             });
         });
-
     </script>
 @endpush

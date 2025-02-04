@@ -50,8 +50,8 @@
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $data->name }}</td>
-                            <td>{{ $data->divisi->name }}</td>
                             <td>{{ formatRupiah($data->price) }}</td>
+                            <td>{{ $data->divisi->name }}</td>
                             <td>{{ $data->code_acces }}</td>
                             <td>{{ $data->stok }}</td>
                         </tr>
