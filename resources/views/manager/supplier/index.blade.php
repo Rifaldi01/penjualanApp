@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered table-striped" id="supplierTable">
+            <table class="table table-bordered table-striped" id="supplier">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -100,40 +100,39 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            var table = $('#supplierTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
+            function fetchSuppliers() {
+                $.ajax({
                     url: "{{ route('manager.supplier.index') }}",
-                    data: function(d) {
-                        d.divisi_id = $('#divisiFilter').val(); // Kirim nilai divisi yang dipilih
+                    type: "GET",
+                    data: { divisi_id: $('#divisiFilter').val() },
+                    success: function(response) {
+                        let rows = '';
+                        response.data.forEach((supplier, index) => {
+                            rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${supplier.kode}</td>
+                            <td>${supplier.name}</td>
+                            <td>${supplier.alamat}</td>
+                            <td>${supplier.telepon}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
+                                <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Hapus</button>
+                            </td>
+                        </tr>`;
+                        });
+                        $('#supplierTable tbody').html(rows);
                     }
-                },
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'kode', name: 'kode' },
-                    { data: 'name', name: 'name' },
-                    { data: 'alamat', name: 'alamat' },
-                    { data: 'telepon', name: 'telepon' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false },
-                ],
-            });
+                });
+            }
 
             $('#divisiFilter').change(function() {
-                var selectedDivisi = $('#divisiFilter option:selected').text(); // Ambil nama divisi yang dipilih
-                $('#breadcrumbDivisiName').text(selectedDivisi); // Perbarui breadcrumb dengan nama divisi
-                table.draw(); // Refresh tabel saat filter berubah
+                var selectedDivisi = $('#divisiFilter option:selected').text();
+                $('#breadcrumbDivisiName').text(selectedDivisi);
+                fetchSuppliers();
             });
 
-            // Pilih divisi yang sudah dipilih sebelumnya saat halaman dimuat
-            var selectedDivisi = $('#divisiFilter option:selected').text();
-            $('#breadcrumbDivisiName').text(selectedDivisi); // Set breadcrumb sesuai divisi yang dipilih
-
-            $('.single-select-field').select2({
-                theme: 'bootstrap-5', // Gunakan tema bootstrap (jika tersedia)
-                placeholder: 'Pilih Divisi',
-                allowClear: true
-            });
+            fetchSuppliers();
 
             $('#createNewSupplier').click(function () {
                 $('#supplierForm').trigger("reset");
@@ -172,11 +171,10 @@
                     data: $('#supplierForm').serialize(),
                     url: url,
                     type: type,
-                    dataType: 'json',
                     success: function (data) {
                         $('#supplierForm').trigger("reset");
                         $('#ajaxModal').modal('hide');
-                        table.draw();
+                        fetchSuppliers();
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -214,7 +212,7 @@
                             type: "DELETE",
                             url: "{{ route('manager.supplier.destroy', ':id') }}".replace(':id', id),
                             success: function (data) {
-                                table.draw();
+                                fetchSuppliers();
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
@@ -234,7 +232,10 @@
                     }
                 });
             });
+            $('#supplier').DataTable({
+            });
         });
+
 
     </script>
     <script>
