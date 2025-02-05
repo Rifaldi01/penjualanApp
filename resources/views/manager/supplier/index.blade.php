@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered table-striped" id="supplier">
+            <table class="table table-bordered table-striped" id="supplierTable">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -232,8 +232,7 @@
                     }
                 });
             });
-            $('#supplier').DataTable({
-            });
+
         });
 
 
