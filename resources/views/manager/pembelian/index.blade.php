@@ -63,7 +63,6 @@
                                         <div class="text-danger">Lengkapi pembelian</div>
                                     @endif
                                 </td>
-
                                 <td>{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_harga)}}</td>
                                 <td>
@@ -135,7 +134,7 @@
                 }
 
                 // Fetch data pembelian berdasarkan divisi
-                fetch(`/penjualan.dnd-survey.com/manager/pembelian/filter/${divisiId}`)
+                fetch(`/manager/pembelian/filter/${divisiId}`)
                     .then(response => response.json())
                     .then(data => {
                         const tbody = document.querySelector('#pembelian tbody');
@@ -143,18 +142,6 @@
 
                         if (data.length > 0) {
                             data.forEach((item, index) => {
-                                const itemRows = item.item_beli.map(i => `
-                                <li>${i.name}</li>
-                            `).join('');
-
-                                const hargaRows = item.item_beli.map(i => `
-                                <li>${formatRupiah(i.harga)}</li>
-                            `).join('');
-
-                                const qtyRows = item.item_beli.map(i => `
-                                <li>${i.qty}</li>
-                            `).join('');
-
                                 const row = `
                                 <tr>
                                     <td>${index + 1}</td>
@@ -168,10 +155,10 @@
                                     : '<span class="badge bg-danger">Belum Lunas</span>'}
                                     </td>
                                     <td>
-                                        <a href="/penjualan.dnd-survey.com/manager/pembelian/edit/${item.id}"
+                                        <a href="/manager/pembelian/edit/${item.id}"
                                            class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                            data-bs-placement="top" title="Edit Data"></a>
-                                        <form action="/penjualan.dnd-survey.com/manager/pembelian/destroy/${item.id}" method="POST" style="display:inline-block;">
+                                        <form action="/manager/pembelian/destroy/${item.id}" method="POST" style="display:inline-block;">
                                             @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm bx bx-trash"
