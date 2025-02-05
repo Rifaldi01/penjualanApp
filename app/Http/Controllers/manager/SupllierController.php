@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Divisi;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use DataTables;
 use Illuminate\Support\Facades\Auth;
 
 class SupllierController extends Controller
@@ -17,21 +18,30 @@ class SupllierController extends Controller
      */
     public function index(Request $request)
     {
-        $divisiUser = Divisi::all(); // Ambil semua data divisi
+        $divisiUser = Divisi::where('name')->get();
         $divisi = Divisi::all();
 
-        // Ambil data supplier dengan filter berdasarkan divisi jika dipilih
-        $query = Supplier::query();
+        if ($request->ajax()) {
+            $query = Supplier::query();
 
-        if ($request->filled('divisi_id')) {
-            $query->where('divisi_id', $request->divisi_id);
+            // Filter berdasarkan divisi jika ada
+            if ($request->filled('divisi_id')) {
+                $query->where('divisi_id', $request->divisi_id);
+            }
+
+            return Datatables::of($query)
+                ->addIndexColumn()
+                ->addColumn('action', function($row){
+                    $btn = '<a href="javascript:void(0)" class="editSupplier btn btn-warning btn-sm bx bx-edit" data-id="'.$row->id.'"></a>';
+                    $btn .= ' <a href="javascript:void(0)" class="deleteSupplier btn btn-danger btn-sm bx bx-trash" data-id="'.$row->id.'"></a>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
         }
 
-        $suppliers = $query->get();
-
-        return view('manager.supplier.index', compact('divisi', 'divisiUser', 'suppliers'));
+        return view('manager.supplier.index', compact('divisi', 'divisiUser'));
     }
-
     /**
      * Show the form for creating a new resource.
      *
