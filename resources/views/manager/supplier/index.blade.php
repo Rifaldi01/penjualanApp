@@ -100,7 +100,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            var table = $('#supplierTable').table({
+            var table = $('#supplierTable').Table({
                 processing: true,
                 serverSide: true,
                 ajax: {
