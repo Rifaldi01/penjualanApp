@@ -9,9 +9,9 @@ use App\Http\Controllers\manager\ItemCategoryController;
 use App\Http\Controllers\manager\CustomerController;
 use App\Http\Controllers\manager\AccesoriesController;
 use App\Http\Controllers\manager\ReportController;
-use App\Http\Controllers\Manager\PembelianController;
-use App\Http\Controllers\Manager\SupllierController;
-use App\Http\Controllers\Manager\PermintaanController;
+use App\Http\Controllers\manager\PembelianController;
+use App\Http\Controllers\manager\SupllierController;
+use App\Http\Controllers\manager\PermintaanController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
