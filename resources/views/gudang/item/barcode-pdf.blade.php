@@ -107,7 +107,7 @@
                         @endforeach
                     </div>
                 </td>
-                @if ($no++ % 4 == 0)
+                @if ($no++ % 3 == 0)
     </tr><tr>
         @endif
         @endforeach
