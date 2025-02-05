@@ -18,7 +18,7 @@ class SupllierController extends Controller
      */
     public function index(Request $request)
     {
-        $divisiUser = Divisi::where('name')->get();
+        $divisiUser = Divisi::all(); // Mengambil semua data divisi
         $divisi = Divisi::all();
 
         if ($request->ajax()) {
@@ -29,15 +29,12 @@ class SupllierController extends Controller
                 $query->where('divisi_id', $request->divisi_id);
             }
 
-            return Datatables::of($query)
-                ->addIndexColumn()
-                ->addColumn('action', function($row){
-                    $btn = '<a href="javascript:void(0)" class="editSupplier btn btn-warning btn-sm bx bx-edit" data-id="'.$row->id.'"></a>';
-                    $btn .= ' <a href="javascript:void(0)" class="deleteSupplier btn btn-danger btn-sm bx bx-trash" data-id="'.$row->id.'"></a>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+            $suppliers = $query->get(); // Ambil semua data supplier sesuai filter
+
+            return response()->json([
+                'success' => true,
+                'data' => $suppliers
+            ]);
         }
 
         return view('manager.supplier.index', compact('divisi', 'divisiUser'));
