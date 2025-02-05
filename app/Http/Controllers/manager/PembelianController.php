@@ -215,7 +215,7 @@ class PembelianController extends Controller
     public function filterByDivisi($divisiId = null)
     {
         // Jika tidak ada divisi dipilih, tampilkan data berdasarkan divisi user yang login
-        $pembelian = Pembelian::with('supplier', 'ItemBeli') // Memastikan relasi dimuat dengan benar
+        $pembelian = Pembelian::with('supplier') // Memastikan relasi dimuat dengan benar
         ->where('divisi_id', $divisiId)
             ->get();
 
