@@ -62,7 +62,13 @@
                             <tr>
                                 <td>{{$key +1}}</td>
                                 <td>{{$data->invoice}}</td>
-                                <td>{{$data->supplier->name}}</td>
+                                <td>
+                                    @if($data->supplier_id)
+                                        {{$data->supplier->name}}
+                                    @else
+                                        <div class="text-danger">Lengkapi pembelian</div>
+                                    @endif
+                                </td>
                                 <td>
                                     @foreach($data->ItemBeli as $item)
                                         <li>{{ $item->name }}</li>
