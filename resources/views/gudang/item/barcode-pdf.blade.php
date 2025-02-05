@@ -99,15 +99,14 @@
         @foreach ($items as $item)
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
-
-                       <center> {!! $barcodeFile !!}</center>
+                    <span style="font-size: 3px">{!! $barcodeFile !!}</span>
                     <div class="code">
                         @foreach (str_split($item->no_seri) as $char)
                             <span>{{ $char }}</span>
                         @endforeach
                     </div>
                 </td>
-                @if ($no++ % 5 == 0)
+                @if ($no++ % 4 == 0)
     </tr><tr>
         @endif
         @endforeach
