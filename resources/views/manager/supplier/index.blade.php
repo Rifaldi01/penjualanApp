@@ -110,7 +110,7 @@
                     }
                 },
                 columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'id', name: 'id', render: function(data, type, row, meta) { return meta.row + 1; } }, // Ubah index agar berurutan
                     { data: 'kode', name: 'kode' },
                     { data: 'name', name: 'name' },
                     { data: 'alamat', name: 'alamat' },
