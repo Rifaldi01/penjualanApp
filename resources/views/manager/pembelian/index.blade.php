@@ -92,7 +92,7 @@
                         </tbody>
                         <tfoot>
                         <tr>
-                            <th colspan="8" class="text-end">Total Hutang</th>
+                            <th colspan="7" class="text-end">Total Hutang</th>
                             <td colspan="2" class="text-center">{{ formatRupiah($totalHarga) }}</td>
                         </tr>
                         </tfoot>
