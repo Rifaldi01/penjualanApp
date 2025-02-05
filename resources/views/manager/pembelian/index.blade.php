@@ -74,10 +74,10 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{route('penjualan.pembelian.edit', $data->id)}}"
+                                    <a href="{{route('manager.pembelian.edit', $data->id)}}"
                                        class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                        data-bs-placement="top" title="Edit Data"></a>
-                                    <form action="{{ route('penjualan.pembelian.destroy', $data->id) }}" method="POST"
+                                    <form action="{{ route('manager.pembelian.destroy', $data->id) }}" method="POST"
                                           style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
