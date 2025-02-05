@@ -104,7 +104,7 @@
 
             function loadSuppliers() {
                 $.ajax({
-                    url: "{{ route('admin.supplier.index') }}",
+                    url: "{{ route('manager.supplier.index') }}",
                     type: "GET",
                     dataType: "json",
                     success: function(response) {
