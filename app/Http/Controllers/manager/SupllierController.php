@@ -18,22 +18,21 @@ class SupllierController extends Controller
      */
     public function index(Request $request)
     {
-        $divisiUser = Divisi::where('name')->get();
+        $divisiUser = Divisi::all(); // Ambil semua data divisi
         $divisi = Divisi::all();
 
-        if ($request->ajax()) {
-            $query = Supplier::query();
+        // Ambil data supplier dengan filter berdasarkan divisi jika dipilih
+        $query = Supplier::query();
 
-            // Filter berdasarkan divisi jika ada
-            if ($request->filled('divisi_id')) {
-                $query->where('divisi_id', $request->divisi_id);
-            }
-
-
+        if ($request->filled('divisi_id')) {
+            $query->where('divisi_id', $request->divisi_id);
         }
 
-        return view('manager.supplier.index', compact('divisi', 'divisiUser'));
+        $suppliers = $query->get();
+
+        return view('manager.supplier.index', compact('divisi', 'divisiUser', 'suppliers'));
     }
+
     /**
      * Show the form for creating a new resource.
      *
