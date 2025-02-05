@@ -100,34 +100,39 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            loadSuppliers(); // Memuat data supplier saat halaman dibuka
+            $('#divisiFilter').change(function() {
+                var selectedDivisi = $(this).val(); // Ambil nilai divisi yang dipilih
+                $('#breadcrumbDivisiName').text($('#divisiFilter option:selected').text()); // Perbarui breadcrumb dengan nama divisi
 
-            function loadSuppliers() {
                 $.ajax({
                     url: "{{ route('manager.supplier.index') }}",
                     type: "GET",
+                    data: {
+                        divisi_id: selectedDivisi // Kirim divisi_id untuk memfilter data supplier
+                    },
                     dataType: "json",
                     success: function(response) {
-                        let suppliers = response;
+                        let suppliers = response.data;
                         let rows = "";
                         $.each(suppliers, function(index, supplier) {
                             rows += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${supplier.kode}</td>
-                            <td>${supplier.name}</td>
-                            <td>${supplier.alamat}</td>
-                            <td>${supplier.telepon}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
-                                <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Delete</button>
-                            </td>
-                        </tr>`;
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${supplier.kode}</td>
+                        <td>${supplier.name}</td>
+                        <td>${supplier.alamat}</td>
+                        <td>${supplier.telepon}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Delete</button>
+                        </td>
+                    </tr>`;
                         });
-                        $("#supplierTableBody").html(rows);
+                        $("#supplierTable tbody").html(rows);
                     }
                 });
-            }
+            });
+
 
             $('#divisiFilter').change(function() {
                 var selectedDivisi = $('#divisiFilter option:selected').text(); // Ambil nama divisi yang dipilih

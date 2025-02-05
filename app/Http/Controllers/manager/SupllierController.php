@@ -39,6 +39,7 @@ class SupllierController extends Controller
 
         return view('manager.supplier.index', compact('divisi', 'divisiUser'));
     }
+
     /**
      * Show the form for creating a new resource.
      *
