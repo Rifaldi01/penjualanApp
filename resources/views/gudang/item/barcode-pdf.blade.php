@@ -105,7 +105,7 @@
         @foreach ($items as $item)
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
-                    <div class="barcode-wrapper">
+                    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px;">
                         {!! $barcodeFile !!}
                         <div class="code">
                             @foreach (str_split($item->no_seri) as $char)
