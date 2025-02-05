@@ -279,7 +279,7 @@ class ItemController extends Controller
                 $barcodePaths[$items->id][] = $generator->getBarcode(
                     $items->no_seri,
                     $generator::TYPE_CODE_128,
-                    $barcodeWidth / 30, // Hitung skala lebar otomatis
+                    $barcodeWidth / 55, // Hitung skala lebar otomatis
                     30, // Tinggi tetap
                     'black',
                     false
