@@ -104,11 +104,12 @@
                 var selectedDivisi = $(this).val(); // Ambil nilai divisi yang dipilih
                 $('#breadcrumbDivisiName').text($('#divisiFilter option:selected').text()); // Perbarui breadcrumb dengan nama divisi
 
+                // Kirim request AJAX berdasarkan pilihan divisi
                 $.ajax({
                     url: "{{ route('manager.supplier.index') }}",
                     type: "GET",
                     data: {
-                        divisi_id: selectedDivisi // Kirim divisi_id untuk memfilter data supplier
+                        divisi_id: selectedDivisi ? selectedDivisi : '' // Jika tidak ada divisi yang dipilih, kirimkan kosong
                     },
                     dataType: "json",
                     success: function(response) {

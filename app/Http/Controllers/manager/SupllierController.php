@@ -24,12 +24,13 @@ class SupllierController extends Controller
         if ($request->ajax()) {
             $query = Supplier::query();
 
-            // Filter berdasarkan divisi jika ada
+            // Jika divisi_id dipilih, filter berdasarkan divisi_id
             if ($request->filled('divisi_id')) {
                 $query->where('divisi_id', $request->divisi_id);
             }
 
-            $suppliers = $query->get(); // Ambil semua data supplier sesuai filter
+            // Ambil semua data supplier (semua divisi atau berdasarkan filter divisi)
+            $suppliers = $query->get();
 
             return response()->json([
                 'success' => true,
@@ -37,6 +38,7 @@ class SupllierController extends Controller
             ]);
         }
 
+        // Tampilkan view dengan data divisi
         return view('manager.supplier.index', compact('divisi', 'divisiUser'));
     }
 
