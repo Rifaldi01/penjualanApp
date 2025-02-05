@@ -160,10 +160,7 @@
                                     <td>${index + 1}</td>
                                     <td>${item.invoice}</td>
                                     <td>${item.supplier ? item.supplier.name : 'Tidak ada Supplier'}</td>
-                                    <td>${itemRows || 'Tidak ada Barang'}</td>
-                                    <td>${hargaRows || 'Tidak ada Harga'}</td>
-                                    <td>${qtyRows || 'Tidak ada Qty'}</td>
-                                    <td>${item.total_item}</td>
+                                    <td>${item.total_item || '0'}</td>
                                     <td>${formatRupiah(item.total_harga)}</td>
                                     <td>
                                         ${item.status == 0
@@ -171,10 +168,10 @@
                                     : '<span class="badge bg-danger">Belum Lunas</span>'}
                                     </td>
                                     <td>
-                                        <a href="/penjualanApp/public/manager/pembelian/edit/${item.id}"
+                                        <a href="/penjualan.dnd-survey.com/manager/pembelian/edit/${item.id}"
                                            class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                            data-bs-placement="top" title="Edit Data"></a>
-                                        <form action="/penjualanApp/public/manager/pembelian/destroy/${item.id}" method="POST" style="display:inline-block;">
+                                        <form action="/penjualan.dnd-survey.com/manager/pembelian/destroy/${item.id}" method="POST" style="display:inline-block;">
                                             @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm bx bx-trash"
