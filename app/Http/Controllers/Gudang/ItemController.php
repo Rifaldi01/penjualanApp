@@ -274,16 +274,7 @@ class ItemController extends Controller
             $quantity = $barcodeQuantities[$items->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$items->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodeWidth = 55 * 1; // Lebar otomatis mengikuti tinggi (rasio 2:1)
-
-                $barcodePaths[$items->id][] = $generator->getBarcode(
-                    $items->no_seri,
-                    $generator::TYPE_CODE_128,
-                    $barcodeWidth / 55, // Hitung skala lebar otomatis
-                    30, // Tinggi tetap
-                    'black',
-                    false
-                );
+                $barcodePaths[$items->id][] = $generator->getBarcode($items->no_seri, $generator::TYPE_CODE_128, 10);
             }
         }
 
