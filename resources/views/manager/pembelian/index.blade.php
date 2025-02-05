@@ -42,19 +42,13 @@
                     <table id="pembelian" class="table table-striped table-bordered" style="width:100%">
                         <thead>
                         <tr>
-                            <th rowspan="2" style="border-top: 2px">No</th>
-                            <th rowspan="2">Invoice</th>
-                            <th rowspan="2">Supplier</th>
-                            <th colspan="3" class="text-center">Barang</th>
-                            <th rowspan="2">Total Barang</th>
-                            <th rowspan="2">Total Harga</th>
-                            <th rowspan="2">Status</th>
-                            <th rowspan="2">Actions</th>
-                        </tr>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Harga</th>
-                            <th>Qty</th>
+                            <th  style="border-top: 2px">No</th>
+                            <th >Invoice</th>
+                            <th >Supplier</th>
+                            <th >Total Barang</th>
+                            <th >Total Harga</th>
+                            <th >Status</th>
+                            <th >Actions</th>
                         </tr>
                         </thead>
                         <tbody id="pembelian">
