@@ -100,47 +100,51 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            function loadSuppliers() {
-                $.ajax({
+            var table = $('#supplierTable').table({
+                processing: true,
+                serverSide: true,
+                ajax: {
                     url: "{{ route('manager.supplier.index') }}",
-                    type: "GET",
-                    data: { divisi_id: $('#divisiFilter').val() },
-                    success: function(response) {
-                        let rows = '';
-                        $.each(response.suppliers, function(index, supplier) {
-                            rows += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${supplier.kode}</td>
-                        <td>${supplier.name}</td>
-                        <td>${supplier.alamat}</td>
-                        <td>${supplier.telepon}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Hapus</button>
-                        </td>
-                    </tr>`;
-                        });
-                        $('#supplierTable tbody').html(rows);
+                    data: function(d) {
+                        d.divisi_id = $('#divisiFilter').val(); // Kirim nilai divisi yang dipilih
                     }
-                });
-            }
-
-            $('#divisiFilter').change(function() {
-                var selectedDivisi = $('#divisiFilter option:selected').text();
-                $('#breadcrumbDivisiName').text(selectedDivisi);
-                loadSuppliers();
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'kode', name: 'kode' },
+                    { data: 'name', name: 'name' },
+                    { data: 'alamat', name: 'alamat' },
+                    { data: 'telepon', name: 'telepon' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
+                ],
             });
 
-            $('#createNewSupplier').click(function() {
+            $('#divisiFilter').change(function() {
+                var selectedDivisi = $('#divisiFilter option:selected').text(); // Ambil nama divisi yang dipilih
+                $('#breadcrumbDivisiName').text(selectedDivisi); // Perbarui breadcrumb dengan nama divisi
+                table.draw(); // Refresh tabel saat filter berubah
+            });
+
+            // Pilih divisi yang sudah dipilih sebelumnya saat halaman dimuat
+            var selectedDivisi = $('#divisiFilter option:selected').text();
+            $('#breadcrumbDivisiName').text(selectedDivisi); // Set breadcrumb sesuai divisi yang dipilih
+
+            $('.single-select-field').select2({
+                theme: 'bootstrap-5', // Gunakan tema bootstrap (jika tersedia)
+                placeholder: 'Pilih Divisi',
+                allowClear: true
+            });
+
+            $('#createNewSupplier').click(function () {
                 $('#supplierForm').trigger("reset");
                 $('#modalHeading').html("Add Supplier");
                 $('#ajaxModal').modal('show');
                 $('#id').val('');
             });
 
-            $(document).on('click', '.editSupplier', function() {
+            $('body').on('click', '.editSupplier', function () {
                 const id = $(this).data('id');
-                $.get("{{ route('manager.supplier.index') }}/" + id + "/edit", function(data) {
+                $.get("{{ route('manager.supplier.index') }}/" + id + "/edit", function (data) {
                     $('#modalHeading').html("Edit Supplier");
                     $('#ajaxModal').modal('show');
                     $('#id').val(data.id);
@@ -152,25 +156,27 @@
                 });
             });
 
-            $('#saveBtn').click(function(e) {
+            $('#saveBtn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Saving...');
                 const id = $('#id').val();
                 let url = "{{ route('manager.supplier.store') }}";
                 let type = "POST";
+
                 if (id) {
                     url = "{{ route('manager.supplier.update', ':id') }}".replace(':id', id);
                     type = "PUT";
                 }
+
                 $.ajax({
                     data: $('#supplierForm').serialize(),
                     url: url,
                     type: type,
                     dataType: 'json',
-                    success: function(data) {
+                    success: function (data) {
                         $('#supplierForm').trigger("reset");
                         $('#ajaxModal').modal('hide');
-                        loadSuppliers();
+                        table.draw();
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -180,7 +186,7 @@
                         });
                         $('#saveBtn').html('Save');
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
@@ -191,7 +197,7 @@
                 });
             });
 
-            $(document).on('click', '.deleteSupplier', function() {
+            $('body').on('click', '.deleteSupplier', function () {
                 const id = $(this).data('id');
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
@@ -207,8 +213,8 @@
                         $.ajax({
                             type: "DELETE",
                             url: "{{ route('manager.supplier.destroy', ':id') }}".replace(':id', id),
-                            success: function(data) {
-                                loadSuppliers();
+                            success: function (data) {
+                                table.draw();
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
@@ -217,7 +223,7 @@
                                     showConfirmButton: false
                                 });
                             },
-                            error: function(xhr) {
+                            error: function (xhr) {
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Gagal',
@@ -228,9 +234,8 @@
                     }
                 });
             });
-
-            loadSuppliers();
         });
+
     </script>
     <script>
         // Example starter JavaScript for disabling form submissions if there are invalid fields
