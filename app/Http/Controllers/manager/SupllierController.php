@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Manager;
+namespace App\Http\Controllers\manager;
 
 use App\Http\Controllers\Controller;
 use App\Models\Divisi;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-use DataTables;
 use Illuminate\Support\Facades\Auth;
 
 class SupllierController extends Controller
