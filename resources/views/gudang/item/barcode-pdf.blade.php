@@ -99,7 +99,8 @@
         @foreach ($items as $item)
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
-                    <span style="font-size: 3px">{!! $barcodeFile !!}</span>
+
+                       <center> {!! $barcodeFile !!}</center>
                     <div class="code">
                         @foreach (str_split($item->no_seri) as $char)
                             <span>{{ $char }}</span>
