@@ -69,21 +69,7 @@
                                         <div class="text-danger">Lengkapi pembelian</div>
                                     @endif
                                 </td>
-                                <td>
-                                    @foreach($data->ItemBeli as $item)
-                                        <li>{{ $item->name }}</li>
-                                    @endforeach
-                                </td>
-                                <td>
-                                    @foreach($data->ItemBeli as $item)
-                                        <li>{{ formatRupiah($item->harga) }}</li>
-                                    @endforeach
-                                </td>
-                                <td>
-                                    @foreach($data->ItemBeli as $item)
-                                        <li>{{ $item->qty }}</li>
-                                    @endforeach
-                                </td>
+
                                 <td>{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_harga)}}</td>
                                 <td>
@@ -94,16 +80,18 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{route('manager.pembelian.edit', $data->id)}}"
+                                    <a href="{{route('admin.pembelian.edit', $data->id)}}"
                                        class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                        data-bs-placement="top" title="Edit Data"></a>
-                                    <form action="{{ route('manager.pembelian.destroy', $data->id) }}" method="POST"
+                                    <form action="{{ route('admin.pembelian.destroy', $data->id) }}" method="POST"
                                           style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm bx bx-trash"
                                                 data-confirm-delete="true" data-bs-toggle="tooltip"
-                                                data-bs-placement="top" title="hapus Data"></button>
+                                                data-bs-placement="top" title="hapus Data">
+
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
