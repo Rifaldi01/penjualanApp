@@ -89,17 +89,6 @@
                 font-size: 0.7em;
                 letter-spacing: 2px;
             }
-            .barcode-wrapper {
-                display: flex;
-                flex-direction: column;
-                align-items: center; /* Tengahkan barcode */
-                justify-content: center; /* Tengahkan secara vertikal */
-                height: 100px; /* Sesuaikan dengan tinggi barcode */
-            }
-            .barcode-wrapper img {
-                max-width: 100%;
-                height: auto;
-            }
         }
     </style>
 </head>
@@ -110,16 +99,15 @@
         @foreach ($items as $item)
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
-                    <div class="barcode-wrapper">
-                    {!! $barcodeFile !!}
+
+                       <center> {!! $barcodeFile !!}</center>
                     <div class="code">
                         @foreach (str_split($item->no_seri) as $char)
                             <span>{{ $char }}</span>
                         @endforeach
                     </div>
-                    </div>
                 </td>
-                @if ($no++ % 4 == 0)
+                @if ($no++ % 6 == 0)
     </tr><tr>
         @endif
         @endforeach
