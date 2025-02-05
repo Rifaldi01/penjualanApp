@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accessories;
+use App\Models\AccessoriesIn;
 use App\Models\Divisi;
+use App\Models\Item;
+use App\Models\ItemIn;
 use App\Models\Pembelian;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PembelianController extends Controller
 {
@@ -39,22 +44,27 @@ class PembelianController extends Controller
     public function create($id = null)
     {
         $inject = [
-            'url' => route('manager.pembelian.store'),
+            'url' => route('admin.pembelian.store'),
             'supplier' => Supplier::pluck('name', 'id')->toArray(),
-            'divisi' => Divisi::pluck('name', 'id')->toArray(),
         ];
+
         if ($id){
             $pembelian = Pembelian::whereId($id)->first();
             $inject = [
-                'url' => route('manager.pembelian.update', $id),
+                'url' => route('admin.pembelian.update', $id),
                 'supplier' => Supplier::pluck('name', 'id')->toArray(),
-                'divisi' => Divisi::pluck('name', 'id')->toArray(),
                 'pembelian' => $pembelian
             ];
         }
-        return view('manager.pembelian.create', $inject);
-    }
 
+        $item = ItemIn::all();
+        $acces = AccessoriesIn::with('accessories')->get();
+
+        // Gabungkan invoice dari accessories dan items, pastikan hanya satu kode invoice yang muncul
+        $invoices = collect($item->pluck('kode_msk'))->merge($acces->pluck('kode_msk'))->unique();
+
+        return view('admin.pembelian.create', $inject,  compact('item', 'acces', 'invoices'));
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -114,49 +124,93 @@ class PembelianController extends Controller
 
         return redirect()->route('manager.pembelian.index')->with('success', 'Pembelian berhasil dihapus!');
     }
-    private function save(Request $request, $id = null)
+    public function save(Request $request, $id = null)
     {
-        $validated = $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'divisi_id' => 'required',
-            'invoice' => 'required|string|max:255',
-            'items' => 'required|array|min:1',
-            'status' => 'required|in:0,1',
-            'items.*.name' => 'required|string|max:255',
-            'items.*.harga' => 'required|numeric|min:0',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.ppn' => 'nullable',
+        $request->validate([
+            'supplier_id' => 'required',
+            'invoice' => 'required',
+            'status' => 'required',
+            'items' => 'nullable|array', // Membolehkan items kosong
+            'items.*.no_seri' => 'required_with:items|string', // Validasi hanya jika items tidak kosong
+            'items.*.capital_price' => 'required_with:items|numeric',
+            'items.*.price' => 'required_with:items|numeric',
+            'acces' => 'nullable|array',
+            'acces.*.code_acces' => 'required|string',
+            'acces.*.capital_price' => 'required|numeric',
+            'acces.*.price' => 'required|numeric',
         ]);
 
-        $totalItem = 0;
-        $totalHarga = 0;
-        $totalPpn = 0;
+        // Ambil data pembelian yang akan diupdate
+        $pembelian = Pembelian::findOrFail($id);
+        $pembelian->update([
+            'supplier_id' => $request->supplier_id,
+            'divisi_id' => Auth::user()->divisi_id,
+            'invoice' => $request->invoice,
+            'status' => $request->status,
+        ]);
 
-        foreach ($validated['items'] as $item) {
-            $totalItem += $item['qty'];
-            $totalPpn += $item['ppn'] * $item['qty'];
-            $totalHarga += $item['harga'] * $item['qty'] + $totalPpn;
+        // Update data untuk item_ins jika items ada
+        if ($request->has('items') && count($request->items) > 0) {
+            foreach ($request->items as $item) {
+                ItemIn::where('kode_msk', $pembelian->invoice)
+                    ->where('no_seri', $item['no_seri'])
+                    ->update([
+                        'capital_price' => $item['capital_price'],
+                        'price' => $item['price'],
+                        'ppn' => $item['ppn'] ?? 0,
+                    ]);
+
+                // Update tabel items (hanya capital_price dan price)
+                Item::where('no_seri', $item['no_seri'])->update([
+                    'capital_price' => $item['capital_price'],
+                    'price' => $item['price'],
+                ]);
+            }
         }
 
-        $pembelian = $id ? Pembelian::findOrFail($id) : new Pembelian;
-        $pembelian->fill([
-            'supplier_id' => $validated['supplier_id'],
-            'divisi_id' => $validated['divisi_id'],
-            'invoice' => $validated['invoice'],
-            'status' => $validated['status'],
+        // Pastikan request acces tidak kosong sebelum memproses
+        if ($request->has('acces') && count($request->acces) > 0) {
+            foreach ($request->acces as $accessory) {
+                // Ambil id accessory berdasarkan code_acces
+                $accessoryId = Accessories::where('code_acces', $accessory['code_acces'])->value('id');
+
+                // Pastikan id accessories ditemukan
+                if ($accessoryId) {
+                    // Update tabel accessories_ins
+                    AccessoriesIn::where('kode_msk', $pembelian->invoice)
+                        ->where('accessories_id', $accessoryId)
+                        ->update([
+                            'capital_price' => $accessory['capital_price'],
+                            'price' => $accessory['price'],
+                            'ppn' => $accessory['ppn'] ?? 0,
+                        ]);
+
+                    // Update tabel accessories (hanya capital_price dan price)
+                    Accessories::where('id', $accessoryId)->update([
+                        'capital_price' => $accessory['capital_price'],
+                        'price' => $accessory['price'],
+                    ]);
+                }
+            }
+        }
+
+        // **Hitung total_item**
+        $totalAccessories = AccessoriesIn::where('kode_msk', $pembelian->invoice)->sum('qty');
+        $totalItems = ItemIn::where('kode_msk', $pembelian->invoice)->count();
+        $totalItem = $totalAccessories + $totalItems;
+
+        // **Hitung total_price**
+        $totalCapitalAccessories = AccessoriesIn::where('kode_msk', $pembelian->invoice)->sum(DB::raw('qty * capital_price'));
+        $totalCapitalItems = ItemIn::where('kode_msk', $pembelian->invoice)->sum('capital_price');
+        $totalPrice = $totalCapitalAccessories + $totalCapitalItems;
+
+        // **Update total_item dan total_price di tabel pembelian**
+        $pembelian->update([
             'total_item' => $totalItem,
-            'total_harga' => $totalHarga,
+            'total_harga' => $totalPrice,
         ]);
-        $pembelian->save();
 
-        // Simpan item pembelian
-        $pembelian->ItemBeli()->delete();
-        foreach ($validated['items'] as $item) {
-            $pembelian->ItemBeli()->create($item);
-        }
-
-        return redirect()->route('manager.pembelian.index')->with('success', 'Pembelian berhasil disimpan!');
-
+        return redirect()->route('admin.pembelian.index')->with('success', 'Data Pembelian Berhasil Diperbarui');
     }
     public function filterByDivisi($divisiId = null)
     {
