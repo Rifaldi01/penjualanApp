@@ -45,6 +45,7 @@
                             <th  style="border-top: 2px">No</th>
                             <th >Invoice</th>
                             <th >Supplier</th>
+                            <th>Divisi</th>
                             <th >Total Barang</th>
                             <th >Total Harga</th>
                             <th >Status</th>
@@ -147,6 +148,7 @@
                                     <td>${index + 1}</td>
                                     <td>${item.invoice}</td>
                                     <td>${item.supplier ? item.supplier.name : 'Tidak ada Supplier'}</td>
+                                    <td>${item.divisi ? item.divisi.name : 'Tidak ada Supplier'}</td>
                                     <td>${item.total_item || '0'}</td>
                                     <td>${formatRupiah(item.total_harga)}</td>
                                     <td>
