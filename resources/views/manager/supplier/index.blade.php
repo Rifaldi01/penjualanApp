@@ -106,7 +106,10 @@
                 ajax: {
                     url: "{{ route('manager.supplier.index') }}",
                     data: function(d) {
-                        d.divisi_id = $('#divisiFilter').val(); // Kirim nilai divisi yang dipilih
+                        d.divisi_id = $('#divisiFilter').val();
+                    },
+                    dataSrc: function(json) {
+                        return json.data || json; // Sesuaikan dengan data yang dikembalikan
                     }
                 },
                 columns: [
