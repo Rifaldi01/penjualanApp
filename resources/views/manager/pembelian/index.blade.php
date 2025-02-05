@@ -64,6 +64,13 @@
                                         <div class="text-danger">Lengkapi pembelian</div>
                                     @endif
                                 </td>
+                                <td>
+                                    @if($data->divisi_id)
+                                        {{$data->divisi->name}}
+                                    @else
+                                        <div class="text-danger">Lengkapi pembelian</div>
+                                    @endif
+                                </td>
                                 <td>{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_harga)}}</td>
                                 <td>
