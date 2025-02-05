@@ -93,7 +93,7 @@
                         </tbody>
                         <tfoot>
                         <tr>
-                            <th colspan="5" class="text-end">Total Hutang</th>
+                            <th colspan="6" class="text-end">Total Hutang</th>
                             <td colspan="2" class="text-center">{{ formatRupiah($totalHarga) }}</td>
                         </tr>
                         </tfoot>
@@ -148,7 +148,7 @@
                                     <td>${index + 1}</td>
                                     <td>${item.invoice}</td>
                                     <td>${item.supplier ? item.supplier.name : 'Tidak ada Supplier'}</td>
-                                    <td>${item.divisi ? item.divisi.name : 'Tidak ada Supplier'}</td>
+                                    <td>${item.divisi ? item.divisi.name : 'Tidak ada Divisi'}</td>
                                     <td>${item.total_item || '0'}</td>
                                     <td>${formatRupiah(item.total_harga)}</td>
                                     <td>
