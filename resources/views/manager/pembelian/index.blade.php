@@ -135,7 +135,7 @@
                 }
 
                 // Fetch data pembelian berdasarkan divisi
-                fetch(`/penjualanApp/public/manager/pembelian/filter/${divisiId}`)
+                fetch(`/penjualan.dnd-survey.com/manager/pembelian/filter/${divisiId}`)
                     .then(response => response.json())
                     .then(data => {
                         const tbody = document.querySelector('#pembelian tbody');
