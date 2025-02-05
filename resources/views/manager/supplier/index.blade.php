@@ -100,27 +100,34 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            var table = $('#supplierTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('manager.supplier.index') }}",
-                    data: function(d) {
-                        d.divisi_id = $('#divisiFilter').val();
-                    },
-                    dataSrc: function(json) {
-                        return json.data || json; // Sesuaikan dengan data yang dikembalikan
+            loadSuppliers(); // Memuat data supplier saat halaman dibuka
+
+            function loadSuppliers() {
+                $.ajax({
+                    url: "{{ route('admin.supplier.index') }}",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(response) {
+                        let suppliers = response;
+                        let rows = "";
+                        $.each(suppliers, function(index, supplier) {
+                            rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${supplier.kode}</td>
+                            <td>${supplier.name}</td>
+                            <td>${supplier.alamat}</td>
+                            <td>${supplier.telepon}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm editSupplier" data-id="${supplier.id}">Edit</button>
+                                <button class="btn btn-danger btn-sm deleteSupplier" data-id="${supplier.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        });
+                        $("#supplierTableBody").html(rows);
                     }
-                },
-                columns: [
-                    { data: 'id', name: 'id', render: function(data, type, row, meta) { return meta.row + 1; } }, // Ubah index agar berurutan
-                    { data: 'kode', name: 'kode' },
-                    { data: 'name', name: 'name' },
-                    { data: 'alamat', name: 'alamat' },
-                    { data: 'telepon', name: 'telepon' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false },
-                ],
-            });
+                });
+            }
 
             $('#divisiFilter').change(function() {
                 var selectedDivisi = $('#divisiFilter option:selected').text(); // Ambil nama divisi yang dipilih
