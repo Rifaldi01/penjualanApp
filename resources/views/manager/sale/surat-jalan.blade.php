@@ -9,27 +9,55 @@
             </div>
             <div class="invoice overflow-auto" id="prinsurat{{$data->id}}">
                 <div class="modal-body modal-surat">
-                    <div class="text-center">
-                        <img src="{{asset('images/logo/'. $data->divisi->logo)}}" alt="" width="24%" class="img-surat">
-                        <div class="mt-1"><strong style="font-size: 15px;">Komplek
-                                Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>
-                        </div>
-                        <div class="mt-1"><strong style="font-size: 15px;">Website : dndsurvey.id |
-                                Email : admin@dndsurvey.id</strong>
-                        </div>
-                        <div class="mt-1"><strong style="font-size: 15px;">Kantor . 022 - 5442 0354
-                                /Phone. 0821-2990-0025 / 081-2992-5005</strong>
-                        </div>
-                    </div>
+                    <table>
+                        <tr>
+                            <td rowspan="4" style="border: none; width: 120px; vertical-align: middle;">
+                                <img src="{{ asset('images/logo/' . $data->divisi->logo) }}"
+                                     class="print-img"
+                                     alt="dnd logo"
+                                     style="width: 100%; height: 100px; object-fit: contain;">
+                            </td>
+                            <td style="border: none; padding-left: 15px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 15px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Sukamenak, Margahayu, Kabupaten Bandung 40227</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 15px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Phone: {{$data->divisi->phone}}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 15px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Email: {{$data->divisi->email}}</strong>
+                            </td>
+                        </tr>
+                    </table>
+                    {{--                    <div class="text-center">--}}
+                    {{--                        <img src="{{asset('images/logo/'. $data->divisi->logo)}}" alt="" width="10%" class="img-surat">--}}
+                    {{--                        <div class="mt-1"><strong style="font-size: 13px;">Komplek--}}
+                    {{--                                Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>--}}
+                    {{--                        </div>--}}
+                    {{--                        <div class="mt-1"><strong style="font-size: 13px;">Website : dndsurvey.id |--}}
+                    {{--                                Email : admin@dndsurvey.id</strong>--}}
+                    {{--                        </div>--}}
+                    {{--                        <div class="mt-1"><strong style="font-size: 13px;">Kantor . 022 - 5442 0354--}}
+                    {{--                                /Phone. 0821-2990-0025 / 081-2992-5005</strong>--}}
+                    {{--                        </div>--}}
+                    {{--                    </div>--}}
                     <hr style="border: 3px solid #000">
-                    <div class="mb-3">
+                    <div class="mb-3" style="font-size: 12px">
                         <strong>Bandung,</strong> {{tanggal($data->created_at)}}
                     </div>
                     <div class="table-responsive mb-4">
                         <table class="" style="width:100%">
                             <thead>
                             <tr>
-                                <th colspan="6" class="text-end bg-secondary bg-opacity-50 sjg" style="font-size: 18px;">
+                                <th colspan="6" class="text-end bg-secondary bg-opacity-50 sjg" style="font-size: 13px;">
                                     SURAT JALAN GUDANG
                                 </th>
                             </tr>
@@ -40,7 +68,7 @@
                                 <th width="1%">No</th>
                                 <th width="1%" class="text-end">:</th>
                                 <th width="1%" class="text-end"
-                                    style="border-right-width:0;">{{ $data->invoiceNumber }}</th>
+                                    style="border-right-width:0;">{{ $data->invoice }}</th>
                             </tr>
                             <tr>
                                 <th></th>
@@ -78,7 +106,7 @@
                             @foreach($data->accessoriesSales as $key => $accessories)
                                 <tr>
                                     <td style="border-left-width:1px;">{{ $key + 1 }}</td>
-                                    <td>{{ $accessories->accessories->name ?? 'NULL' }}</td>
+                                    <td>{{ $accessories->accessories->name }}</td>
                                     <td class="text-center">{{ $accessories->qty }}</td>
                                     <td class="text-right">-</td>
                                 </tr>
@@ -159,6 +187,12 @@
                 margin: 0;
                 padding: 0;
             }
+            td{
+                font-size: 12px;
+            }
+            th{
+                font-size: 12px;
+            }
         }
 
         th.sjg {
@@ -168,7 +202,7 @@
         }
 
         .img-surat {
-            width: 38%;
+            width: 20%;
         }
 
         .modal-surat {

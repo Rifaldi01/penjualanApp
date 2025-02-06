@@ -19,22 +19,22 @@
                                      style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 15px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
+                                <strong style="font-size: 12px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
                             </td>
                         </tr>
                         <tr>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 15px;">Sukamenak, Margahayu, Kabupaten Bandung 40228</strong>
+                                <strong style="font-size: 12px;">Sukamenak, Margahayu, Kabupaten Bandung 40227</strong>
                             </td>
                         </tr>
                         <tr>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 15px;">Phone: (022) 5442 0354 | Mobile: 0821-2990-0025</strong>
+                                <strong style="font-size: 12px;">Phone: {{$data->divisi->phone}}</strong>
                             </td>
                         </tr>
                         <tr>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 15px;">Website: dndsurvey.id | Email: dndsurvey90@gmail.com</strong>
+                                <strong style="font-size: 12px;">Email: {{$data->divisi->email}}</strong>
                             </td>
                         </tr>
                     </table>
@@ -44,7 +44,7 @@
 {{--                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"--}}
 {{--                                 class="float-start print-img" alt="dnd logo">--}}
 {{--                        </div>--}}
-{{--                        <div class="float-start ms-3"><strong style="font-size: 15px;">{{$data->divisi->name}}</strong></div>--}}
+{{--                        <div class="float-start ms-3"><strong style="font-size: 13px;">{{$data->divisi->name}}</strong></div>--}}
 {{--                        <div class="float-start ms-3"></div>--}}
 {{--                        <div class="float-start ms-3"></div>--}}
 {{--                        <div class="float-start ms-3"></div>--}}
@@ -81,6 +81,12 @@
                     <!-- Tabel detail item -->
                     <table class="table table-bordered">
                         <thead>
+                        <thead>
+                        <tr>
+                            <th colspan="5" class="text-center bg-secondary bg-opacity-50 sjg" style="font-size: 13px;">
+                                <strong>INVOICE</strong>
+                            </th>
+                        </tr>
                         <tr>
                             <th width="1%">No</th>
                             <th>Product</th>
@@ -228,6 +234,9 @@
                 width: 100%;
                 margin: 0;
                 padding: 0;
+            }
+            td{
+                font-size: 12px;
             }
 
         }
