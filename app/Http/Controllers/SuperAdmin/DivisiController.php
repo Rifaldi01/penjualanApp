@@ -103,6 +103,7 @@ class DivisiController extends Controller
             'no_rek' => 'required',
             'kode' => 'required|unique:divisis,kode,' . $id,
             'inv_format' => 'required|unique:divisis,inv_format,' . $id,
+            'email' => 'unique:divisis,email,' . $id,
             'logo' => $id ? 'nullable|image' : 'required',
         ]);
 
@@ -111,6 +112,9 @@ class DivisiController extends Controller
         $divisi->kode = $request->input('kode');
         $divisi->no_rek = $request->input('no_rek');
         $divisi->inv_format = $request->input('inv_format');
+        $divisi->alamat = $request->input('alamat');
+        $divisi->phone = $request->input('phone');
+        $divisi->email = $request->input('email');
 
         if ($request->hasFile('logo')) {
             if ($divisi->logo && file_exists(public_path('images/logo/' . $divisi->logo))) {
