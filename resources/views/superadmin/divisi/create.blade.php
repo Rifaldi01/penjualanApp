@@ -23,7 +23,7 @@
                         <label for="LastName" class="form-label mt-3">Email</label>
                         <input type="email" name="email" class="form-control" placeholder="example@gmail.com" value="{{isset($divisi) ? $divisi->email : null }}" >
                         <label for="LastName" class="form-label mt-3">phone</label>
-                        <input type="number" name="text" class="form-control" placeholder="0XXXXXXXXXXX" value="{{isset($divisi) ? $divisi->phone : null }}" >
+                        <input type="text" name="phone" class="form-control" placeholder="0XXXXXXXXXXX" value="{{isset($divisi) ? $divisi->phone : null }}" >
                         <label for="LastName" class="form-label mt-3">No. Rek Divisi</label>
                         <input type="text" name="no_rek" class="form-control" placeholder="XXXXXXX" value="{{isset($divisi) ? $divisi->no_rek : null }}" >
                         <label for="LastName" class="form-label mt-3">Alamat</label>
