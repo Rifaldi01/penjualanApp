@@ -133,11 +133,11 @@ class PembelianController extends Controller
             'status' => 'required',
             'items' => 'nullable|array', // Membolehkan items kosong
             'items.*.no_seri' => 'required_with:items|string', // Validasi hanya jika items tidak kosong
-            'items.*.capital_price' => 'required_with:items|numeric',
+            'items.*.capital_price' => 'nullable:items|numeric',
             'items.*.price' => 'required_with:items|numeric',
             'acces' => 'nullable|array',
             'acces.*.code_acces' => 'required|string',
-            'acces.*.capital_price' => 'required|numeric',
+            'acces.*.capital_price' => 'nullable|numeric',
             'acces.*.price' => 'required|numeric',
         ]);
 
@@ -156,15 +156,15 @@ class PembelianController extends Controller
                 ItemIn::where('kode_msk', $pembelian->invoice)
                     ->where('no_seri', $item['no_seri'])
                     ->update([
-                        'capital_price' => $item['capital_price'],
+                        'capital_price' => $item['capital_price'] ?? 0,
                         'price' => $item['price'],
                         'ppn' => $item['ppn'] ?? 0,
                     ]);
 
                 // Update tabel items (hanya capital_price dan price)
                 Item::where('no_seri', $item['no_seri'])->update([
-                    'capital_price' => $item['capital_price'],
-                    'price' => $item['price'],
+                    'capital_price' => $item['capital_price'] ?? 0,
+                    'price' => $item['price'] ?? 0,
                 ]);
             }
         }
@@ -181,14 +181,14 @@ class PembelianController extends Controller
                     AccessoriesIn::where('kode_msk', $pembelian->invoice)
                         ->where('accessories_id', $accessoryId)
                         ->update([
-                            'capital_price' => $accessory['capital_price'],
+                            'capital_price' => $accessory['capital_price'] ?? 0,
                             'price' => $accessory['price'],
                             'ppn' => $accessory['ppn'] ?? 0,
                         ]);
 
                     // Update tabel accessories (hanya capital_price dan price)
                     Accessories::where('id', $accessoryId)->update([
-                        'capital_price' => $accessory['capital_price'],
+                        'capital_price' => $accessory['capital_price'] ?? 0,
                         'price' => $accessory['price'],
                     ]);
                 }

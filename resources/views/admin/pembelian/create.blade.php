@@ -68,9 +68,13 @@
                     <tr>
                         <th>Nama Barang</th>
                         <th>Kode</th>
-                        <th>Harga Beli</th>
+                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
+                            <th>Harga Beli</th>
+                        @endif
                         <th>Harga Jual</th>
-                        <th>PPN</th>
+                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
+                            <th>PPN</th>
+                        @endif
                         <th>Qty</th>
                     </tr>
                     </thead>
@@ -99,6 +103,7 @@
         // Data dari controller
         const items = @json($item);
         const accessories = @json($acces);
+        const userHasAccess = {{ in_array(Auth::user()->divisi->kode, ['001', '002']) ? 'true' : 'false' }};
 
         // Fungsi untuk menampilkan item berdasarkan kode_msk
         function displayItemsBykode_msk(kode_msk) {
@@ -120,18 +125,12 @@
                         <input type="text" name="items[${itemIndex}][no_seri]" class="form-control"
                             value="${item.no_seri}" required readonly>
                     </td>
-                    <td>
-                        <input type="number" name="items[${itemIndex}][capital_price]" class="form-control"
-                            value="${item.capital_price}" required>
-                    </td>
+                     ${userHasAccess ? `<td><input type="number" name="items[${index}][capital_price]" class="form-control" value="${item.capital_price}"></td>` : ''}
                     <td>
                         <input type="number" name="items[${itemIndex}][price]" class="form-control"
                             value="${item.price}" required>
                     </td>
-                    <td>
-                        <input type="number" name="items[${itemIndex}][ppn]" class="form-control"
-                            value="${item.ppn || ''}">
-                    </td>
+                     ${userHasAccess ? `<td><input type="number" name="items[${index}][ppn]" class="form-control" value="${item.ppn || ''}"></td>` : ''}
                     <td>
                         <input type="number" name="items[${itemIndex}][qty]" class="form-control"
                             value="${item.qty ?? '1'}" required readonly>
@@ -162,18 +161,12 @@
                         <input type="text" name="acces[${accesIndex}][code_acces]" class="form-control"
                             value="${acces.accessories.code_acces}" required readonly>
                     </td>
-                    <td>
-                        <input type="number" name="acces[${accesIndex}][capital_price]" class="form-control"
-                            value="${acces.capital_price}" required>
-                    </td>
+                    ${userHasAccess ? `<td><input type="number" name="acces[${index}][capital_price]" class="form-control" value="${acces.capital_price}"></td>` : ''}
                     <td>
                         <input type="number" name="acces[${accesIndex}][price]" class="form-control"
                             value="${acces.price}" required>
                     </td>
-                    <td>
-                        <input type="number" name="acces[${accesIndex}][ppn]" class="form-control"
-                            value="${acces.ppn || ''}">
-                    </td>
+                    ${userHasAccess ? `<td><input type="number" name="acces[${index}][ppn]" class="form-control" value="${acces.ppn || ''}"></td>` : ''}
                     <td>
                         <input type="number" name="acces[${accesIndex}][qty]" class="form-control"
                             value="${acces.qty}" required readonly>

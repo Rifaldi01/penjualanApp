@@ -107,13 +107,13 @@
                                 tbody.innerHTML += row;
                             });
                         } else {
-                            tbody.innerHTML = `<tr><td colspan="5" class="text-center">Tidak ada data untuk divisi yang dipilih</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">Tidak ada data untuk divisi yang dipilih</td></tr>`;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching accessories:', error);
                         const tbody = document.querySelector('#accessoriesTable tbody');
-                        tbody.innerHTML = `<tr><td colspan="5" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>`;
                     });
             });
 
