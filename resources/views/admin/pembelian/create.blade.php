@@ -50,10 +50,14 @@
                     </tr>
                     <tr>
                         <th>Nama Barang</th>
-                        <th>No Seri</th>
-                        <th>Harga Beli</th>
+                        <th>Kode</th>
+                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
+                            <th>Harga Beli</th>
+                        @endif
                         <th>Harga Jual</th>
-                        <th>PPN</th>
+                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
+                            <th>PPN</th>
+                        @endif
                         <th>Qty</th>
                     </tr>
                     </thead>
