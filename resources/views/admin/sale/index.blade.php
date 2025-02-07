@@ -23,6 +23,7 @@
                         <th class="text-center" width="5%">Uang Msk</th>
                         <th class="text-center" width="5%">Total Price</th>
                         <th class="text-center" width="5%">Ppn</th>
+                        <th class="text-center" width="5%">Pph</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
                         <th class="text-center" width="5%">Total Pay</th>
@@ -43,6 +44,7 @@
                                 <td>{{formatRupiah($data->nominal_in)}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
                                 <td>{{formatRupiah($data->ppn)}}</td>
+                                <td>{{formatRupiah($data->pph)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
@@ -218,6 +220,7 @@
                         <th class="text-center" width="5%">Total Item</th>
                         <th class="text-center" width="5%">Total Price</th>
                         <th class="text-center" width="5%">Ppn</th>
+                        <th class="text-center" width="5%">Pph</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
                         <th class="text-center" width="5%">Total Pay</th>
@@ -236,6 +239,7 @@
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
                                 <td>{{formatRupiah($data->ppn)}}</td>
+                                <td>{{formatRupiah($data->pph)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>

@@ -40,15 +40,15 @@
                     </table>
 
                     <div class="row">
-{{--                        <div class="col-lg-6">--}}
-{{--                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"--}}
-{{--                                 class="float-start print-img" alt="dnd logo">--}}
-{{--                        </div>--}}
-{{--                        <div class="float-start ms-3"><strong style="font-size: 13px;">{{$data->divisi->name}}</strong></div>--}}
-{{--                        <div class="float-start ms-3"></div>--}}
-{{--                        <div class="float-start ms-3"></div>--}}
-{{--                        <div class="float-start ms-3"></div>--}}
-{{--                        <div class="float-start ms-3"></div>--}}
+                        {{--                        <div class="col-lg-6">--}}
+                        {{--                            <img src="{{asset('images/logo/'. $data->divisi->logo)}}"--}}
+                        {{--                                 class="float-start print-img" alt="dnd logo">--}}
+                        {{--                        </div>--}}
+                        {{--                        <div class="float-start ms-3"><strong style="font-size: 13px;">{{$data->divisi->name}}</strong></div>--}}
+                        {{--                        <div class="float-start ms-3"></div>--}}
+                        {{--                        <div class="float-start ms-3"></div>--}}
+                        {{--                        <div class="float-start ms-3"></div>--}}
+                        {{--                        <div class="float-start ms-3"></div>--}}
                     </div>
                     <hr>
                     <table class="table-style">
@@ -121,24 +121,53 @@
                             <div class="col-lg-6"></div>
                             <div class="col-lg-6">
                                 <div class="float-end">
-                                    <table class="table table-bordered">
+                                    <table>
                                         <tr>
-                                            <td colspan="4">SUBTOTAL</td>
-                                            <td class="text-right">{{ formatRupiah($data->total_price) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">ONGKIR</td>
-                                            <td class="text-right">{{ formatRupiah($data->ongkir) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">DISCOUNT</td>
-                                            <td class="text-right">{{ formatRupiah($data->diskon) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">GRAND TOTAL</td>
-                                            <td class="text-right">{{ formatRupiah($data->pay) }}</td>
-                                        </tr>
+                                            <td style="vertical-align: top;">
+                                                <table class="table table-bordered">
+                                                    @if($data->nominal_in == $data->pay)
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="4" style="font-size: 10px"><strong>DIBAYAR</strong></td>
+                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->nominal_in) }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="4" style="font-size: 10px"><strong>TAGIHAN</strong></td>
+                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay - $data->nominal_in) }}</td>
+                                                        </tr>
+                                                    @endif
+                                                </table>
+                                            </td>
+                                            <td>
+                                                <table class="table table-bordered">
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>SUBTOTAL</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->total_price) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>PPN</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ppn) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>PPH</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pph) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>ONGKIR</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ongkir) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>DISCOUNT</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->diskon) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>GRAND TOTAL</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay) }}</td>
+                                                    </tr>
 
+                                                </table>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>
@@ -235,7 +264,8 @@
                 margin: 0;
                 padding: 0;
             }
-            td{
+
+            td {
                 font-size: 12px;
             }
 

@@ -49,7 +49,7 @@
                         </div>
                         <div class="mt-2">
                             <label for="">PPH</label>
-                            <input type="text" class="form-control" name="pph" id="pph" value="0">
+                            <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)" value="0">
                         </div>
                     </div>
                     <div class=" col-lg-4 float-end">
@@ -192,6 +192,12 @@
                 }
                 bayar = total - diskon;
 
+                let pph = parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(pph)) {
+                    pph = 0;
+                }
+                bayar -= pph;
+
                 let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ppn)) {
                     ppn = 0;
@@ -236,6 +242,9 @@
                 calculateTotal();
             });
             $('#ppn').on('input', function () {
+                calculateTotal();
+            });
+            $('#pph').on('input', function () {
                 calculateTotal();
             });
 
@@ -345,7 +354,7 @@
                         diskon: $('#diskon').val(),
                         nominal_in: Math.floor(parseFloat($('#nominal_in').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
-                        pph: $('#pph').val(),
+                        pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         deadlines: $('#deadlines').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
