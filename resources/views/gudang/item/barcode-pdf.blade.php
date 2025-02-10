@@ -67,6 +67,14 @@
             }
         }
 
+        .barcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+
         @media (max-width: 768px) {
             td {
                 padding: 3px;
@@ -100,7 +108,7 @@
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
 
-                    {!! DNS1D::getBarcodeHTML($item->no_seri, 'C128' ,1.35 , 30, 'black', false) !!}
+                    <div class="barcode"> {!! DNS1D::getBarcodeHTML($item->no_seri, 'C128' ,1 , 30, 'black', false) !!} </div>
                     <div class="code">
                         @foreach (str_split($item->no_seri) as $char)
                             <span>{{ $char }}</span>

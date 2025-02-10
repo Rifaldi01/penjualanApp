@@ -39,6 +39,12 @@
                 @method('PUT')
             @endif
             <div class="row mb-3">
+                <label for="input42" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Divisi</label>
+                <div class="col-sm-9">
+                        {{ html()->select('divisi_id', $divisi, isset($cust) ? $cust->divisi_id : null )->class('form-control')->id('single-select-optgroup-field')->placeholder("--Select Divisi--") }}
+                </div>
+            </div>
+            <div class="row mb-3">
                 <label for="input42" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Customer Name</label>
                 <div class="col-sm-9">
                     <div class="position-relative input-icon">

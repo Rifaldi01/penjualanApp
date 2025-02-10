@@ -5,6 +5,7 @@ namespace App\Http\Controllers\manager;
 use App\Http\Controllers\Controller;
 use App\Imports\CustomerImport;
 use App\Models\Customer;
+use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -34,12 +35,15 @@ class CustomerController extends Controller
     public function create($id = null)
     {
         $inject = [
-            'url' => route('manager.customer.store')
+            'url' => route('manager.customer.store'),
+            'divisi'=> Divisi::pluck('name', 'id')->toArray(),
+
         ];
         if ($id){
             $cust = Customer::whereId($id)->first();
             $inject = [
                 'url' => route('manager.customer.update', $id),
+                'divisi'=> Divisi::pluck('name', 'id')->toArray(),
                 'cust' => $cust
             ];
         }
@@ -126,6 +130,7 @@ class CustomerController extends Controller
         $cust->phone_wa = $request->input('phone_wa');
         $cust->phone = $request->input('phone');
         $cust->addres = $request->input('addres');
+        $cust->divisi_id = $request->input('divisi_id');
         $cust->save();
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('manager.customer.index');
