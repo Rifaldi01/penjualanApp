@@ -43,7 +43,7 @@ class ItemController extends Controller
             $barcode = base64_encode($generator->getBarcode($item->no_seri, $generator::TYPE_CODE_128));
             $barcodes[$item->id] = $barcode;
         }
-        $setting = Setting::where('divisi_id', Auth::user()->divisi_id);
+        $setting = Setting::where('divisi_id', Auth::user()->divisi_id)->first();
         return view('gudang.item.index', compact('items', 'barcodes', 'setting'));
     }
 
@@ -123,10 +123,20 @@ class ItemController extends Controller
      */
     public function destroy($id)
     {
-        Item::whereId($id)->delete();
-        Alert::success('Success', 'Delet Iteme Success');
-        return back();
+        // Cari item berdasarkan ID
+        $item = Item::findOrFail($id);
+
+        // Hapus semua item di tabel item_ins yang memiliki no_seri yang sama
+        ItemIn::where('no_seri', $item->no_seri)->delete();
+
+        // Hapus item dari tabel items
+        $item->delete();
+
+        // Tampilkan alert sukses
+
+        return back()->withSuccess('Success', 'Delete Item Success');
     }
+
     private function save(Request $request, $id = null)
     {
         $validate = $request->validate([
@@ -325,12 +335,28 @@ class ItemController extends Controller
     }
     public function setting(Request $request)
     {
-        Setting::create([
-            'divisi_id' => Auth::user()->divisi_id,
-            'width' => $request->input('width'),
-            'height' => $request->input('height'),
-        ]);
+        $divisiId = Auth::user()->divisi_id;
+
+        // Cek apakah sudah ada data untuk divisi ini
+        $setting = Setting::where('divisi_id', $divisiId)->first();
+
+        if ($setting) {
+            // Jika sudah ada, update data
+            $setting->update([
+                'width' => $request->input('width'),
+                'height' => $request->input('height'),
+            ]);
+        } else {
+            // Jika belum ada, buat data baru
+            Setting::create([
+                'divisi_id' => $divisiId,
+                'width' => $request->input('width'),
+                'height' => $request->input('height'),
+            ]);
+        }
+
         return back()->withSuccess('Ukuran diatur');
     }
+
 
 }

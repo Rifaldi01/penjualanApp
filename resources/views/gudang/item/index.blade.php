@@ -43,19 +43,26 @@
                             </div>
                             <form action="{{ route('gudang.item.setting') }}" method="POST">
                                 @csrf
-                                <div class="modal-body">
-                                    <lable>Width</lable>
-                                    <input type="text" name="width" class="form-control">
-                                    <lable>Height</lable>
-                                    <input type="text" name="height" class="form-control">
+                                @method('POST')
 
+                                <div class="modal-body">
+                                    <label for="width">Width</label>
+                                    <input type="text" name="width" class="form-control"
+                                           value="{{ $setting->width ?? '' }}" required>
+
+                                    <label for="height">Height</label>
+                                    <input type="text" name="height" class="form-control"
+                                           value="{{ $setting->height ?? '' }}" required>
                                 </div>
+
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Close
                                     </button>
                                     <button type="submit" class="btn btn-primary">Save changes</button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>

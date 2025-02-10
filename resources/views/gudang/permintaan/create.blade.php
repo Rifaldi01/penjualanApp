@@ -4,15 +4,15 @@
     <div class="card">
         <div class="container">
             <div class="card-head mt-2">
-                <h4>Form Permintaan Antar Cabang</h4>
+                <h4>Form Permintaan Accessories</h4>
             </div>
             <div class="card-body">
                 <form action="{{ route('gudang.permintaan.store') }}" method="POST">
                     @csrf
                     <div class="form-group mb-4">
-                        <label for="divisi_id_asal" class="mb-2">Cabang Asal</label>
+                        <label for="divisi_id_asal" class="mb-2">Divisi Asal</label>
                         <select name="divisi_id_asal" id="divisi_id_asal" class="form-control @error('divisi_id_asal') is-invalid @enderror">
-                            <option value="">-- Pilih Cabang Asal --</option>
+                            <option value="">-- Pilih Divisi Asal --</option>
                             @foreach($divisi as $divisi_item)
                                 <option value="{{ $divisi_item->id }}" {{ old('divisi_id_asal') == $divisi_item->id ? 'selected' : '' }}>
                                     {{ $divisi_item->name }}

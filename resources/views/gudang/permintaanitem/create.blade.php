@@ -10,9 +10,9 @@
                 <form action="{{ route('gudang.permintaanitem.store') }}" method="POST">
                     @csrf
                     <div class="form-group mb-4">
-                        <label for="divisi_id_asal" class="mb-2">Cabang Asal</label>
+                        <label for="divisi_id_asal" class="mb-2">Divisi Asal</label>
                         <select name="divisi_id_asal" id="divisi_id_asal" class="form-control @error('divisi_id_asal') is-invalid @enderror">
-                            <option value="">-- Pilih Cabang Asal --</option>
+                            <option value="">-- Pilih Divisi Asal --</option>
                             @foreach($divisi as $divisi_item)
                                 <option value="{{ $divisi_item->id }}" {{ old('divisi_id_asal') == $divisi_item->id ? 'selected' : '' }}>
                                     {{ $divisi_item->name }}
@@ -80,25 +80,32 @@
         // Fungsi untuk menambahkan baris baru
         document.getElementById('addItem').addEventListener('click', function () {
             let newRow = `
-                <tr>
-                    <td>
-                        <select name="item_in_id[]" class="form-control single-select-field @error('item_in_id') is-invalid @enderror" style="width: 100%" onchange="updateNoSeri(this)">
-                            <option value="">-- Pilih Item --</option>
-                            ${getAccessoriesOptions()}
-                        </select>
-                    </td>
-                    <td class="no-seri"></td> <!-- Kolom untuk menampilkan no_seri -->
-                    <td>
-                        <input type="number" name="jumlah[]" class="form-control" value="1" required>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger remove-item bx bx-trash" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Barang"></button>
-                    </td>
-                </tr>`;
+        <tr>
+            <td>
+                <select name="item_in_id[]" class="form-control single-select-field" style="width: 100%" onchange="updateNoSeri(this)">
+                    <option value="">-- Pilih Item --</option>
+                    ${getAccessoriesOptions()}
+                </select>
+            </td>
+            <td class="no-seri"></td> <!-- Kolom untuk menampilkan no_seri -->
+            <td>
+                <input type="number" name="jumlah[]" class="form-control" value="1" required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger remove-item bx bx-trash" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Barang"></button>
+            </td>
+        </tr>`;
             document.querySelector('#itemTable tbody').insertAdjacentHTML('beforeend', newRow);
 
             // Inisialisasi Select2 pada dropdown baru
             initializeSelect2();
+        });
+
+        // Event delegation untuk tombol hapus
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-item')) {
+                event.target.closest('tr').remove();
+            }
         });
 
         // Fungsi untuk mengupdate no_seri setelah memilih item
