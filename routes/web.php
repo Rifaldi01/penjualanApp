@@ -45,6 +45,8 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::post('/item/print', [ItemController::class, 'print'])->name('gudang.item.print');
     Route::post('reject/item/{id}', [ItemController::class, 'reject'])->name('gudang.item.reject');
     Route::post('redy/item/{id}', [ItemController::class, 'redy'])->name('gudang.item.redy');
+    Route::post('setting/item/', [ItemController::class, 'setting'])->name('gudang.item.setting');
+    Route::post('setting/item/{id}', [ItemController::class, 'settingUpd'])->name('gudang.item.settingupd');
     //Item end
 
     //Item Category

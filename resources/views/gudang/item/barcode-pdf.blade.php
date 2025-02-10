@@ -107,8 +107,9 @@
         @foreach ($items as $item)
             @foreach ($barcodePath[$item->id] as $barcodeFile)
                 <td>
-
-                    <div class="barcode"> {!! DNS1D::getBarcodeHTML($item->no_seri, 'C128' ,1 , 30, 'black', false) !!} </div>
+                    @foreach($setting as $ukuran)
+                        <div class="barcode"> {!! DNS1D::getBarcodeHTML($item->no_seri, 'C128' ,$ukuran->width ,$ukuran->height , 'black', false) !!} </div>
+                    @endforeach
                     <div class="code">
                         @foreach (str_split($item->no_seri) as $char)
                             <span>{{ $char }}</span>

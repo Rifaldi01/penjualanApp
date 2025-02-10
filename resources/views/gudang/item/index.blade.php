@@ -26,7 +26,39 @@
                             <i class="bx bx-barcode"></i> Print Barcode
                         </button>
                     </div>
+
                 </form>
+                <button type="button" class="btn btn-info btn-sm ms-2" data-bs-toggle="modal"
+                        data-bs-target="#setting">
+                    <i class="bx bx-cog bx-spin"></i> Setting
+                </button>
+                <div class="modal fade" id="setting" tabindex="-1" aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Setting Size Barcode</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <form action="{{ route('gudang.item.setting') }}" method="POST">
+                                @csrf
+                                <div class="modal-body">
+                                    <lable>Width</lable>
+                                    <input type="text" name="width" class="form-control">
+                                    <lable>Height</lable>
+                                    <input type="text" name="height" class="form-control">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -49,7 +81,8 @@
                     @foreach($items as $key => $item)
                         <tr>
                             <td>
-                                <input type="checkbox" name="items[]" value="{{ $item->id }}" class="select_item" form="printBarcodeForm">
+                                <input type="checkbox" name="items[]" value="{{ $item->id }}" class="select_item"
+                                       form="printBarcodeForm">
                             </td>
                             <td>{{$key + 1}}</td>
                             <td>
@@ -154,6 +187,7 @@
                 }
             });
         }
+
         function confirmRedy(url) {
             event.preventDefault(); // Mencegah eksekusi default link
 

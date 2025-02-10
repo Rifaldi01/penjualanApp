@@ -9,6 +9,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemIn;
 use App\Models\ItemSale;
 use App\Models\Pembelian;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
@@ -42,7 +43,8 @@ class ItemController extends Controller
             $barcode = base64_encode($generator->getBarcode($item->no_seri, $generator::TYPE_CODE_128));
             $barcodes[$item->id] = $barcode;
         }
-        return view('gudang.item.index', compact('items', 'barcodes'));
+        $setting = Setting::where('divisi_id', Auth::user()->divisi_id);
+        return view('gudang.item.index', compact('items', 'barcodes', 'setting'));
     }
 
     /**
@@ -238,6 +240,7 @@ class ItemController extends Controller
 
         // Ambil data accessories yang dipilih
         $items = Item::whereIn('id', $request->items)->get();
+        $setting = Setting::where('divisi_id', Auth::user()->divisi_id)->get();
 
         if ($items->isEmpty()) {
             return redirect()->back()->withErrors(['error' => 'Accessories yang dipilih tidak ditemukan.']);
@@ -285,6 +288,7 @@ class ItemController extends Controller
         $html = view('gudang.item.barcode-pdf', [
             'items' => $barcodes,
             'barcodePath' => $barcodePaths,
+            'setting' => $setting,
         ])->render();
 
         $dompdf = new Dompdf();
@@ -318,6 +322,15 @@ class ItemController extends Controller
         }
 
         return back()->with('error', 'Item tidak ditemukan atau sudah direject.');
+    }
+    public function setting(Request $request)
+    {
+        Setting::create([
+            'divisi_id' => Auth::user()->divisi_id,
+            'width' => $request->input('width'),
+            'height' => $request->input('height'),
+        ]);
+        return back()->withSuccess('Ukuran diatur');
     }
 
 }
