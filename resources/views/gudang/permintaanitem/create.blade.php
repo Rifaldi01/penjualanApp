@@ -131,7 +131,7 @@
         // Fungsi untuk mendapatkan opsi aksesori dalam bentuk HTML
         function getAccessoriesOptions() {
             return accessoriesData.map(item => {
-                return `<option value="${item.id}">${item.name} - ${formatRupiah(item.price)}</option>`;
+                return `<option value="${item.id}">${item.name} - ${formatRupiah(item.no_seri)}</option>`;
             }).join('');
         }
 
