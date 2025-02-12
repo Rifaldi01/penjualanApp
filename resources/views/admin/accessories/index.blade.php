@@ -94,16 +94,23 @@
                         // Cek jika data ada untuk divisi yang dipilih
                         if (data.length > 0) {
                             data.forEach((item, index) => {
+                                const priceFormatted = new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0, // Menghapus angka di belakang koma
+                                    maximumFractionDigits: 0
+                                }).format(item.price);
+
                                 const row = `
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td>${item.name}</td>
-                                        <td>${item.divisi.name}</td>
-                                        <td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price)}</td>
-                                        <td>${item.code_acces}</td>
-                                        <td>${item.stok}</td>
-                                    </tr>
-                                `;
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.name}</td>
+                                <td>${item.divisi.name}</td>
+                                <td>${priceFormatted}</td>
+                                <td>${item.code_acces}</td>
+                                <td>${item.stok}</td>
+                            </tr>
+                        `;
                                 tbody.innerHTML += row;
                             });
                         } else {
@@ -122,5 +129,6 @@
                 paginate: false,
             });
         });
+
     </script>
 @endpush
