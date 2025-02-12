@@ -120,7 +120,6 @@ class PembelianController extends Controller
     public function destroy($id)
     {
         $pembelian = Pembelian::findOrFail($id);
-        $pembelian->itemBelis()->delete();
         $pembelian->delete();
 
         return redirect()->route('admin.pembelian.index')->with('success', 'Pembelian berhasil dihapus!');
