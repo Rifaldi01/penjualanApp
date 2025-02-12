@@ -58,17 +58,25 @@ class ItemController extends Controller
             'url' => route('gudang.item.store'),
             'divisi' => Divisi::pluck('name', 'id')->toArray(),
         ];
-        if ($id){
+
+        if ($id) {
             $item = Item::whereId($id)->first();
+
+            // Mencari kode_msk yang sesuai dengan no_seri di table item_ins
+            $itemIn = ItemIn::where('no_seri', $item->no_seri)->first();
+
             $inject = [
                 'url' => route('gudang.item.update', $id),
                 'divisi' => Divisi::pluck('name', 'id')->toArray(),
-                'item' => $item
+                'item' => $item,
+                'itemIn' => $itemIn // Masukkan itemIn untuk diakses di Blade
             ];
         }
+
         $cat = ItemCategory::all();
         return view('gudang.item.create', $inject, compact('cat'));
     }
+
 
     /**
      * Store a newly created resource in storage.

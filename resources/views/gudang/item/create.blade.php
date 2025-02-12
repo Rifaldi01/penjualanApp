@@ -46,7 +46,7 @@
                     <div class="mb-2">
                         <label class="col-form-label">Invoice</label>
                         <input type="text" name="kode_msk" class="form-control" placeholder="Enter Invoice"
-                               value="">
+                               value="{{ isset($item) ? optional($item->itemIn)->kode_msk : null }}">
                     </div>
                 </div>
             </div>

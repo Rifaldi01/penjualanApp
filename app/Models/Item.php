@@ -18,4 +18,9 @@ class Item extends Model
     {
         return $this->belongsTo(Divisi::class);
     }
+    public function itemIn()
+    {
+        return $this->hasOne(ItemIn::class, 'no_seri', 'no_seri');
+    }
+
 }
