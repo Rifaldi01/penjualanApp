@@ -205,15 +205,25 @@ class PermintaanController extends Controller
             // Kurangi stok di divisi asal
             $accessoriesAsal->update(['stok' => $accessoriesAsal->stok - $detail->qty]);
 
-            // Buat aksesori baru di divisi tujuan tanpa memeriksa yang lama
-            Accessories::create([
-                'divisi_id' => $permintaan->divisi_id_tujuan,
-                'name' => $accessoriesAsal->name,
-                'price' => $accessoriesAsal->price,
-                'capital_price' => $accessoriesAsal->capital_price,
-                'code_acces' => 'P-' . rand(1000000, 9999999), // Format kode akses unik
-                'stok' => $detail->qty,
-            ]);
+            // Cek apakah aksesori dengan code_acces sudah ada di divisi tujuan
+            $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
+                ->where('divisi_id', $permintaan->divisi_id_tujuan)
+                ->first();
+
+            if ($accessoriesTujuan) {
+                // Jika sudah ada, tambahkan stoknya
+                $accessoriesTujuan->update(['stok' => $accessoriesTujuan->stok + $detail->qty]);
+            } else {
+                // Jika belum ada, buat aksesori baru di divisi tujuan
+                Accessories::create([
+                    'divisi_id' => $permintaan->divisi_id_tujuan,
+                    'name' => $accessoriesAsal->name,
+                    'price' => $accessoriesAsal->price,
+                    'capital_price' => $accessoriesAsal->capital_price,
+                    'code_acces' => $accessoriesAsal->code_acces,
+                    'stok' => $detail->qty,
+                ]);
+            }
         }
 
         // Update status permintaan menjadi 'diterima'
@@ -221,6 +231,7 @@ class PermintaanController extends Controller
 
         return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil diterima.');
     }
+
 
     public function receive($id)
     {
