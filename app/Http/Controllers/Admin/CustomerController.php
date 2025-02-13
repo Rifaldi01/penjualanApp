@@ -113,7 +113,7 @@ class CustomerController extends Controller
     {
         $validate = $request->validate([
             'name' => 'required',
-            'phone_wa' => $id ? 'nullable|numeric' : 'required|regex:/^\d{12}$/|unique:customers|numeric',
+            'phone_wa' => $id ? 'nullable|numeric' : 'required|regex:/^\d{10}$/|unique:customers|numeric',
             'addres' => 'required'
         ],[
             'name.required' => 'Name Customer Tidak Boleh Kosong',
