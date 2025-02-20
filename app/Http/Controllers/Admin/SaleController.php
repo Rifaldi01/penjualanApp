@@ -342,7 +342,6 @@ class SaleController extends Controller
         // Ambil accessory berdasarkan divisi dan kode akses, pastikan harga > 0
         $accessory = Accessories::where('divisi_id', Auth::user()->divisi_id)
             ->where('code_acces', $codeSale)
-            ->where('price', '>', 0)
             ->first();
 
         // Ambil item berdasarkan divisi, no_seri, status 0, dan harga > 0

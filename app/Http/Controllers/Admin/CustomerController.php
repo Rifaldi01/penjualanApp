@@ -113,12 +113,11 @@ class CustomerController extends Controller
     {
         $validate = $request->validate([
             'name' => 'required',
-            'phone_wa' => $id ? 'nullable|numeric' : 'required|regex:/^\d{9}$/|unique:customers|numeric',
+            'phone_wa' => $id ? 'nullable|numeric' : 'required|unique:customers|numeric',
             'addres' => 'required'
         ],[
             'name.required' => 'Name Customer Tidak Boleh Kosong',
             'phone_wa.required' => 'Phone Whatsapp Tidak Boleh Kosong',
-            'phone_wa.regex' => 'Phone Whatsapp Harus 12 Angka',
             'phone_wa.unique' => 'Phone Whatsapp Sudah Terdaftar',
             'phone_wa.numeric' => 'Phone Whatsapp Harus Angka',
             'addres.required' => 'Address Tidak Boleh Kosong',
