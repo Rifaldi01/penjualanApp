@@ -20,6 +20,9 @@ class PermintaanItemController extends Controller
      */
     public function index(Request $request)
     {
+        PermintaanItem::where('status', 'pending')
+            ->whereDate('created_at', '<', now()->subDays(7))
+            ->delete();
         $permintaans = PermintaanItem::with(['detailItem', 'divisiAsal', 'divisiTujuan'])
             ->where('divisi_id_tujuan', $request->user()->divisi_id)
             ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
@@ -137,6 +140,9 @@ class PermintaanItemController extends Controller
     }
     public function konfirmasi(Request $request)
     {
+        PermintaanItem::where('status', 'pending')
+            ->whereDate('created_at', '<', now()->subDays(7))
+            ->delete();
         $permintaans = PermintaanItem::with(['detailItem.itemIn', 'divisiAsal', 'divisiTujuan'])
             ->where('divisi_id_asal', $request->user()->divisi_id)
             ->orderBy('status', 'asc')

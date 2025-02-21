@@ -101,8 +101,8 @@
 
 @push('js')
     <script>
-        let itemIndex = {{ isset($pembelian) ? count($pembelian->itemin ?? []) : 1 }};
-        let accesIndex = {{ isset($pembelian) ? count($pembelian->accessoriesin ?? []) : 1 }};
+        let itemIndex = 0;
+        let accesIndex = 0;
 
         // Data dari controller
         const items = @json($item);
@@ -113,28 +113,25 @@
         function displayItemsBykode_msk(kode_msk) {
             const filteredItems = items.filter(item => item.kode_msk === kode_msk);
 
-            const allItems = [...filteredItems]; // Gabungkan keduanya
-
             let tableContent = '';
 
-            allItems.forEach((item, index) => {
-                const isAccessory = !!item.accessories; // Cek apakah data ini dari AccessoriesIn
+            filteredItems.forEach((item) => {
                 tableContent += `
                 <tr>
                     <td>
                         <input type="text" name="items[${itemIndex}][name]" class="form-control"
-                            value="${item.name}" required readonly>
+                            value="${item.name ?? ''}" required readonly>
                     </td>
                     <td>
                         <input type="text" name="items[${itemIndex}][no_seri]" class="form-control"
-                            value="${item.no_seri}" required readonly>
+                            value="${item.no_seri ?? ''}" required readonly>
                     </td>
-                     ${userHasAccess ? `<td><input type="number" name="items[${index}][capital_price]" class="form-control" value="${item.capital_price}"></td>` : ''}
+                     ${userHasAccess ? `<td><input type="number" name="items[${itemIndex}][capital_price]" class="form-control" value="${item.capital_price ?? ''}"></td>` : ''}
                     <td>
                         <input type="number" name="items[${itemIndex}][price]" class="form-control"
-                            value="${item.price}" required>
+                            value="${item.price ?? ''}" required>
                     </td>
-                     ${userHasAccess ? `<td><input type="number" name="items[${index}][ppn]" class="form-control" value="${item.ppn || ''}"></td>` : ''}
+                     ${userHasAccess ? `<td><input type="number" name="items[${itemIndex}][ppn]" class="form-control" value="${item.ppn ?? ''}"></td>` : ''}
                     <td>
                         <input type="number" name="items[${itemIndex}][qty]" class="form-control"
                             value="${item.qty ?? '1'}" required readonly>
@@ -147,37 +144,36 @@
             document.getElementById('itemTableBody').innerHTML = tableContent;
         }
 
+        // Fungsi untuk menampilkan accessories berdasarkan kode_msk
         function displayAccesBykode_msk(kode_msk) {
             const filteredAccessories = accessories.filter(acces => acces.kode_msk === kode_msk);
 
-            const allAcces = [...filteredAccessories]; // Gabungkan keduanya
-
             let tableContent = '';
 
-            allAcces.forEach((acces, index) => {
+            filteredAccessories.forEach((acces) => {
                 tableContent += `
                 <tr>
                     <td>
                         <input type="text" name="acces[${accesIndex}][name]" class="form-control"
-                            value="${acces.accessories.name}" required readonly>
+                            value="${acces.accessories?.name ?? ''}" required readonly>
                     </td>
                     <td>
                         <input type="text" name="acces[${accesIndex}][code_acces]" class="form-control"
-                            value="${acces.accessories.code_acces}" required readonly>
+                            value="${acces.accessories?.code_acces ?? ''}" required readonly>
                     </td>
-                    ${userHasAccess ? `<td><input type="number" name="acces[${index}][capital_price]" class="form-control" value="${acces.capital_price}"></td>` : ''}
+                    ${userHasAccess ? `<td><input type="number" name="acces[${accesIndex}][capital_price]" class="form-control" value="${acces.capital_price ?? ''}"></td>` : ''}
                     <td>
                         <input type="number" name="acces[${accesIndex}][price]" class="form-control"
-                            value="${acces.price}" required>
+                            value="${acces.price ?? ''}" required>
                     </td>
-                    ${userHasAccess ? `<td><input type="number" name="acces[${index}][ppn]" class="form-control" value="${acces.ppn || ''}"></td>` : ''}
+                    ${userHasAccess ? `<td><input type="number" name="acces[${accesIndex}][ppn]" class="form-control" value="${acces.ppn ?? ''}"></td>` : ''}
                     <td>
                         <input type="number" name="acces[${accesIndex}][qty]" class="form-control"
-                            value="${acces.qty}" required readonly>
+                            value="${acces.qty ?? '1'}" required readonly>
                     </td>
                 </tr>
                 `;
-                accesIndex++;  // Pastikan accesIndex bertambah setiap kali aksesori ditambahkan
+                accesIndex++;
             });
 
             document.getElementById('accesTableBody').innerHTML = tableContent;
@@ -206,4 +202,5 @@
         });
     </script>
 @endpush
+
 

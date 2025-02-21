@@ -20,6 +20,9 @@ class PermintaanController extends Controller
      */
     public function index(Request $request)
     {
+        Permintaan::where('status', 'pending')
+            ->whereDate('created_at', '<', now()->subDays(7))
+            ->delete();
         // Jika user adalah pemohon (yang meminta barang)
         $permintaans = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])
             ->where('divisi_id_tujuan', $request->user()->divisi_id)
@@ -248,12 +251,20 @@ class PermintaanController extends Controller
     }
     public function konfirmasi(Request $request)
     {
+        // Hapus permintaan dengan status "pending" jika sudah lebih dari 7 hari sejak dibuat
+        Permintaan::where('status', 'pending')
+            ->whereDate('created_at', '<', now()->subDays(7))
+            ->delete();
+
+        // Ambil daftar permintaan setelah penghapusan
         $permintaans = Permintaan::with(['detailAccessories.accessories', 'divisiAsal', 'divisiTujuan'])
             ->where('divisi_id_asal', $request->user()->divisi_id)
             ->orderBy('status', 'asc')
             ->get();
-        return view('gudang.permintaan.konfirmasi', compact('permintaans', ));
+
+        return view('gudang.permintaan.konfirmasi', compact('permintaans'));
     }
+
     public function fetchAccessories($divisi_id)
     {
         $accessories = Accessories::where('divisi_id', $divisi_id)->get(['id', 'name', 'price', 'stok']);

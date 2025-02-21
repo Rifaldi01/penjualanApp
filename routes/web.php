@@ -66,6 +66,7 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::get('reject/acces/', [AccessoriesController::class, 'kembali'])->name('gudang.acces.kembali');
     Route::post('reject/acces/', [AccessoriesController::class, 'reject'])->name('gudang.acces.reject');
     Route::get('reject/', [AccessoriesController::class, 'listReject'])->name('gudang.acces.listreject');
+    Route::put('update/accesin/{id}', [AccessoriesController::class, 'updatein'])->name('gudang.acces.updatein');
     //accessories end
 
     //permintaan accessories

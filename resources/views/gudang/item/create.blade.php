@@ -42,7 +42,14 @@
                                value="{{isset($item) ? $item->name : null}}">
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-3">
+                    <div class="mb-2">
+                        <label class="col-form-label">Tanggal Masuk</label>
+                        <input type="text" name="created_at" class="form-control datepicker" placeholder="Enter Date"
+                               value="{{isset($item) ? $item->created_at : null}}">
+                    </div>
+                </div>
+                <div class="col-sm-3">
                     <div class="mb-2">
                         <label class="col-form-label">Invoice</label>
                         <input type="text" name="kode_msk" class="form-control" placeholder="Enter Invoice"

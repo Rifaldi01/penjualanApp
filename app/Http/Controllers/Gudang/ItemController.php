@@ -165,6 +165,7 @@ class ItemController extends Controller
                 'itemcategory_id' => $request->input('itemcategory_id'),
                 'name' => $request->input('name'),
                 'no_seri' => $request->input('no_seri'),
+                'created_at' => $request->input('created_at'),
                 'divisi_id' => Auth::user()->divisi_id,
             ]
         );
@@ -176,6 +177,7 @@ class ItemController extends Controller
                 'itemcategory_id' => $item->itemcategory_id,
                 'divisi_id' => $item->divisi_id,
                 'name' => $item->name,
+                'created_at' => $item->created_at,
                 'kode_msk' => $request->input('kode_msk'),
             ]
         );
@@ -196,8 +198,6 @@ class ItemController extends Controller
         Alert::success('Success', 'Data berhasil disimpan');
         return redirect()->route('gudang.item.index');
     }
-
-
 
     public function download(Item $item)
     {

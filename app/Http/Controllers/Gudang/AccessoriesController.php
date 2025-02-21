@@ -267,7 +267,7 @@ class AccessoriesController extends Controller
             $query->where('divisi_id', Auth::user()->divisi_id);
         })
             ->with(['accessories' => function ($query) {
-                $query->select('id', 'price', 'name'); // Pilih kolom yang relevan
+                $query->select('id', 'price', 'name', 'code_acces'); // Pilih kolom yang relevan
             }])
             ->get()
             ->map(function ($item) {
@@ -278,6 +278,7 @@ class AccessoriesController extends Controller
 
         return view('gudang.accessories.accesin', compact('accesin'));
     }
+
 
     public function accesout(Request $request)
     {
@@ -458,5 +459,29 @@ class AccessoriesController extends Controller
 
         return back()->with('success', 'Accessories Reject Ditambah dan Stok Accessories Dikurangi');
     }
+    public function updatein(Request $request, $id)
+    {
+        $item = AccessoriesIn::findOrFail($id);
+        $item->update([
+            'kode_msk' => $request->kode_msk,
+            'date_in' => $request->date_in,
+        ]);
+
+        // Cek apakah invoice sudah ada di tabel `pembelian`
+        $invoice = $request->kode_msk;
+        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+
+        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+        if (!$existingPembelian && $invoice) {
+            Pembelian::create([
+                'divisi_id' => $item->divisi_id,
+                'invoice' => $invoice,
+                'status' => '1',
+            ]);
+        }
+
+        return back()->with('success', 'Accessories Berhasil Diedit');
+    }
+
 
 }
