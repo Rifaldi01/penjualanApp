@@ -98,7 +98,7 @@
         $(document).ready(function () {
             function loadData(startDate = '', endDate = '') {
                 $.ajax({
-                    url: '{{ route("report.filter") }}',
+                    url: '{{ route("manager.report.filter") }}',
                     method: 'GET',
                     data: {
                         start_date: startDate,
