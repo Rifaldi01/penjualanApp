@@ -43,7 +43,7 @@
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
-                        <th class="text-center" width="5%">Tgl Invoice</th>
+                        <th class="text-center" width="5%"> Invoice</th>
                         <th>Customer</th>
                         <th>Item</th>
                         <th>Accessories</th>
