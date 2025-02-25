@@ -28,7 +28,7 @@
                            <td>{{ $permintaan->kode }}</td>
                            <td>
                                @foreach($permintaan->detailAccessories as $detail)
-                                   {{ $detail->accessories }}
+                                   {{ $detail->accessories->name }}
                                @endforeach
                            </td>
                            <td>
