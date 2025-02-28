@@ -204,13 +204,13 @@
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
-                                <td style="border: none;"></td>
+                                <td style="border: none;" height="50%"></td>
                             </tr>
                             <tr>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
-                                <td class="text-center" width="20%" style="border: none;">
+                                <td class="text-center" width="20%" height="50%" style="border: none;">
                                     {{Auth::user()->name}} <br>
                                 </td>
                             </tr>
