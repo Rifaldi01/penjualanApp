@@ -19,7 +19,7 @@
                                      style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 12px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
+                                <strong style="font-size: 12px;">{{$data->divisi->alamat}}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -62,7 +62,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->name}}</strong>
+                                <strong>{{$data->customer->name}}</strong> <br>
+                                <strong>{{$data->customer->addres}}</strong>
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
