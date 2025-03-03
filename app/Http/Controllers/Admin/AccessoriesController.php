@@ -8,7 +8,7 @@ use App\Models\AccessoriesSale;
 use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Contracts\DataTable;
+use Yajra\DataTables\Facades\DataTables;
 
 class AccessoriesController extends Controller
 {
@@ -38,7 +38,7 @@ class AccessoriesController extends Controller
             $query->where('divisi_id', $request->divisi_id);
         }
 
-        return DataTable::of($query)
+        return DataTables::of($query)
             ->addIndexColumn() // Menambahkan nomor urut otomatis
             ->make(true);
     }
