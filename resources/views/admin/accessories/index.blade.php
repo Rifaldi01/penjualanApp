@@ -69,64 +69,43 @@
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'bootstrap-5',
-            }); // Mengaktifkan select2 pada divisi filter
+            });
+
+            function fetchData(url) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    beforeSend: function () {
+                        $('#tableBody').html('<tr><td colspan="6" class="text-center">Loading...</td></tr>');
+                    },
+                    success: function(response) {
+                        $('#tableBody').html(response);
+
+                        // Update paginasi
+                        let paginationLinks = $(response).find("#paginationLinks").html();
+                        $("#paginationLinks").html(paginationLinks);
+                    },
+                    error: function() {
+                        $('#tableBody').html('<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>');
+                    }
+                });
+            }
 
             // Event listener untuk perubahan divisi
             $('#divisiFilter').on('change', function () {
-                const divisiId = this.value;
-                const breadcrumbDivisiName = document.getElementById('breadcrumbDivisiName');
-                const selectedOption = this.options[this.selectedIndex].text;
+                let divisiId = $(this).val();
+                let url = `/admin/accessories?divisi_id=${divisiId}`;
 
-                // Update nama divisi di breadcrumb
-                if (divisiId) {
-                    breadcrumbDivisiName.textContent = selectedOption;
-                } else {
-                    breadcrumbDivisiName.textContent = '{{ $userDivisi }}'; // Default ke divisi user login
-                }
-
-                // Fetch data accessories berdasarkan divisi
-                fetch(`/admin/accessories/filter/${divisiId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const tbody = document.querySelector('#accessoriesTable tbody');
-                        tbody.innerHTML = '';
-
-                        // Cek jika data ada untuk divisi yang dipilih
-                        if (data.length > 0) {
-                            data.forEach((item, index) => {
-                                const priceFormatted = new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0, // Menghapus angka di belakang koma
-                                    maximumFractionDigits: 0
-                                }).format(item.price);
-
-                                const row = `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${item.name}</td>
-                                <td>${item.divisi.name}</td>
-                                <td>${priceFormatted}</td>
-                                <td>${item.code_acces}</td>
-                                <td>${item.stok}</td>
-                            </tr>
-                        `;
-                                tbody.innerHTML += row;
-                            });
-                        } else {
-                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">Tidak ada data untuk divisi yang dipilih</td></tr>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching accessories:', error);
-                        const tbody = document.querySelector('#accessoriesTable tbody');
-                        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>`;
-                    });
+                fetchData(url);
+                window.history.pushState({}, '', url);
             });
 
-            // Initialize DataTable
-            $('#accessoriesTable').DataTable({
-                paginate: false,
+            // Event listener untuk paginasi
+            $(document).on('click', '#paginationLinks a', function(event) {
+                event.preventDefault();
+                let url = $(this).attr('href');
+                fetchData(url);
+                window.history.pushState({}, '', url);
             });
         });
 
