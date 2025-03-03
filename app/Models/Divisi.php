@@ -10,9 +10,4 @@ class Divisi extends Model
     use HasFactory;
 
     protected $guarded = [];
-
-    public function accessories()
-    {
-        return $this->hasMany(Accessories::class, 'divisi_id', 'id');
-    }
 }
