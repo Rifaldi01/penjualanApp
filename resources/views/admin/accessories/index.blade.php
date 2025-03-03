@@ -69,9 +69,8 @@
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'bootstrap-5',
-            }); // Mengaktifkan select2 pada divisi filter
+            });
 
-            // Event listener untuk perubahan divisi
             let divisiId = ''; // Variabel untuk menyimpan divisi yang dipilih
 
             // Inisialisasi DataTable dengan AJAX
@@ -115,12 +114,8 @@
                 // Perbarui tabel tanpa reset halaman
                 table.ajax.reload(null, false);
             });
-
-            // Initialize DataTable
-            $('#accessoriesTable').DataTable({
-
-            });
         });
+
 
     </script>
 @endpush
