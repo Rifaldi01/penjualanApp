@@ -45,18 +45,6 @@
                         <th>Stok</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    @foreach ($acces as $key => $data)
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>{{ $data->name }}</td>
-                            <td>{{ $data->divisi->name }}</td>
-                            <td>{{ formatRupiah($data->price) }}</td>
-                            <td>{{ $data->code_acces }}</td>
-                            <td>{{ $data->stok }}</td>
-                        </tr>
-                    @endforeach
-                    </tbody>
                 </table>
             </div>
         </div>
@@ -65,49 +53,45 @@
 
 @push('js')
     <script>
-        // Inisialisasi Select2
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'bootstrap-5',
             });
 
-            function fetchData(url) {
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    beforeSend: function () {
-                        $('#tableBody').html('<tr><td colspan="6" class="text-center">Loading...</td></tr>');
-                    },
-                    success: function(response) {
-                        $('#tableBody').html(response);
+            let divisiId = ''; // Menyimpan ID divisi yang dipilih
 
-                        // Update paginasi
-                        let paginationLinks = $(response).find("#paginationLinks").html();
-                        $("#paginationLinks").html(paginationLinks);
-                    },
-                    error: function() {
-                        $('#tableBody').html('<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>');
+            let table = $('#accessoriesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.accessories.data') }}",
+                    data: function(d) {
+                        d.divisi_id = divisiId; // Kirim ID divisi sebagai filter ke server
                     }
-                });
-            }
-
-            // Event listener untuk perubahan divisi
-            $('#divisiFilter').on('change', function () {
-                let divisiId = $(this).val();
-                let url = `/admin/accessories?divisi_id=${divisiId}`;
-
-                fetchData(url);
-                window.history.pushState({}, '', url);
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'name', name: 'name' },
+                    { data: 'divisi.name', name: 'divisi.name' },
+                    { data: 'price', name: 'price', render: function(data) {
+                            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data);
+                        }},
+                    { data: 'code_acces', name: 'code_acces' },
+                    { data: 'stok', name: 'stok' }
+                ],
+                order: [[1, 'asc']],
+                pageLength: 10
             });
 
-            // Event listener untuk paginasi
-            $(document).on('click', '#paginationLinks a', function(event) {
-                event.preventDefault();
-                let url = $(this).attr('href');
-                fetchData(url);
-                window.history.pushState({}, '', url);
+            // Event listener saat select divisi berubah
+            $('#divisiFilter').on('change', function () {
+                divisiId = $(this).val();
+                const selectedOption = $(this).find('option:selected').text();
+                $('#breadcrumbDivisiName').text(divisiId ? selectedOption : '{{ $userDivisi }}');
+
+                // Reload DataTables dengan divisi terpilih
+                table.ajax.reload();
             });
         });
-
     </script>
 @endpush
