@@ -26,14 +26,7 @@
                             @endif
                         </a>
                     </li>
-                    <li>
-                        <a href="{{route('gudang.permintaan.konfirmasi')}}">
-                            <i class='bx bx-arrow-to-top'></i> Permintaan Accessories
-                            @if($notif > 0)
-                                <span class="badge bg-danger">{{$notif}}</span>
-                            @endif
-                        </a>
-                    </li>
+
                 </ul>
             </li>
             <li>
@@ -50,14 +43,7 @@
                             @endif
                         </a>
                     </li>
-                    <li>
-                        <a href="{{route('gudang.permintaanitem.konfirmasi')}}">
-                            <i class='bx bx-arrow-to-top'></i> Permintaan Item
-                            @if($notifitem > 0)
-                                <span class="badge bg-danger">{{$notifitem}}</span>
-                            @endif
-                        </a>
-                    </li>
+
                 </ul>
             </li>
         @else
