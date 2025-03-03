@@ -69,53 +69,66 @@
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'bootstrap-5',
-            });
+            }); // Mengaktifkan select2 pada divisi filter
 
-            let divisiId = ''; // Variabel untuk menyimpan divisi yang dipilih
-
-            // Inisialisasi DataTable dengan AJAX dan server-side processing
-            let table = $('#accessoriesTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '/admin/accessories/filter',
-                    data: function (d) {
-                        d.divisi_id = divisiId; // Mengirimkan filter divisi ke server
-                    }
-                },
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'name', name: 'name' },
-                    { data: 'divisi.name', name: 'divisi.name' },
-                    { data: 'price', name: 'price', render: function(data) {
-                            return new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                            }).format(data);
-                        }
-                    },
-                    { data: 'code_acces', name: 'code_acces' },
-                    { data: 'stok', name: 'stok' }
-                ],
-                order: [[0, 'asc']]
-            });
-
-            // Event listener untuk filter divisi
+            // Event listener untuk perubahan divisi
             $('#divisiFilter').on('change', function () {
-                divisiId = this.value;
+                const divisiId = this.value;
                 const breadcrumbDivisiName = document.getElementById('breadcrumbDivisiName');
                 const selectedOption = this.options[this.selectedIndex].text;
 
-                // Update breadcrumb
-                breadcrumbDivisiName.textContent = divisiId ? selectedOption : '{{ $userDivisi }}';
+                // Update nama divisi di breadcrumb
+                if (divisiId) {
+                    breadcrumbDivisiName.textContent = selectedOption;
+                } else {
+                    breadcrumbDivisiName.textContent = '{{ $userDivisi }}'; // Default ke divisi user login
+                }
 
-                // Reload DataTable tanpa reset halaman (false parameter kedua)
-                table.ajax.reload(null, false);
+                // Fetch data accessories berdasarkan divisi
+                fetch(`/admin/accessories/filter/${divisiId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#accessoriesTable tbody');
+                        tbody.innerHTML = '';
+
+                        // Cek jika data ada untuk divisi yang dipilih
+                        if (data.length > 0) {
+                            data.forEach((item, index) => {
+                                const priceFormatted = new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0, // Menghapus angka di belakang koma
+                                    maximumFractionDigits: 0
+                                }).format(item.price);
+
+                                const row = `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.name}</td>
+                                <td>${item.divisi.name}</td>
+                                <td>${priceFormatted}</td>
+                                <td>${item.code_acces}</td>
+                                <td>${item.stok}</td>
+                            </tr>
+                        `;
+                                tbody.innerHTML += row;
+                            });
+                        } else {
+                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">Tidak ada data untuk divisi yang dipilih</td></tr>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching accessories:', error);
+                        const tbody = document.querySelector('#accessoriesTable tbody');
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>`;
+                    });
+            });
+
+            // Initialize DataTable
+            $('#accessoriesTable').DataTable({
+                paginate: false,
             });
         });
-
 
     </script>
 @endpush

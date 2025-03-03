@@ -8,7 +8,6 @@ use App\Models\AccessoriesSale;
 use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Facades\DataTables;
 
 class AccessoriesController extends Controller
 {
@@ -29,18 +28,18 @@ class AccessoriesController extends Controller
         ->with('sale', 'accessories')->get();
         return view('admin.accessories.sale', compact('sale'));
     }
-    public function filterByDivisi(Request $request)
+    public function filterByDivisi($divisiId = null)
     {
-        $query = Accessories::with('divisi');
-
-        // Filter berdasarkan divisi jika ada
-        if ($request->has('divisi_id') && !empty($request->divisi_id)) {
-            $query->where('divisi_id', $request->divisi_id);
+        // Jika tidak ada divisi dipilih, tampilkan data berdasarkan divisi user yang login
+        if ($divisiId) {
+            // Ambil aksesoris yang hanya terkait dengan divisi yang dipilih
+            $acces = Accessories::where('divisi_id', $divisiId)->with('divisi')->get();
+        } else {
+            // Ambil semua aksesoris jika tidak ada filter divisi
+            $acces = Accessories::with('divsis')->get();
         }
 
-        return DataTables::of($query)
-            ->addIndexColumn() // Menambahkan nomor urut otomatis
-            ->make(true);
+        return response()->json($acces);
     }
 
 }
