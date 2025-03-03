@@ -45,18 +45,7 @@
                         <th>Stok</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    @foreach ($acces as $key => $data)
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>{{ $data->name }}</td>
-                            <td>{{ $data->divisi->name }}</td>
-                            <td>{{ formatRupiah($data->price) }}</td>
-                            <td>{{ $data->code_acces }}</td>
-                            <td>{{ $data->stok }}</td>
-                        </tr>
-                    @endforeach
-                    </tbody>
+                    <tbody></tbody> <!-- Kosong karena akan diisi via AJAX -->
                 </table>
             </div>
         </div>
@@ -65,70 +54,59 @@
 
 @push('js')
     <script>
-        // Inisialisasi Select2
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'bootstrap-5',
-            }); // Mengaktifkan select2 pada divisi filter
+            });
 
-            // Event listener untuk perubahan divisi
+            let divisiId = ''; // Default kosong (menampilkan semua data)
+
+            // Inisialisasi DataTable dengan AJAX
+            let table = $('#accessoriesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: function(data, callback, settings) {
+                    $.ajax({
+                        url: `/admin/accessories/filter`,
+                        data: {
+                            divisi_id: divisiId, // Kirim divisi yang dipilih ke server
+                            start: data.start, // DataTable parameter
+                            length: data.length // DataTable parameter
+                        },
+                        success: function(response) {
+                            callback({
+                                draw: data.draw,
+                                recordsTotal: response.recordsTotal,
+                                recordsFiltered: response.recordsFiltered,
+                                data: response.data
+                            });
+                        },
+                        error: function(error) {
+                            console.error('Error fetching accessories:', error);
+                        }
+                    });
+                },
+                columns: [
+                    { data: 'no', name: 'no', orderable: false, searchable: false },
+                    { data: 'name', name: 'name' },
+                    { data: 'divisi_name', name: 'divisi_name' },
+                    { data: 'price', name: 'price' },
+                    { data: 'code_acces', name: 'code_acces' },
+                    { data: 'stok', name: 'stok' }
+                ]
+            });
+
+            // Event listener untuk filter divisi
             $('#divisiFilter').on('change', function () {
-                const divisiId = this.value;
+                divisiId = this.value;
                 const breadcrumbDivisiName = document.getElementById('breadcrumbDivisiName');
                 const selectedOption = this.options[this.selectedIndex].text;
 
-                // Update nama divisi di breadcrumb
-                if (divisiId) {
-                    breadcrumbDivisiName.textContent = selectedOption;
-                } else {
-                    breadcrumbDivisiName.textContent = '{{ $userDivisi }}'; // Default ke divisi user login
-                }
+                breadcrumbDivisiName.textContent = divisiId ? selectedOption : '{{ $userDivisi }}';
 
-                // Fetch data accessories berdasarkan divisi
-                fetch(`/admin/accessories/filter/${divisiId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const tbody = document.querySelector('#accessoriesTable tbody');
-                        tbody.innerHTML = '';
-
-                        // Cek jika data ada untuk divisi yang dipilih
-                        if (data.length > 0) {
-                            data.forEach((item, index) => {
-                                const priceFormatted = new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0, // Menghapus angka di belakang koma
-                                    maximumFractionDigits: 0
-                                }).format(item.price);
-
-                                const row = `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${item.name}</td>
-                                <td>${item.divisi.name}</td>
-                                <td>${priceFormatted}</td>
-                                <td>${item.code_acces}</td>
-                                <td>${item.stok}</td>
-                            </tr>
-                        `;
-                                tbody.innerHTML += row;
-                            });
-                        } else {
-                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">Tidak ada data untuk divisi yang dipilih</td></tr>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching accessories:', error);
-                        const tbody = document.querySelector('#accessoriesTable tbody');
-                        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Terjadi kesalahan dalam mengambil data</td></tr>`;
-                    });
-            });
-
-            // Initialize DataTable
-            $('#accessoriesTable').DataTable({
-
+                // Reload DataTable dengan filter divisi
+                table.ajax.reload();
             });
         });
-
     </script>
 @endpush
