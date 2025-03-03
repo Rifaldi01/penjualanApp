@@ -65,6 +65,20 @@
                                 <strong>{{$data->customer->name}}</strong> <br>
                                 <strong>{{$data->customer->addres}}</strong>
                             </td>
+                            <td width="10%" class="text-start">No PO</td>
+                            <td width="2%" class="text-center">:</td>
+                            <td>
+                                @if($data->no_po)
+                                    {{$data->no_po}}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>{{$data->customer->company}}</strong>
+                            </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
                             <td>{{tanggal($data->created_at)}}</td>

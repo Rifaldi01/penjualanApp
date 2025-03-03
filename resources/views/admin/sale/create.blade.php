@@ -4,8 +4,26 @@
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>New Transaction</h3>
-                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h4>New Transaction</h4>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-end">
+                            <div class="form-group row">
+                                <label for="code" class="mt-2">
+                                    <strong>No PO</strong>
+                                </label>
+                                <div class="">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="no_po" id="no_po"
+                                               placeholder="Nomor PO">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -356,6 +374,7 @@
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         deadlines: $('#deadlines').val(),
+                        no_po: $('#no_po').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
                         items: itemsData

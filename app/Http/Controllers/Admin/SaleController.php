@@ -118,6 +118,7 @@ class SaleController extends Controller
                 'pph' => $request->pph,
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
+                'no_po' => $request->no_po,
                 'user_id' => Auth::id(),
                 'divisi_id' => Auth::user()->divisi_id,
                 'invoice' => $invoiceNumber
