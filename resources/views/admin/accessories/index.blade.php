@@ -78,7 +78,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '/admin/accessories/filter',
+                    url: '/admin/accessories/filter/${divisiId}',
                     data: function (d) {
                         d.divisi_id = divisiId; // Mengirim divisi_id ke server
                     }
