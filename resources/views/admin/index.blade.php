@@ -45,7 +45,7 @@
                                <td>{{formatRupiah($data->pay)}}</td>
                                <td>{{$data->user->name}}</td>
                                <td>
-                                   <a href="https://api.whatsapp.com/send?phone=62{{ $data->customer->phone ?? '' }}&text=Halo%20Customer%20yth,%20segera%20selesaikan%20tagihan%20Pembelian-mu%20yang%20akan%20jatuh%20tempo%20pada%20{{dateId($data->deadlines)}}"
+                                   <a href="https://api.whatsapp.com/send?phone=62{{ $data->customer->phone_wa}}&text=Halo%20Customer%20yth,%20segera%20selesaikan%20tagihan%20Pembelian-mu%20yang%20akan%20jatuh%20tempo%20pada%20{{dateId($data->deadlines)}}"
                                       class="btn btn-success lni lni-whatsapp float-end me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Chat Customer" target="_blank" rel="noopener noreferrer">
                                    </a>
                                </td>
