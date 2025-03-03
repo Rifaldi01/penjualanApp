@@ -64,7 +64,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('admin.accessories.data') }}",
+                    url: "{{ route('admin.acces.filterByDivisi') }}",
                     data: function(d) {
                         d.divisi_id = divisiId; // Kirim ID divisi sebagai filter ke server
                     }

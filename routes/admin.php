@@ -37,7 +37,7 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
 
     //accessories
     Route::get('/accessories', [AccessoriesController::class, 'index'])->name('admin.acces.index');
-    Route::get('/accessories/filter/{divisiId?}', [AccessoriesController::class, 'filterByDivisi']);
+    Route::get('/accessories/filter/{divisiId?}', [AccessoriesController::class, 'filterByDivisi'])->name('admin.acces.filterByDivisi');
     Route::get('/acces-sale', [AccessoriesController::class, 'sale'])->name('admin.acces.sale');
 
     //accessories end
