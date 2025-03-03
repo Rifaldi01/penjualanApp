@@ -39,9 +39,12 @@ class PermintaanController extends Controller
      */
     public function create()
     {
-        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)->get();
-        return view('gudang.permintaan.create', compact( 'divisi'));
+        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->where('name', '!=', 'Rental') // Menyembunyikan divisi dengan nama "Rental"
+            ->get();
+        return view('gudang.permintaan.create', compact('divisi'));
     }
+
 
     /**
      * Store a newly created resource in storage.

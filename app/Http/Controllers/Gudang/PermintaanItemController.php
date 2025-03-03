@@ -38,7 +38,9 @@ class PermintaanItemController extends Controller
      */
     public function create()
     {
-        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)->get();
+        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->where('name', '!=', 'Rental') // Menyembunyikan divisi dengan nama "Rental"
+            ->get();
         return view('gudang.permintaanitem.create', compact( 'divisi'));
     }
 
