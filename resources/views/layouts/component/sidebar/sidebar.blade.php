@@ -11,6 +11,13 @@
     <!--navigation-->
     <ul class="metismenu" id="menu">
         @if(Auth::user()->divisi_id == 6)
+            <li>
+                <a href="{{url('/gudang/dashboard')}}">
+                    <div class="parent-icon"><i class='bx bx-home-alt'></i>
+                    </div>
+                    <div class="menu-title">Dashboard</div>
+                </a>
+            </li>
             <li class="menu-label">Permintaan Barang</li>
             <li>
                 <a href="javascript:;" class="has-arrow">
