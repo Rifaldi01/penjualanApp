@@ -474,7 +474,7 @@ class AccessoriesController extends Controller
         // Jika invoice belum ada, buat entri baru di tabel `pembelian`
         if (!$existingPembelian && $invoice) {
             Pembelian::create([
-                'divisi_id' => $item->divisi_id,
+                'divisi_id' => Auth::user()->divisi_id,
                 'invoice' => $invoice,
                 'status' => '1',
             ]);
