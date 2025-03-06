@@ -126,7 +126,6 @@
 
             // Initialize DataTable
             $('#accessoriesTable').DataTable({
-                paginate: false,
             });
         });
 
