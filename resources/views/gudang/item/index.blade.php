@@ -103,8 +103,10 @@
                             <td>
                                 @if($item->status == 0)
                                     <span class="badge bg-success">Redy</span>
-                                @else
+                                @elseif($item->status == 1)
                                     <span class="badge bg-danger">Reject</span>
+                                @else
+                                    <span class="badge bg-primary">Khusus</span>
                                 @endif
                             </td>
                             <td class="text-center">
@@ -123,6 +125,13 @@
                                        data-bs-placement="top"
                                        title="Item Reject"
                                        onclick="confirmReject('{{ route('gudang.item.reject', $item->id) }}')">
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-primary btn-sm bx bx-user-circle"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="top"
+                                       title="Item Khusus"
+                                       onclick="confirmKhusus('{{ route('gudang.item.khusus', $item->id) }}')">
                                     </a>
                                 @else
                                     <a href="#"
@@ -195,6 +204,37 @@
             });
         }
 
+        function confirmKhusus(url) {
+            event.preventDefault(); // Mencegah eksekusi default link
+
+            Swal.fire({
+                title: 'Apakah Item Khusus?',
+                text: "Item Khusus adalah milik Oner!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#71dd33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Khusus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Buat dan submit form secara dinamis
+                    let form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.style.display = 'none';
+
+                    let csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+
+                    form.appendChild(csrf);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
         function confirmRedy(url) {
             event.preventDefault(); // Mencegah eksekusi default link
 

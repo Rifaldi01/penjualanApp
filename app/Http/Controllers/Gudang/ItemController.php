@@ -347,6 +347,18 @@ class ItemController extends Controller
 
         return back()->with('error', 'Item tidak ditemukan atau sudah direject.');
     }
+    public function khusus($id)
+    {
+        // Update hanya item dengan ID yang diberikan dan status 0
+        $item = Item::where('id', $id)->first();
+
+        if ($item) {
+            $item->update(['status' => 2]);
+            return back()->with('success', 'Item Khusus.');
+        }
+
+        return back()->with('error', 'Item tidak ditemukan atau sudah direject.');
+    }
     public function setting(Request $request)
     {
         $divisiId = Auth::user()->divisi_id;
