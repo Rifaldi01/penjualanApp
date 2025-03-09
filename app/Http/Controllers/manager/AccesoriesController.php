@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Accessories;
 use App\Models\AccessoriesIn;
 use App\Models\AccessoriesSale;
+use App\Models\Divisi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
@@ -55,7 +56,8 @@ class AccesoriesController extends Controller
                 'acces' => $acces
             ];
         }
-        return view('manager.accessories.barcode', $inject);
+        $divisi = Divisi::all();
+        return view('manager.accessories.barcode', $inject, compact('divisi'));
     }
 
     /**
@@ -144,6 +146,7 @@ class AccesoriesController extends Controller
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
         $acces->capital_price = $request->input('capital_price');
+        $acces->divisi_id = $request->input('divisi_id');
 
         if ($id === null) {
             $acces->code_acces = $codeAcces;

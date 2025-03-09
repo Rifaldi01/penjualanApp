@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemCategory;
+use App\Models\ItemIn;
 use App\Models\ItemSale;
+use App\Models\Pembelian;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Milon\Barcode\DNS1D;
 use Picqer\Barcode\BarcodeGeneratorHTML;
 use Picqer\Barcode\BarcodeGeneratorPNG;
@@ -57,7 +61,8 @@ class ItemController extends Controller
             ];
         }
         $cat = ItemCategory::all();
-        return view('manager.item.create', $inject, compact('cat'));
+        $divisi = Divisi::all();
+        return view('manager.item.create', $inject, compact('cat', 'divisi'));
     }
 
     /**
@@ -120,26 +125,58 @@ class ItemController extends Controller
     private function save(Request $request, $id = null)
     {
         $validate = $request->validate([
-            'name'=> 'required',
-            'itemcategory_id'=> 'required',
-            'no_seri'=> $id ? 'required' : 'required|unique:items',
-            'price' => 'required'
-        ],[
+            'name' => 'required',
+            'itemcategory_id' => 'required',
+            'no_seri' => $id ? 'required' : 'required|unique:items',
+        ], [
             'name.required' => 'Nama Tidak Boleh Kosong',
             'itemcategory_id.required' => 'Pilih Category',
             'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
-            'price.required' => 'Harga Tidak boleh Kosong',
         ]);
-        $item = Item::firstOrNew(['id' => $id]);
-        $item->itemcategory_id  = $request->input('itemcategory_id');
-        $item->name    = $request->input('name');
-        $item->no_seri = $request->input('no_seri');
-        $item->price = $request->input('price');
-        $item->capital_price = $request->input('capital_price');
-        $item->save();
-        Alert::success('Success', 'Upload Data Success');
-        return redirect()->route('manager.item.index');
+
+        // Simpan atau update data di tabel `items`
+        $item = Item::updateOrCreate(
+            ['id' => $id],
+            [
+                'itemcategory_id' => $request->input('itemcategory_id'),
+                'name' => $request->input('name'),
+                'no_seri' => $request->input('no_seri'),
+                'created_at' => $request->input('created_at'),
+                'price' => $request->input('price'),
+                'capital_price' => $request->input('capital_price'),
+                'divisi_id' => $request->input('divisi_id'),
+            ]
+        );
+
+        // Update atau buat data di tabel `item_ins`
+        ItemIn::updateOrCreate(
+            ['no_seri' => $item->no_seri], // Cari berdasarkan `no_seri`
+            [
+                'itemcategory_id' => $item->itemcategory_id,
+                'divisi_id' => $item->divisi_id,
+                'name' => $item->name,
+                'price' => $item->price,
+                'capital_price' => $item->capital_price,
+                'created_at' => $item->created_at,
+                'kode_msk' => $request->input('kode_msk'),
+            ]
+        );
+
+        // Cek apakah invoice sudah ada di tabel `pembelian`
+        $invoice = $request->input('kode_msk');
+        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+
+        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+        if (!$existingPembelian && $invoice) {
+            Pembelian::create([
+                'divisi_id' => $item->divisi_id,
+                'invoice' => $invoice,
+                'status' => '1',
+            ]);
+        }
+
+        return redirect()->route('manager.item.index')->withSuccess('Data berhasil disimpan');
     }
 
     public function download(Item $item)

@@ -34,25 +34,64 @@
             @isset($item)
                 @method('PUT')
             @endisset
-            <div class="mb-2">
-                <label class="col-form-label">Name Item</label>
-                <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
-                       value="{{isset($item) ? $item->name : null}}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-2">
+                        <label class="col-form-label">Name Item</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
+                               value="{{isset($item) ? $item->name : null}}">
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="mb-2">
+                        <label class="col-form-label">Tanggal Masuk</label>
+                        <input type="text" name="created_at" class="form-control datepicker" placeholder="Enter Date"
+                               value="{{isset($item) ? $item->created_at : null}}">
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="mb-2">
+                        <label class="col-form-label">Invoice</label>
+                        <input type="text" name="kode_msk" class="form-control" placeholder="Enter Invoice"
+                               value="{{ isset($item) ? optional($item->itemIn)->kode_msk : null }}">
+                    </div>
+                </div>
             </div>
-            <div class="mt-3 mb-2">
-                <label for="single-select-field" class="form-label">Category</label>
-                <select name="itemcategory_id" class="form-select" id="single-select-clear-field"
-                        data-placeholder="Choose one thing">
-                    @foreach($cat as $category)
-                        @if(isset($item))
-                            <option
-                                value="{{ $category->id }}" {{ $item->itemcategory_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                        @else
-                            <option value=""></option>
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endif
-                    @endforeach
-                </select>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mt-3 mb-2">
+                        <label for="single-select-field" class="form-label">Divisi</label>
+                        <select name="divisi_id" class="form-select" id="single-select-clear-field"
+                                data-placeholder="Pilih Divisi">
+                            @foreach($divisi as $div)
+                                @if(isset($item))
+                                    <option
+                                        value="{{ $div->id }}" {{ $div->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                                @else
+                                    <option value=""></option>
+                                    <option value="{{ $div->id }}">{{ $div->name }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mt-3 mb-2">
+                        <label for="single-select-field" class="form-label">Category</label>
+                        <select name="itemcategory_id" class="form-control" id="category"
+                                data-placeholder="Pilih Category">
+                            @foreach($cat as $category)
+                                @if(isset($item))
+                                    <option
+                                        value="{{ $category->id }}" {{ $item->itemcategory_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @else
+                                    <option value=""></option>
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="mt-3 mb-2">
                 <label class="col-form-label">No Seri</label>
@@ -100,6 +139,15 @@
 
                 // Kirim form secara manual
                 $('#myForm').submit();
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#category').select2({
+                theme:'bootstrap-5',
+                placeholder: "--Pilih Invoice--",
+                width: '100%'
             });
         });
     </script>

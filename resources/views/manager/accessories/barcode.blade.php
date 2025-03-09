@@ -38,6 +38,21 @@
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
+                <div class="mt-3 mb-2">
+                    <label for="single-select-field" class="form-label">Divisi</label>
+                    <select name="divisi_id" class="form-select" id="single-select-clear-field"
+                            data-placeholder="Pilih Divisi">
+                        @foreach($divisi as $div)
+                            @if(isset($acces))
+                                <option
+                                    value="{{ $div->id }}" {{ $div->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                            @else
+                                <option value=""></option>
+                                <option value="{{ $div->id }}">{{ $div->name }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
                 <div class=" mb-2">
                     <label class="col-form-label">Capital Price</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>

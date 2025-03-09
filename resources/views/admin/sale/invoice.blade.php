@@ -69,7 +69,7 @@
                             <td width="2%" class="text-center">:</td>
                             <td>
                                 @if($data->no_po)
-                                    {{$data->no_po}}
+                                    <strong>{{$data->no_po}}</strong>
                                 @else
                                     -
                                 @endif
@@ -81,15 +81,14 @@
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
-                            <td>{{tanggal($data->created_at)}}</td>
+                            <td><strong>{{tanggal($data->created_at)}}</strong></td>
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->company}}</strong>
                             </td>
                             <td class="text-start">No. Rekening</td>
                             <td width="1%" class="text-end">:</td>
-                            <td width="20%">{{$data->customer->divisi->no_rek}}</td>
+                            <td width="20%"><strong>{{$data->customer->divisi->no_rek}}</strong></td>
                         </tr>
                     </table>
                     <hr>

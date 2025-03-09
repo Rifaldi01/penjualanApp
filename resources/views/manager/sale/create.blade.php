@@ -5,7 +5,7 @@
         <div class="card-header">
             <div class="container mt-3">
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <h4>New Transaction</h4>
                     </div>
                     <div class="col-sm-4">
@@ -29,24 +29,46 @@
                             </select>
                         </div>
                     </div>
+                    <div class="col-sm-2">
+                        <div class="float-end">
+                            <input type="text" name="created_at" class="form-control datepicker" id="created_at" placeholder="Tanggal Invoice" >
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="card-body">
-            <form class="form-sale">
-                @csrf
-                <div class="form-group row">
-                    <label for="code" class="col-lg-2 mt-2">
-                        <strong>Kode:</strong>
-                    </label>
-                    <div class="col-lg-5">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="code" id="code"
-                                   placeholder="Enter Code or Serial">
+            <div class="row">
+                <div class="col-sm-9">
+                    <form class="form-sale">
+                        @csrf
+                        <div class="form-group row">
+                            <label for="code" class="col-lg-2 mt-2">
+                                <strong>Kode:</strong>
+                            </label>
+                            <div class="col-lg-5">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="code" id="code"
+                                           placeholder="Enter Code or Serial">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group row">
+                        <label for="code" class="col-lg-3 mt-2">
+                            <strong>No PO:</strong>
+                        </label>
+                        <div class="col-lg-5">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="no_po" id="no_po"
+                                       placeholder="No PO">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
             <table class="table mt-2 table-sale">
                 <thead>
                 <tr>
@@ -372,6 +394,8 @@
                         pph: $('#pph').val(),
                         nominal_in: $('#nominal_in').val(),
                         deadlines: $('#deadlines').val(),
+                        created_at: $('#created_at').val(),
+                        no_po: $('#no_po').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
                         items: itemsData

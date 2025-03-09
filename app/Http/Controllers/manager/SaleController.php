@@ -109,8 +109,37 @@ class SaleController extends Controller
             'diskon' => 'required|numeric|min:0',
             'bayar' => 'required|numeric|min:0',
             'accessories' => 'nullable|array',
-            'items' => 'nullable|array'
+            'items' => 'nullable|array',
+            'created_at' => 'required',
+        ], [
+            'customer_id.required' => 'Pelanggan wajib diisi.',
+            'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
+
+            'divisi_id.required' => 'Divisi wajib diisi.',
+
+            'total_item.required' => 'Total item wajib diisi.',
+            'total_item.integer' => 'Total item harus berupa angka.',
+            'total_item.min' => 'Total item minimal harus 1.',
+
+            'total_price.required' => 'Total harga wajib diisi.',
+            'total_price.numeric' => 'Total harga harus berupa angka.',
+            'total_price.min' => 'Total harga tidak boleh kurang dari 0.',
+
+            'ongkir.required' => 'Ongkos kirim wajib diisi.',
+            'ongkir.numeric' => 'Ongkos kirim harus berupa angka.',
+            'ongkir.min' => 'Ongkos kirim tidak boleh kurang dari 0.',
+
+            'diskon.required' => 'Diskon wajib diisi.',
+            'diskon.numeric' => 'Diskon harus berupa angka.',
+            'diskon.min' => 'Diskon tidak boleh kurang dari 0.',
+
+            'bayar.required' => 'Jumlah bayar wajib diisi.',
+            'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
+            'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
+
+            'creates_at.required' => 'Tanggal transaksi wajib diisi.',
         ]);
+
 
         DB::beginTransaction();
 
@@ -127,8 +156,10 @@ class SaleController extends Controller
                 'pph' => $request->pph,
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
+                'no_po' => $request->no_po,
                 'user_id' => Auth::id(),
                 'divisi_id' => $validated['divisi_id'],
+                'created_at' => $validated['created_at'],
                 'invoice' => $invoiceNumber
             ]);
 

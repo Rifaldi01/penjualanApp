@@ -9,18 +9,46 @@
             </div>
             <div class="invoice overflow-auto" id="prinsurat{{$permintaan->id}}">
                 <div class="modal-body modal-surat">
-                    <div class="text-center">
-                        <img src="{{asset('images/logo/'. Auth::user()->divisi->logo)}}" alt="" width="24%" class="img-surat">
-                        <div class="mt-1"><strong style="font-size: 15px;">Komplek
-                                Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>
-                        </div>
-                        <div class="mt-1"><strong style="font-size: 15px;">Website : dndsurvey.id |
-                                Email : admin@dndsurvey.id</strong>
-                        </div>
-                        <div class="mt-1"><strong style="font-size: 15px;">Kantor . 022 - 5442 0354
-                                /Phone. 0821-2990-0025 / 081-2992-5005</strong>
-                        </div>
-                    </div>
+                    <table>
+                        <tr>
+                            <td rowspan="4" style="border: none; width: 120px; vertical-align: middle;">
+                                <img src="{{asset('images/logo/'. Auth::user()->divisi->logo)}}"
+                                     class="print-img"
+                                     alt="dnd logo"
+                                     style="width: 100%; height: 100px; object-fit: contain;">
+                            </td>
+                            <td style="border: none; padding-left: 12px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">{{Auth::user()->divisi->alamat}}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 12px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Sukamenak, Margahayu, Kabupaten Bandung 40227</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 12px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Phone: {{Auth::user()->divisi->phone}}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding-left: 12px; white-space: nowrap;">
+                                <strong style="font-size: 12px;">Email: {{Auth::user()->divisi->email}}</strong>
+                            </td>
+                        </tr>
+                    </table>
+{{--                    <div class="text-center">--}}
+{{--                        <img src="{{asset('images/logo/'. Auth::user()->divisi->logo)}}" alt="" width="24%" class="img-surat">--}}
+{{--                        <div class="mt-1"><strong style="font-size: 15px;">Komplek--}}
+{{--                                Sukamenak Indah Blok Q90 Kopo - Sayati, Kabupaten Bandung,</strong>--}}
+{{--                        </div>--}}
+{{--                        <div class="mt-1"><strong style="font-size: 15px;">Website : dndsurvey.id |--}}
+{{--                                Email : admin@dndsurvey.id</strong>--}}
+{{--                        </div>--}}
+{{--                        <div class="mt-1"><strong style="font-size: 15px;">Kantor . 022 - 5442 0354--}}
+{{--                                /Phone. 0821-2990-0025 / 081-2992-5005</strong>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
                     <hr style="border: 3px solid #000">
                     <div class="mb-3">
                         <strong>Bandung,</strong> {{tanggal($permintaan->created_at)}}
@@ -170,6 +198,7 @@
 
         .modal-surat {
             padding: 15mm;
+            font-size: 12px;
         }
     </style>
 @endpush

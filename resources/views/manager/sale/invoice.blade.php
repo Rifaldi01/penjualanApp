@@ -19,7 +19,7 @@
                                      style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 12px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
+                                <strong style="font-size: 12px;">{{$data->divisi->alamat}}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -62,19 +62,33 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->name}}</strong>
+                                <strong>{{$data->customer->name}}</strong> <br>
+                                <strong>{{$data->customer->addres}}</strong>
                             </td>
-                            <td width="10%" class="text-start">Tanggal</td>
+                            <td width="10%" class="text-start">No PO</td>
                             <td width="2%" class="text-center">:</td>
-                            <td>{{tanggal($data->created_at)}}</td>
+                            <td>
+                                @if($data->no_po)
+                                    <strong>{{$data->no_po}}</strong>
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td>
                                 <strong>{{$data->customer->company}}</strong>
                             </td>
+                            <td width="10%" class="text-start">Tanggal</td>
+                            <td width="2%" class="text-center">:</td>
+                            <td><strong>{{tanggal($data->created_at)}}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                            </td>
                             <td class="text-start">No. Rekening</td>
                             <td width="1%" class="text-end">:</td>
-                            <td width="20%">{{$data->customer->divisi->no_rek}}</td>
+                            <td width="20%"><strong>{{$data->customer->divisi->no_rek}}</strong></td>
                         </tr>
                     </table>
                     <hr>
@@ -121,24 +135,53 @@
                             <div class="col-lg-6"></div>
                             <div class="col-lg-6">
                                 <div class="float-end">
-                                    <table class="table table-bordered">
+                                    <table>
                                         <tr>
-                                            <td colspan="4">SUBTOTAL</td>
-                                            <td class="text-right">{{ formatRupiah($data->total_price) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">ONGKIR</td>
-                                            <td class="text-right">{{ formatRupiah($data->ongkir) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">DISCOUNT</td>
-                                            <td class="text-right">{{ formatRupiah($data->diskon) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4">GRAND TOTAL</td>
-                                            <td class="text-right">{{ formatRupiah($data->pay) }}</td>
-                                        </tr>
+                                            <td style="vertical-align: top;">
+                                                <table class="table table-bordered">
+                                                    @if($data->nominal_in == $data->pay)
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="4" style="font-size: 10px"><strong>DIBAYAR</strong></td>
+                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->nominal_in) }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="4" style="font-size: 10px"><strong>TAGIHAN</strong></td>
+                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay - $data->nominal_in) }}</td>
+                                                        </tr>
+                                                    @endif
+                                                </table>
+                                            </td>
+                                            <td>
+                                                <table class="table table-bordered">
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>SUBTOTAL</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->total_price) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>PPN</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ppn) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>PPH</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pph) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>ONGKIR</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ongkir) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>DISCOUNT</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->diskon) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="font-size: 10px"><strong>GRAND TOTAL</strong></td>
+                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay) }}</td>
+                                                    </tr>
 
+                                                </table>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>
@@ -168,7 +211,31 @@
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
-                                <td class="text-center" width="20%" style="border: none;">
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td class="text-center" width="20%" height="70%" style="border: none;">
                                     {{Auth::user()->name}} <br>
                                 </td>
                             </tr>
@@ -235,7 +302,8 @@
                 margin: 0;
                 padding: 0;
             }
-            td{
+
+            td {
                 font-size: 12px;
             }
 

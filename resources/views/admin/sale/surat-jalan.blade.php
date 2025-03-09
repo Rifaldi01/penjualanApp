@@ -18,7 +18,7 @@
                                      style="width: 100%; height: 100px; object-fit: contain;">
                             </td>
                             <td style="border: none; padding-left: 15px; white-space: nowrap;">
-                                <strong style="font-size: 12px;">Komplek Sukamenak Indah Blok Q90 Kopo Sayati</strong>
+                                <strong style="font-size: 12px;">{{$data->divisi->alamat}}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -207,6 +207,7 @@
 
         .modal-surat {
             padding: 15mm;
+            font-size: 12px;
         }
     </style>
 @endpush
