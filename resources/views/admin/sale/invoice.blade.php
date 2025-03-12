@@ -139,7 +139,7 @@
                                         <tr>
                                             <td style="vertical-align: top;">
                                                 <table class="table table-bordered">
-                                                    @if($data->nominal_in == $data->pay)
+                                                    @if($data->nominal_in >= $data->pay)
                                                     @else
                                                         <tr>
                                                             <td colspan="4" style="font-size: 10px"><strong>DIBAYAR</strong></td>
