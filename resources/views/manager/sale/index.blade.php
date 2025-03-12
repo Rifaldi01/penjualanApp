@@ -30,7 +30,7 @@
                     </thead>
                     <tbody>
                     @foreach($sales as $key => $data)
-                        @if($data->nominal_in == $data->pay)
+                        @if($data->nominal_in >= $data->pay)
                         @else
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
@@ -206,7 +206,7 @@
                     </thead>
                     <tbody>
                     @foreach($sales as $key => $data)
-                        @if($data->nominal_in == $data->pay)
+                        @if($data->nominal_in >= $data->pay)
                             <tr>
                                 <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
                                 <td>{{tanggal($data->created_at)}}</td>
