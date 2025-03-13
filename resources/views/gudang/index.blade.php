@@ -114,18 +114,13 @@
                                <td>{{formatRupiah($data->ongkir)}}</td>
                                <td>{{formatRupiah($data->pay)}}</td>
                                <td>{{$data->user->name}}</td>
-                               <td>
+                               <td class="text-center">
                                    <button class="btn btn-dnd lni lni-files btn-sm" data-bs-toggle="modal"
                                            data-bs-target="#exampleExtraLargeModal{{$data->id}}" data-bs-tool="tooltip"
                                            data-bs-placement="top" title="Print Surat Jalan">
                                    </button>
                                    @include('admin.sale.surat-jalan')
-                                   <button type="button" class="btn btn-primary lni lni-empty-file btn-sm"
-                                           data-bs-toggle="modal" id="btn-print{{$data->id}}"
-                                           data-bs-target="#exampleLargeModal{{$data->id}}" data-bs-tool="tooltip"
-                                           data-bs-placement="top" title="Print Invoice">
-                                   </button>
-                                   @include('admin.sale.invoice')
+
                                </td>
                            </tr>
                    @endforeach
