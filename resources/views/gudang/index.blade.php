@@ -85,11 +85,12 @@
        </div>
        <div class="card-body">
            <div class="table-responsive">
-               <table id="excel" class="table table-striped table-bordered" style="width:100%">
+               <table id="example" class="table table-striped table-bordered" style="width:100%">
                    <thead>
                    <tr>
                        <th width="4%">No</th>
                        <th class="text-center" width="5%">Tanggal</th>
+                       <th width="5%">Invoice</th>
                        <th>Customer</th>
                        <th class="text-center" width="5%">Total Item</th>
                        <th class="text-center" width="5%">Total Price</th>

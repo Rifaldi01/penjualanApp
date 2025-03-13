@@ -23,7 +23,6 @@ class DashboardController extends Controller
         $item = Item::where('divisi_id', Auth::user()->divisi_id)->count();
         $sales = Sale::where('divisi_id', Auth::user()->divisi_id)
             ->with(['customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])
-            ->whereDate('created_at', Carbon::today())
             ->get();
         return view('gudang.index', compact('itemsByCategory', 'item', 'sales'));
     }
