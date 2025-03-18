@@ -77,7 +77,16 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->addres}}</strong>
+                                @php
+                                    $words = explode(' ', $data->customer->addres);
+                                    $chunks = array_chunk($words, 8);
+                                @endphp
+
+                                <strong>
+                                    @foreach ($chunks as $line)
+                                        {{ implode(' ', $line) }}<br>
+                                    @endforeach
+                                </strong>
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
