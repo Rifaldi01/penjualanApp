@@ -74,7 +74,7 @@
                                     </div>
                                 @endif
                             </td>
-                            <td>{{$data->addres}}</td>
+                            <td>{{ Str::limit($data->addres, 80, '...') }}</td>
                             <td>{{$data->company}}</td>
                             <td>
                                 <a href="{{route('admin.customer.destroy', $data->id)}}" data-confirm-delete="true"
