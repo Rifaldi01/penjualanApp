@@ -63,7 +63,7 @@
                         <tr>
                             <td>
                                 <strong>{{$data->customer->name}}</strong> <br>
-                                <strong>{{$data->customer->addres}}</strong>
+                                <strong>{{$data->customer->company}}</strong>
                             </td>
                             <td width="10%" class="text-start">No PO</td>
                             <td width="2%" class="text-center">:</td>
@@ -77,7 +77,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->company}}</strong>
+                                <strong>{{$data->customer->addres}}</strong>
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>

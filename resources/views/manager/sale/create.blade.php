@@ -91,17 +91,17 @@
                         <div class=" col-lg-4 float-end ms-2">
                             <div class="mt-2">
                                 <label for="">PPN</label>
-                                <input type="number" name="ppn" class="form-control" id="ppn">
+                                <input type="text" name="ppn" class="form-control" id="ppn" onkeyup="formatRupiah(this)">
                             </div>
                             <div class="mt-2">
                                 <label for="">PPH</label>
-                                <input type="text" class="form-control" name="pph" id="pph">
+                                <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)">
                             </div>
                         </div>
                         <div class=" col-lg-4 float-end">
                             <div class="mt-2">
                                 <label for="">Nominal In</label>
-                                <input type="number" name="nominal_in" class="form-control" id="nominal_in">
+                                <input type="text" name="nominal_in" class="form-control" id="nominal_in" onkeyup="formatRupiah(this)">
                             </div>
                             <div class="mt-2">
                                 <label for="">Pay Plan</label>
@@ -147,6 +147,8 @@
                                 <input type="text" id="bayarrp" name="bayar" class="form-control" readonly>
                             </div>
                         </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -246,6 +248,18 @@
                 }
                 bayar = total - diskon;
 
+                let pph = parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(pph)) {
+                    pph = 0;
+                }
+                bayar -= pph;
+
+                let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(ppn)) {
+                    ppn = 0;
+                }
+                bayar += ppn;
+
                 let ongkir = parseFloat($('#ongkir').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ongkir)) {
                     ongkir = 0;
@@ -281,6 +295,12 @@
             });
 
             $('#ongkir').on('input', function () {
+                calculateTotal();
+            });
+            $('#ppn').on('input', function () {
+                calculateTotal();
+            });
+            $('#pph').on('input', function () {
                 calculateTotal();
             });
 

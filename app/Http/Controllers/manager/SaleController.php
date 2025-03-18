@@ -243,8 +243,6 @@ class SaleController extends Controller
         }
     }
 
-
-
     /**
      * Display the specified resource.
      *
@@ -269,8 +267,9 @@ class SaleController extends Controller
             return response()->json($sale);
         }
         $customers = Customer::all();
-        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories'])->findOrFail($id);
-        return view('manager.sale.edit', compact('sale', 'customers'));
+        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'divisi'])->findOrFail($id);
+        $divisi = Divisi::all();
+        return view('manager.sale.edit', compact('sale', 'customers', 'divisi'));
     }
 
     /**
@@ -290,10 +289,15 @@ class SaleController extends Controller
             $sale->total_price = str_replace('.', '', $request->total_price); // Total harga tanpa titik
             $sale->diskon = $request->diskon;
             $sale->ongkir = $request->ongkir;
-            $sale->nominal_in = $request->nominal_in;
+            $sale->nominal_in = str_replace('.', '', $request->nominal_in);;
             $sale->deadlines = $request->deadlines;
             $sale->total_item = $request->total_item;
+            $sale->created_at = $request->created_at;
+            $sale->no_po = $request->no_po;
+            $sale->divisi_id = $request->divisi_id;
             $sale->pay = str_replace('.', '', $request->bayar); // Bayar tanpa titik
+            $sale->ppn = str_replace('.', '', $request->ppn); // Bayar tanpa titik
+            $sale->pph = str_replace('.', '', $request->pph); // Bayar tanpa titik
             $sale->save();
             ItemSale::where('sale_id', $id);
             AccessoriesSale::where('sale_id', $id);
@@ -408,64 +412,62 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
+        DB::beginTransaction(); // Mulai transaksi database
+
         try {
-            // Cari itemSale berdasarkan ID
-            $itemSale = ItemSale::find($id);
-            $accessorySale = AccessoriesSale::find($id);
+            // Ambil data sale berdasarkan id
+            $sale = Sale::findOrFail($id);
 
-            if ($itemSale) {
-                // Pindahkan data itemSale ke tabel items
-                // Mencari item berdasarkan category_id
-                $item = Item::where('id', $itemSale->itemcategory_id)->first();
+            // Proses pengembalian item_sales ke table items
+            $itemSales = ItemSale::where('sale_id', $id)->get();
+            foreach ($itemSales as $itemSale) {
+                // Buat ulang data item berdasarkan item_sales
+                Item::create([
+                    'divisi_id' => $itemSale->divisi_id,
+                    'itemcategory_id' => $itemSale->itemcategory_id,
+                    'name' => $itemSale->name,
+                    'price' => $itemSale->price,
+                    'capital_price' => $itemSale->capital_price,
+                    'no_seri' => $itemSale->no_seri,
+                    'status' => 1, // Ubah status item ke tersedia
+                ]);
 
-                // Jika item tidak ditemukan, buat item baru
-                if (!$item) {
-                    // Membuat item baru dengan data dari itemSale
-                    $item = Item::create([
-                        'itemcategory_id' => $itemSale->itemcategory_id,
-                        'name' => $itemSale->name,
-                        'price' => $itemSale->price,
-                        'capital_price' => $itemSale->capital_price,
-                        'no_seri' => $itemSale->no_seri,
-                        'status' => 0 // Pastikan status sesuai dengan yang diinginkan
-                    ]);
-                }
-
-                // Hapus item dari tabel item_sales
+                // Hapus data dari item_sales
                 $itemSale->delete();
+            }
 
-            } elseif ($accessorySale) {
-                // Kembalikan aksesori ke stok dan hapus dari accessories_sales
+            // Proses pengembalian stok accessories
+            $accessoriesSales = AccessoriesSale::where('sale_id', $id)->get();
+            foreach ($accessoriesSales as $accessorySale) {
+                // Tambahkan stok kembali di tabel accessories
                 $accessory = Accessories::find($accessorySale->accessories_id);
-
                 if ($accessory) {
-                    // Tambahkan qty ke stok
                     $accessory->stok += $accessorySale->qty;
                     $accessory->save();
                 }
 
-                // Hapus aksesori dari tabel accessories_sales
+                // Hapus data dari accessories_sales
                 $accessorySale->delete();
-
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Data tidak ditemukan.'
-                ], 404);
             }
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Item berhasil dipindahkan dan dihapus.'
-            ]);
+            // Hapus data dari tabel debts yang memiliki sale_id yang sama
+            Debt::where('sale_id', $id)->delete();
 
+            // Hapus data sale
+            $sale->delete();
+
+            DB::commit(); // Commit transaksi jika semua berhasil
+
+            // Kembalikan respons JSON untuk AJAX
+            return response()->json(['success' => true, 'message' => 'Transaksi berhasil dibatalkan']);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()
-            ], 500);
+            DB::rollBack(); // Rollback transaksi jika ada error
+
+            // Kembalikan respons JSON untuk error
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat membatalkan transaksi: ' . $e->getMessage()], 500);
         }
     }
+
 
 
     public function fetchData(Request $request)

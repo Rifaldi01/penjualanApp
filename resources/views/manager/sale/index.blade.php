@@ -165,9 +165,15 @@
                                             </div>
                                         </div>
                                     </div>
-{{--                                    <a href="{{route('manager.sale.edit', $data->id)}}"--}}
-{{--                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"--}}
-{{--                                       data-bs-placement="top" title="Edit Transaksi"></a>--}}
+                                    <a href="{{route('manager.sale.edit', $data->id)}}"
+                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
+                                       data-bs-placement="top" title="Edit Transaksi"></a>
+                                    <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
+                                            data-id="{{ $data->id }}"
+                                            data-bs-tool="tooltip"
+                                            data-bs-placement="top"
+                                            title="Batalkan">
+                                    </button>
                                 </td>
                             </tr>
                         @endif
@@ -229,9 +235,15 @@
                                             data-bs-placement="top" title="Print Invoice">
                                     </button>
                                     @include('manager.sale.invoice')
-{{--                                    <a href="{{route('manager.sale.edit', $data->id)}}"--}}
-{{--                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"--}}
-{{--                                       data-bs-placement="top" title="Edit Transaksi"></a>--}}
+                                    <a href="{{route('manager.sale.edit', $data->id)}}"
+                                       class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
+                                       data-bs-placement="top" title="Edit Transaksi"></a>
+                                    <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
+                                            data-id="{{ $data->id }}"
+                                            data-bs-tool="tooltip"
+                                            data-bs-placement="top"
+                                            title="Batalkan">
+                                    </button>
                                 </td>
 
                             </tr>
@@ -378,6 +390,46 @@
             // Inisialisasi validasi saat halaman dimuat
             toggleValidation();
         }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.delete-sale', function () {
+                const saleId = $(this).data('id'); // ID dari data yang akan dihapus
+
+                Swal.fire({
+                    title: 'Hapus Transaksi?',
+                    text: "Transaksi Yang Dihapus Tidak Dapat Dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route("manager.sale.destroy", ":id") }}'.replace(':id', saleId), // Gunakan route() dengan mengganti placeholder :id
+                            method: 'DELETE',
+                            data: {
+                                _token: '{{ csrf_token() }}', // Kirim token CSRF
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    // Hapus elemen baris dari DOM
+                                    $(`button[data-id="${saleId}"]`).closest('tr').remove();
+                                    Swal.fire('Berhasil!', 'Transaksi Berhasil Dihapus', 'success');
+                                } else {
+                                    Swal.fire('Failed!', response.message || 'Failed to delete sale.', 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                Swal.fire('Error!', xhr.responseJSON?.message || 'An error occurred while processing your request.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
     </script>
 
 @endpush

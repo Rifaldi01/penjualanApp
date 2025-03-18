@@ -4,20 +4,65 @@
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>Edit Transaction</h3>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h4>New Transaction</h4>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-end">
+                            <select name="divisi_id" id="single-select-optgroup-field"
+                                    data-placeholder="--Pilih Divisi--" class="form-control accessory-select">
+                                @foreach($divisi as $div)
+                                    @if(isset($sale))
+                                        <option
+                                            value="{{ $div->id }}" {{ $sale->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="float-end">
+                            <input type="text" name="created_at" class="form-control datepicker" id="created_at"
+                                   placeholder="Tanggal Invoice" value="{{$sale->created_at}}">
+                        </div>
+                    </div>
+                </div>
                 <hr>
             </div>
         </div>
         <div class="card-body">
             <form class="form-sale">
                 @csrf
-                <div class="form-group row">
-                    <label for="code" class="col-lg-2 mt-2">
-                        <strong>Kode:</strong>
-                    </label>
-                    <div class="col-lg-5">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="code" id="code" placeholder="Enter Code or Serial">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <form class="form-sale">
+                            @csrf
+                            <div class="form-group row">
+                                <label for="code" class="col-lg-2 mt-2">
+                                    <strong>Kode:</strong>
+                                </label>
+                                <div class="col-lg-5">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="code" id="code"
+                                               placeholder="Enter Code or Serial">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group row">
+                            <label for="code" class="col-lg-3 mt-2">
+                                <strong>No PO:</strong>
+                            </label>
+                            <div class="col-lg-5">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="no_po" id="no_po"
+                                           value="{{$sale->no_po}}"
+                                           placeholder="No PO">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -35,35 +80,48 @@
                 <tbody id="accessoriesTableBody">
                 </tbody>
             </table>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="bg-primary">
-                        <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
-                    </div>
-                    <form action="" class="form-pembelian" method="post">
-                        @csrf
-                    <div class=" col-lg-4 float-end">
-                        <div class="mt-2">
-                            <label for="">Nominal In</label>
-                            <input type="number" name="nominal_in" class="form-control" id="nominal_in" value="{{$sale->nominal_in}}">
+            <form action="" class="form-pembelian" method="post">
+                @csrf
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="bg-primary">
+                            <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
                         </div>
-                        <div class="mt-2">
-                            <label for="">Pay Plan</label>
-                            <input type="text" class="form-control datepicker" name="deadlines" id="deadlines" value="{{$sale->deadlines}}">
+                        <div class=" col-lg-4 float-end ms-2">
+                            <div class="mt-2">
+                                <label for="">PPN</label>
+                                <input type="text" name="ppn" class="form-control" id="ppn" onkeyup="formatRupiah(this)" value="{{$sale->ppn}}">
+                            </div>
+                            <div class="mt-2">
+                                <label for="">PPH</label>
+                                <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)" value="{{$sale->pph}}">
+                            </div>
+                        </div>
+                        <div class=" col-lg-4 float-end">
+                            <div class="mt-2">
+                                <label for="">Nominal In</label>
+                                <input type="text" name="nominal_in" class="form-control" id="nominal_in"
+                                       value="{{$sale->nominal_in}}" onkeyup="formatRupiah(this)">
+                            </div>
+                            <div class="mt-2">
+                                <label for="">Pay Plan</label>
+                                <input type="text" class="form-control datepicker" name="deadlines" id="deadlines"
+                                       value="{{$sale->deadlines}}">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-
-
+                    <div class="col-lg-4">
                         <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
                             <label for="customer" class="col-lg-4 control-label">Customer</label>
                             <div class="col-lg-8">
-                                <select name="customer_id" id="single-select-field" data-placeholder="--Pilih Customer--" class="form-control accessory-select">
+                                <select name="customer_id" id="single-select-field"
+                                        data-placeholder="--Pilih Customer--"
+                                        class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}" {{ $sale->customer_id == $customer->id ? 'selected' : '' }}>
+                                        <option
+                                            value="{{ $customer->id }}" {{ $sale->customer_id == $customer->id ? 'selected' : '' }}>
                                             {{ $customer->name }}
                                         </option>
                                     @endforeach
@@ -73,35 +131,41 @@
                         <div class="form-group row mb-2">
                             <label for="totalrp" class="col-lg-4 control-label">Total Price</label>
                             <div class="col-lg-8">
-                                <input type="text" id="totalrp" class="form-control" readonly value="{{formatRupiah($sale->total_price)}}">
+                                <input type="text" id="totalrp" class="form-control" readonly
+                                       value="{{formatRupiah($sale->total_price)}}">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="diskon" class="col-lg-4 control-label">Diskon</label>
                             <div class="col-lg-8">
-                                <input type="number" name="diskon" id="diskon" class="form-control" value="0">
+                                <input type="number" name="diskon" id="diskon" class="form-control" value="{{$sale->diskon}}">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="ongkir" class="col-lg-4 control-label">Ongkir</label>
                             <div class="col-lg-8">
-                                <input type="number" name="ongkir" id="ongkir" class="form-control" value="0">
+                                <input type="number" name="ongkir" id="ongkir" class="form-control" value="{{$sale->ongkir}}">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="bayar" class="col-lg-4 control-label">Bayar</label>
                             <div class="col-lg-8">
-                                <input type="text" id="bayarrp" name="bayar" class="form-control" readonly value="{{formatRupiah($sale->pay)}}">
+                                <input type="text" id="bayarrp" name="bayar" class="form-control" readonly
+                                       value="{{formatRupiah($sale->pay)}}">
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <div class="box-footer">
-                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Save</button>
-            </div>
+            </form>
         </div>
+    </div>
+    <hr>
+    <div class="box-footer">
+        <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
+            Save
+        </button>
+    </div>
+    </div>
     </div>
 @endsection
 
@@ -113,6 +177,13 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        $(document).ready(function () {
+            $('#invoice').select2({
+                theme: 'bootstrap-5',
+                placeholder: "--Pilih Invoice--",
+                width: '100%'
+            });
+        });
         $(document).ready(function () {
             let table = $('.table-sale').DataTable({
                 processing: true,
@@ -129,7 +200,7 @@
                     },
                     {
                         data: 'qty', render: function (data, type, row) {
-                            return '<input type="number" name="qty[]" class="form-control stok-input" value="'+data+'"/>';
+                            return '<input type="number" name="qty[]" class="form-control stok-input" value="' + data + '"/>';
                         }
                     },
                     {
@@ -212,8 +283,21 @@
                 }
                 bayar += ongkir;
 
+                let pph = parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(pph)) {
+                    pph = 0;
+                }
+                bayar -= pph;
+
+                let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(ppn)) {
+                    ppn = 0;
+                }
+                bayar += ppn;
+
                 $('#totalrp').val('Rp. ' + Math.floor(total).toLocaleString('id-ID'));
                 $('#bayarrp').val('Rp. ' + Math.floor(bayar).toLocaleString('id-ID'));
+                $('#nominal_in').val('' + Math.floor(bayar));
                 $('#totalAmount').text('Bayar Rp. ' + Math.floor(bayar).toLocaleString('id-ID'));
 
                 $('#total_item').val(totalQty);
@@ -240,6 +324,12 @@
             });
 
             $('#ongkir').on('input', function () {
+                calculateTotal();
+            });
+            $('#ppn').on('input', function () {
+                calculateTotal();
+            });
+            $('#pph').on('input', function () {
                 calculateTotal();
             });
 
@@ -344,12 +434,16 @@
                 $.ajax({
                     url: '{{route('manager.sale.edit', $sale->id)}}',
                     method: 'GET',
-                    success: function(data) {
+                    success: function (data) {
                         $('#totalrp').val(data.total_price);
                         $('#diskon').val(data.diskon);
                         $('#ongkir').val(data.ongkir);
                         $('#bayarrp').val(data.pay);
                         $('#nominal_in').val(data.nominal_in);
+                        $('#no_po').val(data.no_po);
+                        $('#ppn').val(data.ppn);
+                        $('#pph').val(data.pph);
+                        $('#created_at').val(data.created_at);
                         $('#deadlines').val(data.deadlines);
                     }
                 });
@@ -360,12 +454,17 @@
                     data: {
                         _token: '{{ csrf_token() }}',
                         customer_id: $('select[name="customer_id"]').val(),
+                        divisi_id: $('select[name="divisi_id"]').val(),
                         total_item: $('#total_item').val(),
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
                         nominal_in: $('#nominal_in').val(),
                         deadlines: $('#deadlines').val(),
+                        no_po: $('#no_po').val(),
+                        ppn: $('#ppn').val(),
+                        pph: $('#pph').val(),
+                        created_at: $('#created_at').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
                         items: itemsData,
