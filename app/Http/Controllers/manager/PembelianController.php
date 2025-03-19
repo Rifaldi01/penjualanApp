@@ -44,15 +44,16 @@ class PembelianController extends Controller
     public function create($id = null)
     {
         $inject = [
-            'url' => route('admin.pembelian.store'),
+            'url' => route('manager.pembelian.store'),
             'supplier' => Supplier::pluck('name', 'id')->toArray(),
         ];
 
         if ($id){
             $pembelian = Pembelian::whereId($id)->first();
             $inject = [
-                'url' => route('admin.pembelian.update', $id),
+                'url' => route('manager.pembelian.update', $id),
                 'supplier' => Supplier::pluck('name', 'id')->toArray(),
+                'divisi' => Divisi::pluck('name', 'id')->toArray(),
                 'pembelian' => $pembelian
             ];
         }
@@ -63,7 +64,7 @@ class PembelianController extends Controller
         // Gabungkan invoice dari accessories dan items, pastikan hanya satu kode invoice yang muncul
         $invoices = collect($item->pluck('kode_msk'))->merge($acces->pluck('kode_msk'))->unique();
 
-        return view('admin.pembelian.create', $inject,  compact('item', 'acces', 'invoices'));
+        return view('manager.pembelian.create', $inject,  compact('item', 'acces', 'invoices'));
     }
     /**
      * Store a newly created resource in storage.
@@ -130,6 +131,7 @@ class PembelianController extends Controller
             'supplier_id' => 'required',
             'invoice' => 'required',
             'status' => 'required',
+            'divisi_id' => $id ? 'nullable' : 'required',
             'items' => 'nullable|array', // Membolehkan items kosong
             'items.*.no_seri' => 'required_with:items|string', // Validasi hanya jika items tidak kosong
             'items.*.capital_price' => 'required_with:items|numeric',
@@ -144,7 +146,6 @@ class PembelianController extends Controller
         $pembelian = Pembelian::findOrFail($id);
         $pembelian->update([
             'supplier_id' => $request->supplier_id,
-            'divisi_id' => Auth::user()->divisi_id,
             'invoice' => $request->invoice,
             'status' => $request->status,
         ]);
@@ -210,7 +211,7 @@ class PembelianController extends Controller
             'total_harga' => $totalPrice,
         ]);
 
-        return redirect()->route('admin.pembelian.index')->with('success', 'Data Pembelian Berhasil Diperbarui');
+        return redirect()->route('manager.pembelian.index')->with('success', 'Data Pembelian Berhasil Diperbarui');
     }
     public function filterByDivisi($divisiId = null)
     {
