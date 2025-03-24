@@ -121,9 +121,9 @@ class AccesoriesController extends Controller
     private function save(Request $request, $id = null)
     {
         $request->validate([
-            'name' => 'required|',
+            'name' => 'required',
             'price' => 'required'
-        ],[
+        ], [
             'name.required' => 'Nama Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
         ]);
@@ -142,7 +142,12 @@ class AccesoriesController extends Controller
             $codeAcces = 'P-' . $currentDate . $newCode; // contoh output: P-240822001
         }
 
+        // Cek apakah accessories sudah ada
         $acces = Accessories::firstOrNew(['id' => $id]);
+        $oldPrice = $acces->price; // Simpan harga lama
+        $oldCapitalPrice = $acces->capital_price; // Simpan harga modal lama
+
+        // Update data accessories
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
         $acces->capital_price = $request->input('capital_price');
@@ -153,9 +158,20 @@ class AccesoriesController extends Controller
         }
 
         $acces->save();
+
+        // Jika data accessories berhasil diupdate, update juga accessories_ins
+        if ($id !== null) {
+            AccessoriesIn::where('accessories_id', $id)
+                ->update([
+                    'price' => $request->input('price'),
+                    'capital_price' => $request->input('capital_price')
+                ]);
+        }
+
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('manager.acces.index');
     }
+
 
     public function editmultiple()
     {
@@ -238,9 +254,21 @@ class AccesoriesController extends Controller
     }
     public function accesin()
     {
-        $accesin = AccessoriesIn::with('accessories.divisi')->get();
+        $accesin = AccessoriesIn::with(['accessories' => function ($query) {
+            $query->select('id', 'price', 'name', 'code_acces', 'divisi_id');
+        }, 'accessories.divisi' => function ($query) {
+            $query->select('id', 'name');
+        }])
+            ->get()
+            ->map(function ($item) {
+                // Pastikan accessories tidak null sebelum mengakses price
+                $item->total_price = $item->accessories ? $item->accessories->price * $item->qty : 0;
+                return $item;
+            });
+
         return view('manager.accessories.accesin', compact('accesin'));
     }
+
     public function accesout(Request $request)
     {
         $bulan = $request->bulan;
@@ -281,7 +309,7 @@ class AccesoriesController extends Controller
         if ($request->ajax()) {
             return response()->json($result);
         }
-        return view('manager.accessories.accesin', compact('accesout'));
+        return view('manager.accessories.accesout', compact('accesout'));
     }
     public function print(Request $request)
     {

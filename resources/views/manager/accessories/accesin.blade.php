@@ -4,89 +4,44 @@
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(request()->routeIs('manager.acces.accesin'))
-                    <h4 class="text-uppercase">List Accessories In</h4>
-                @else
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h4 class="text-uppercase">List Accessories Out</h4>
-                        </div>
-                        <div class="col-sm-6">
-                            <form id="filterForm">
-                                <div class="float-end me-2">
-                                    <select name="bulan" id="bulan" class="form-control">
-                                        <option value="">Pilih Bulan</option>
-                                        @for ($i = 1; $i <= 12; $i++)
-                                            <option
-                                                value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                                <div class="float-end me-2">
-                                    <select name="tahun" id="tahun" class="form-control">
-                                        <option value="">Pilih Tahun</option>
-                                        @for ($i = now()->year - 5; $i <= now()->year; $i++)
-                                            <option value="{{ $i }}">{{ $i }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endif
+                <h4 class="text-uppercase">List Accessories In</h4>
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="inout" class="table table-striped table-bordered" style="width:100%">
-                    @if(request()->routeIs('manager.acces.accesin'))
-                        <thead>
+                    <thead>
+                    <tr>
+                        <th class="text-center">Tanggal</th>
+                        <th>Code Acces</th>
+                        <th>Divisi</th>
+                        <th>Kode/Invoice</th>
+                        <th>Nam Accessories</th>
+                        <th>Price</th>
+                        <th class="text-center" width="10%">Stok</th>
+                        <th>Total Harga</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($accesin as $key => $data)
                         <tr>
-                            <th class="text-center">Tanggal</th>
-                            <th>Code Acces</th>
-                            <th>Divisi</th>
-                            <th>Kode/Invoice</th>
-                            <th>Nam Accessories</th>
-                            <th>Price</th>
-                            <th class="text-center" width="10%">Stok</th>
-                            <th>Total Harga</th>
+                            <td class="text-center">{{ tanggal($data->date_in) }}</td>
+                            <td>{{ $data->accessories?->code_acces ?? '-' }}</td>
+                            <td>{{ $data->accessories?->divisi?->name ?? '-' }}</td>
+                            <td>{{ $data->kode_msk }}</td>
+                            <td>
+                                <a class="text-dark">{{ $data->accessories?->name ?? '-' }}</a>
+                            </td>
+                            <td>
+                                <a class="text-dark">{{ $data->accessories ? formatRupiah($data->accessories->price) : '0' }}
+                                    ,-</a>
+                            </td>
+                            <td class="text-center">{{ $data->qty }}</td>
+                            <td>{{ formatRupiah($data->total_price ?? 0) }}</td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($accesin as $key => $data)
-                            <tr>
-                                <td class="text-center">{{ tanggal($data->date_in) }}</td>
-                                <td>{{ $data->accessories->code_acces }}</td>
-                                <td>{{ $data->accessories->divisi->name }}</td>
-                                <td>{{ $data->kode_msk }}</td>
-                                <td>
-                                    <a class="text-dark">{{ $data->accessories->name }}</a>
-                                </td>
-                                <td>
-                                    <a class="text-dark">{{ formatRupiah($data->accessories->price) }},-</a>
-                                </td>
-                                <td class="text-center">{{ $data->qty }}</td>
-                                <td>{{formatRupiah($data->total_price)}}</td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    @else
-                        <thead>
-                        <tr>
-                            <th>No Invoice</th>
-                            <th class="text-center">Tanggal</th>
-                            <th>Code Access</th>
-                            <th>Divsi</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th class="text-center" width="10%">Qty</th>
-                            <th>Subtotal</th>
-                        </tr>
-                        </thead>
-                        <tbody id="accesout-data">
-                        {{-- Data akan dimuat melalui AJAX --}}
-                        </tbody>
-                    @endif
+
+                    @endforeach
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -99,53 +54,6 @@
 @push('js')
     <script>
         $(document).ready(function () {
-            function loadData(bulan = '', tahun = '') {
-                $.ajax({
-                    url: "{{ route('manager.acces.accesout') }}",
-                    type: "GET",
-                    data: { bulan: bulan, tahun: tahun },
-                    success: function (response) {
-                        let tableRows = '';
-                        $.each(response, function (accessoryId, data) {
-                            tableRows += `
-                            <tr>
-                                <td colspan="3"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
-                                <td colspan="3"><strong>Total Keluar:</strong> ${data.total_keluar}</td>
-                                <td colspan="2"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
-                            </tr>
-                        `;
-                            $.each(data.data, function (index, acces) {
-                                tableRows += `
-                                <tr>
-                                    <td>${acces.sale.invoice}</td>
-                                    <td>${acces.acces_out}</td>
-                                    <td>${acces.accessories.code_acces}</td>
-                                    <td>${acces.accessories.divisi.name}</td>
-                                    <td>${acces.accessories.name}</td>
-                                    <td>${acces.accessories.price}</td>
-                                    <td>${acces.qty}</td>
-                                    <td>${acces.total_price}</td>
-                                </tr>`;
-                            });
-
-                        });
-                        $('#accesout-data').html(tableRows);
-                    },
-                    error: function () {
-                        alert('Terjadi kesalahan saat memuat data.');
-                    }
-                });
-            }
-
-            // Panggil fungsi loadData pertama kali
-            loadData();
-
-            // Event listener untuk filter
-            $('#filterForm select').on('change', function () {
-                const bulan = $('#bulan').val();
-                const tahun = $('#tahun').val();
-                loadData(bulan, tahun);
-            });
             var table = $('#inout').DataTable({
                 lengthChange: false,
                 buttons: [
@@ -154,7 +62,7 @@
                         exportOptions: {
                             stripHtml: false,
                         },
-                        customize: function(doc) {
+                        customize: function (doc) {
                             doc.content = [];
 
                             doc.pageSize = {
@@ -167,25 +75,25 @@
 
                             var thead = $('#inout thead').clone();
                             var headers = [];
-                            thead.find('th').each(function() {
-                                headers.push({ text: $(this).text(), style: 'tableHeader' });
+                            thead.find('th').each(function () {
+                                headers.push({text: $(this).text(), style: 'tableHeader'});
                             });
 
                             var tableBody = [];
                             tableBody.push(headers);
 
-                            $('#inout tbody tr').each(function() {
+                            $('#inout tbody tr').each(function () {
                                 var row = [];
-                                $(this).find('td').each(function() {
+                                $(this).find('td').each(function () {
                                     var cellText = $(this).text();
                                     if ($(this).find('ul').length > 0) {
                                         cellText = $(this).find('ul').html().replace(/<\/?li>/g, '');
-                                        cellText = cellText.split('</li>').filter(item => item).map(item => ({ text: item.trim() }));
+                                        cellText = cellText.split('</li>').filter(item => item).map(item => ({text: item.trim()}));
                                     }
-                                    row.push({ text: cellText, style: 'tableCell' });
+                                    row.push({text: cellText, style: 'tableCell'});
                                 });
                                 while (row.length < headers.length) {
-                                    row.push({ text: '' });
+                                    row.push({text: ''});
                                 }
                                 tableBody.push(row);
                             });
@@ -193,11 +101,11 @@
                             var tfoot = $('#inout tfoot').clone();
                             if (tfoot.length) {
                                 var footerRow = [];
-                                tfoot.find('th').each(function() {
-                                    footerRow.push({ text: $(this).text(), style: 'tableCell' });
+                                tfoot.find('th').each(function () {
+                                    footerRow.push({text: $(this).text(), style: 'tableCell'});
                                 });
                                 while (footerRow.length < headers.length) {
-                                    footerRow.push({ text: '' });
+                                    footerRow.push({text: ''});
                                 }
                                 tableBody.push(footerRow);
                             }
@@ -232,7 +140,7 @@
                         exportOptions: {
                             stripHtml: false,
                         },
-                        customize: function(win) {
+                        customize: function (win) {
                             $(win.document.body).find('table').addClass('compact').css('font-size', '10px');
                             var bodyContent = $('#inout tbody').clone();
                             $(win.document.body).find('table').append(bodyContent);

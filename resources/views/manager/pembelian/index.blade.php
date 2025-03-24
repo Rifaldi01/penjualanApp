@@ -164,10 +164,10 @@
                                     : '<span class="badge bg-danger">Belum Lunas</span>'}
                                     </td>
                                     <td>
-                                        <a href="/manager/pembelian/edit/${item.id}"
+                                        <a href="{{route('manager.pembelian.edit', $data->id)}}"
                                            class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                            data-bs-placement="top" title="Edit Data"></a>
-                                        <form action="/manager/pembelian/destroy/${item.id}" method="POST" style="display:inline-block;">
+                                        <form action="{{route('manager.pembelian.destroy', $data->id)}}" method="POST" style="display:inline-block;">
                                             @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm bx bx-trash"
