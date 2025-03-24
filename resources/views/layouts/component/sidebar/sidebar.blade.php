@@ -20,37 +20,70 @@
             </li>
             <li class="menu-label">Permintaan Barang</li>
             <li>
+                @if(isset($notiff) && $notiff > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
+                @else
+                @endif
                 <a href="javascript:;" class="has-arrow">
-                    <div class="parent-icon"><i class='bx bx-collection'></i></div>
+                    <div class="parent-icon">
+                        <i class='bx bx-collection'></i>
+                    </div>
                     <div class="menu-title">Request Accessories</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaan.index')}}">
-                            <i class='bx bx-arrow-to-bottom'></i> Minta Accessories
+                            <i class='bx bx-arrow-to-bottom'></i>
+                            Minta Accessories
                             @if($minta > 0)
                                 <span class="badge bg-danger">{{$minta}}</span>
+                            @else
                             @endif
                         </a>
                     </li>
-
+                    <li>
+                        <a href="{{route('gudang.permintaan.konfirmasi')}}">
+                            <i class='bx bx-arrow-to-top'></i>
+                            Permintaan Accessories
+                            @if($notif > 0)
+                                <span class="badge bg-danger">{{$notif}}</span>
+                            @else
+                            @endif
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>
+                @if(isset($notiffitem) && $notiffitem > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
+                @else
+                @endif
                 <a href="javascript:;" class="has-arrow">
-                    <div class="parent-icon"><i class='bx bx-box'></i></div>
+                    <div class="parent-icon"><i class='bx bx-box'></i>
+                    </div>
                     <div class="menu-title">Request Item</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaanitem.index')}}">
-                            <i class='bx bx-arrow-to-bottom'></i> Minta Item
+                            <i class='bx bx-arrow-to-bottom'></i>
+                            Minta Item
                             @if($mintaitem > 0)
                                 <span class="badge bg-danger">{{$mintaitem}}</span>
+                            @else
                             @endif
                         </a>
                     </li>
-
+                    <li>
+                        <a href="{{route('gudang.permintaanitem.konfirmasi')}}">
+                            <i class='bx bx-arrow-to-top'></i>
+                            Permintaan Item
+                            @if($notifitem > 0)
+                                <span class="badge bg-danger">{{$notifitem}}</span>
+                            @else
+                            @endif
+                        </a>
+                    </li>
                 </ul>
             </li>
         @else

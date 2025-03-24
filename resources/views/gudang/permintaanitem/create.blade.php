@@ -152,7 +152,7 @@
 
         // Fungsi untuk mengambil aksesori dari divisi asal
         function fetchAccessories(divisiId) {
-            fetch(`/gudang/minta/item/${divisiId}`)
+            fetch(`{{ route('gudang.permintaan.fetchItems', ['divisi_id' => ':divisi_id']) }}`.replace(':divisi_id', divisiId))
                 .then(response => response.json())
                 .then(data => {
                     accessoriesData = data;  // Menyimpan data aksesori

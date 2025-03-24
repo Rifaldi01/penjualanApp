@@ -83,7 +83,7 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::put('/permintaan-item/{id}/approve', [PermintaanItemController::class, 'approve'])->name('gudang.permintaanitem.approve');
     Route::put('/permintaan-item/{id}/receive', [PermintaanItemController::class, 'receive'])->name('gudang.permintaanitem.receive');
     Route::get('/konfirmasi-item', [PermintaanItemController::class, 'konfirmasi'])->name('gudang.permintaanitem.konfirmasi');
-    Route::get('/minta/item/{divisi_id}', [PermintaanItemController::class, 'fetchAccessories'])->name('gudang.permintaanitem.fetchAccessories');
+    Route::get('/minta/item/{divisi_id}', [PermintaanItemController::class, 'fetchAccessories'])->name('gudang.permintaan.fetchItems');
 
 
 
