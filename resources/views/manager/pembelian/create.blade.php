@@ -78,7 +78,7 @@
                 </table>
 
                 @if(isset($pembelian))
-                    <a href="{{ route('admin.pembelian.index') }}" class="btn btn-dnd btn-sm">Kembali</a>
+                    <a href="{{ route('manager.pembelian.index') }}" class="btn btn-dnd btn-sm">Kembali</a>
                 @endif
                 <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
             </form>
