@@ -77,6 +77,21 @@
                 <div class="menu-title">Accessories</div>
             </a>
         </li>
+
+        <li>
+            <a href="{{route('admin.item.editItem')}}">
+                <div class="parent-icon"><i class='bx bx-dollar'></i>
+                </div>
+                <div class="menu-title">Edit Item</div>
+            </a>
+        </li>
+        <li>
+            <a href="{{route('admin.acces.editAcces')}}">
+                <div class="parent-icon"><i class='bx bx-dollar'></i>
+                </div>
+                <div class="menu-title">Edit Acces</div>
+            </a>
+        </li>
         <li>
             <a href="{{route('admin.item.sale')}}">
                 <div class="parent-icon"><i class='bx bx-dollar'></i>

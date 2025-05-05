@@ -33,13 +33,16 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
     //item
     Route::resource('/item', ItemController::class)->names('admin.item');
     Route::get('/item-sale', [ItemController::class, 'sale'])->name('admin.item.sale');
+    Route::get('/item-edit', [ItemController::class, 'editItem'])->name('admin.item.editItem');
     //ietm end
 
     //accessories
     Route::get('/accessories', [AccessoriesController::class, 'index'])->name('admin.acces.index');
     Route::get('/accessories/filter/{divisiId?}', [AccessoriesController::class, 'filterByDivisi']);
     Route::get('/acces-sale', [AccessoriesController::class, 'sale'])->name('admin.acces.sale');
-
+    Route::get('/acces-edit', [AccessoriesController::class, 'editAcces'])->name('admin.acces.editAcces');
+    Route::get('/acces-edit/{id}', [AccessoriesController::class, 'edit'])->name('admin.acces.edit');
+    Route::put('/acces-edit/{id}', [AccessoriesController::class, 'update'])->name('admin.acces.update');
     //accessories end
 
     //sale
