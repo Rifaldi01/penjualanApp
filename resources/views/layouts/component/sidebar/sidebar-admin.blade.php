@@ -79,18 +79,25 @@
         </li>
 
         <li>
-            <a href="{{route('admin.item.editItem')}}">
-                <div class="parent-icon"><i class='bx bx-dollar'></i>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='bx bx-edit'></i>
                 </div>
-                <div class="menu-title">Edit Item</div>
+                <div class="menu-title">Edit Harga</div>
             </a>
-        </li>
-        <li>
-            <a href="{{route('admin.acces.editAcces')}}">
-                <div class="parent-icon"><i class='bx bx-dollar'></i>
-                </div>
-                <div class="menu-title">Edit Acces</div>
-            </a>
+            <ul>
+                <li>
+                    <a href="{{route('admin.item.editItem')}}">
+                        <i class='bx bx-box'></i>
+                        Item
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('admin.acces.editAcces')}}">
+                        <i class='bx bx-collection'></i>
+                        Accessories
+                    </a>
+                </li>
+            </ul>
         </li>
         <li>
             <a href="{{route('admin.item.sale')}}">
