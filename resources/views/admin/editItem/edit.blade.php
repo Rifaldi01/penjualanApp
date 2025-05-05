@@ -94,13 +94,10 @@
                 <div class="mt-3">
                     <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Save<i
                             class="bx bx-save"></i></button>
-                    @if(isset($item))
-                        <a href="{{route('manager.item.index')}}" class="btn btn-warning float-end me-2"><i
+
+                        <a href="{{route('admin.item.editItem')}}" class="btn btn-warning float-end me-2"><i
                                 class="bx bx-undo"></i>Back</a>
-                    @else
-                        <a href="{{route('manager.item.index')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-list-ul"></i>List Item</a>
-                    @endif
+
                 </div>
             </div>
         </form>
