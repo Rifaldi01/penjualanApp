@@ -390,17 +390,20 @@
                 $(`#nominal_in_${id}`).val('Rp. ' + total.toLocaleString('id-ID'));
             }
 
-            $('[id^=pay_debts_]').on('input', function () {
+            // GUNAKAN delegated binding agar tetap bekerja saat pindah halaman DataTable
+            $(document).on('input', '[id^=pay_debts_]', function () {
                 let id = $(this).attr('id').split('_')[2];
                 calculateTotal(id);
             });
 
+            // Tetap inisialisasi saat halaman pertama dimuat
             $('[id^=nominal_in_value_]').each(function () {
                 let id = $(this).attr('id').split('_')[2];
                 calculateTotal(id);
             });
         });
     </script>
+
     <script>
         $(document).ready(function () {
             $('#submitBtn').click(function (event) {
