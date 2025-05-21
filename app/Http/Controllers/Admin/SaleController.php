@@ -79,18 +79,16 @@ class SaleController extends Controller
         }
 
         $currentYear = date('Y');
-        $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT); // Bulan selalu dua digit
+        $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT); // Bulan 2 digit
+        $invFormat = $divisi->inv_format;
 
-        // Hitung jumlah transaksi pada divisi terkait untuk tahun ini
+        // Hitung jumlah transaksi untuk tahun ini dan inv_format ini
         $transactionCount = Sale::where('divisi_id', Auth::user()->divisi_id)
-            ->whereYear('created_at', $currentYear) // Hanya menghitung transaksi dalam tahun yang sama
+            ->where('invoice', 'like', "INV/{$invFormat}/%/%/{$currentYear}")
             ->count();
 
-        $nextNumber = str_pad($transactionCount + 1, 4, '0', STR_PAD_LEFT); // Nomor urut dengan 4 digit
-
-        // Format nomor invoice
-        $invoiceNumber = "INV/{$divisi->inv_format}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
-
+        $nextNumber = str_pad($transactionCount + 1, 4, '0', STR_PAD_LEFT); // Nomor urut 4 digit
+        $invoiceNumber = "INV/{$invFormat}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
 
         $validated = $request->validate([
             'customer_id' => 'required|integer|exists:customers,id',
@@ -124,7 +122,7 @@ class SaleController extends Controller
                 'invoice' => $invoiceNumber
             ]);
 
-            // Handle nominal_in for debts
+            // Simpan data hutang jika ada nominal_in
             if (!empty($request->nominal_in) && $request->nominal_in > 0) {
                 Debt::create([
                     'sale_id' => $sale->id,
@@ -133,7 +131,7 @@ class SaleController extends Controller
                 ]);
             }
 
-            // Save Accessories sale and update stock
+            // Simpan accessories sale dan update stok
             if ($request->has('accessories')) {
                 foreach ($validated['accessories'] as $accessory) {
                     $accessoryRecord = Accessories::find($accessory['accessories_id']);
@@ -147,11 +145,10 @@ class SaleController extends Controller
                             ], 400);
                         }
 
-                        // Update stock
+                        // Update stok
                         $accessoryRecord->stok -= $accessory['qty'];
                         $accessoryRecord->save();
 
-                        // Save Accessories sale
                         AccessoriesSale::create([
                             'sale_id' => $sale->id,
                             'accessories_id' => $accessory['accessories_id'],
@@ -163,7 +160,7 @@ class SaleController extends Controller
                 }
             }
 
-            // Save Item sale and remove from items
+            // Simpan item sale dan hapus dari tabel items
             if ($request->has('items')) {
                 foreach ($validated['items'] as $item) {
                     $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
@@ -182,8 +179,7 @@ class SaleController extends Controller
                             'date_in' => $itemRecord->created_at
                         ]);
 
-                        // Remove item from items
-                        $itemRecord->delete();
+                        $itemRecord->delete(); // Hapus item dari stok
                     }
                 }
             }
@@ -192,16 +188,18 @@ class SaleController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Sale saved successfully.'
+                'message' => 'Sale berhasil disimpan.',
+                'invoice' => $invoiceNumber
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while saving the sale: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat menyimpan penjualan: ' . $e->getMessage()
             ], 500);
         }
     }
+
     /**
      * Display the specified resource.
      *
