@@ -459,6 +459,11 @@ class AccessoriesController extends Controller
 
         return back()->with('success', 'Accessories Reject Ditambah dan Stok Accessories Dikurangi');
     }
+    public function deleteReject($id)
+    {
+        AccessoriesRejecte::whereId($id)->delete();
+        return back()->with('success', 'Accessories Reject Dihapus');
+    }
     public function updatein(Request $request, $id)
     {
         $item = AccessoriesIn::findOrFail($id);

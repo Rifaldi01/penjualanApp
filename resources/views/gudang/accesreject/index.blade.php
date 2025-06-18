@@ -31,6 +31,7 @@
                             <th>Price</th>
                             <th class="text-center" width="10%">Stok</th>
                             <th class="text-center" width="10%">Keterangan</th>
+                            <th class="text-center" width="10%">Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -44,6 +45,19 @@
                                 <td>{{ formatRupiah($data->price) }},-</td>
                                 <td class="text-center">{{ $data->stok }}</td>
                                 <td class="text-center">{{$data->keterangan}}</td>
+                                <td class="text-center">
+                                    <a href="#"
+                                       class="btn btn-danger btn-sm delete-accessory bx bx-trash"
+                                       data-id="{{ $data->id }}"
+                                       data-url="{{ route('gudang.acces.deletReject', $data->id) }}"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="top"
+                                       title="Hapus">
+                                    </a>
+
+{{--                                    <a href="" class="btn btn-warning bx bx-reset btn-sm"data-bs-toggle="tooltip"--}}
+{{--                                       data-bs-placement="top" title="Diperbaiki" ></a>--}}
+                                </td>
                             </tr>
                         @endforeach
                         </tbody>
@@ -59,6 +73,34 @@
 @endpush
 
 @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-accessory');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const url = this.dataset.url;
+
+                    Swal.fire({
+                        title: 'Apakah kamu yakin?',
+                        text: "Data ini akan dihapus secara permanen!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             $('#exampleA').DataTable({
