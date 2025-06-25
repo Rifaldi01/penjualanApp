@@ -123,9 +123,18 @@ class AccessoriesController extends Controller
      */
     public function destroy($id)
     {
-        Accessories::whereId($id)->delete();
-        Alert::success('Success', 'Delet Accessories Success');
-        return back();
+        // Cari item berdasarkan ID
+        $acces = Accessories::findOrFail($id);
+
+        // Hapus semua item di tabel item_ins yang memiliki no_seri yang sama
+        AccessoriesIn::where('accessories_id', $acces->id)->delete();
+
+        // Hapus item dari tabel items
+        $acces->delete();
+
+        // Tampilkan alert sukses
+
+        return back()->withSuccess('Success', 'Delete accessories Success');
     }
 
     private function save(Request $request, $id = null)
