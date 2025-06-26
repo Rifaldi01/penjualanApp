@@ -320,28 +320,25 @@
     </script>
     <script>
         $(document).ready(function () {
-            // Fungsi untuk menghitung total nominal_in
-            function calculateTotal() {
-                // Ambil nilai nominal_in yang sudah dalam angka asli
-                let nominal_in = parseFloat($('#nominal_in_value').val()) || 0;
+            function calculateTotal(id) {
+                let nominal_in = parseFloat($(`#nominal_in_value_${id}`).val()) || 0;
+                let pay_debts = parseFloat($(`#pay_debts_${id}`).val().replace(/[^0-9]/g, '')) || 0;
 
-                // Ambil nilai pay_debts dan pastikan nilai default jika kosong atau 0
-                let pay_debts = parseFloat($('#pay_debts').val().replace(/[^0-9]/g, '')) || 0;
-
-                // Penjumlahan nominal_in dan pay_debts
                 let total = nominal_in + pay_debts;
-
-                // Update nilai nominal_in dengan format Rupiah yang benar
-                $('#nominal_in').val('Rp. ' + total.toLocaleString('id-ID'));
+                $(`#nominal_in_${id}`).val('Rp. ' + total.toLocaleString('id-ID'));
             }
 
-            // Event listener untuk input pay_debts
-            $('#pay_debts').on('input', function () {
-                calculateTotal();  // Menghitung ulang total ketika pay_debts diubah
+            // GUNAKAN delegated binding agar tetap bekerja saat pindah halaman DataTable
+            $(document).on('input', '[id^=pay_debts_]', function () {
+                let id = $(this).attr('id').split('_')[2];
+                calculateTotal(id);
             });
 
-            // Inisialisasi nilai nominal_in saat halaman dimuat
-            calculateTotal();
+            // Tetap inisialisasi saat halaman pertama dimuat
+            $('[id^=nominal_in_value_]').each(function () {
+                let id = $(this).attr('id').split('_')[2];
+                calculateTotal(id);
+            });
         });
     </script>
     <script>
