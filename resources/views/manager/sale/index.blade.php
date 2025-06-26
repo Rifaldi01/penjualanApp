@@ -74,13 +74,13 @@
                                                     <div class="modal-body">
                                                         <div class="row mb-3">
                                                             <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                    class="text-danger">*</i> Nominal In</label>
+                                                                    class="text-danger">*</i> Uang Masuk</label>
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
-                                                                    <input type="hidden" id="nominal_in_value"
+                                                                    <input type="hidden" id="nominal_in_value_{{$data->id}}"
                                                                            value="{{ $data->nominal_in }}">
                                                                     <input type="text" class="form-control"
-                                                                           id="nominal_in" name="nominal_in"
+                                                                           id="nominal_in_{{$data->id}}" name="nominal_in"
                                                                            value="{{ formatRupiah($data->nominal_in) }}"
                                                                            readonly>
                                                                     <span
