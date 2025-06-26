@@ -87,6 +87,7 @@
                                         {{ implode(' ', $line) }}<br>
                                     @endforeach
                                 </strong>
+
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
@@ -199,13 +200,24 @@
                     <div class="mt-5">
                         <table class="table">
                             <tr>
-                                <td style="border: none;"></td>
+                                <td ><strong>Notes :	</strong>	</td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td class="text-center" style="border: none;">Hormat Kami,</td>
                             </tr>
                             <tr>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000;" width="50%">1. Jika Dokumen ini hilang, diubah, dan minta dibuatkan kembali, konsumen
+                                    akan dikenakan biaya admin sebesar Rp.300.000,-
+                                    <br>
+                                    2. Invoice bukan pembayaran yang sah apabila kwitansi tidak terlampir
+                                </td>
                                 <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                                <td style="border: none;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: none;">
+                                </td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
@@ -229,13 +241,7 @@
                                 <td style="border: none;"></td>
                             </tr>
                             <tr>
-                                <td style="border: none;"></td>
-                                <td style="border: none;"></td>
-                                <td style="border: none;"></td>
-                                <td style="border: none;"></td>
-                            </tr>
-                            <tr>
-                                <td style="border: none;"></td>
+                                <td style="border: none;"> </td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
