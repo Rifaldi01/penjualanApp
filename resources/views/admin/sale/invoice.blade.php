@@ -148,7 +148,7 @@
                                         <td width="5%"><strong>Notes:</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000;" width="30%">
+                                        <td style="border-left: 0.5px solid #dee2e6; border-right: 0.5px solid #dee2e6;" width="30%">
                                             1. Jika Dokumen ini hilang, diubah, dan minta dibuatkan
                                             <br>kembali, konsumen akan dikenakan biaya admin sebesar Rp.300.000,-
                                             <br>
