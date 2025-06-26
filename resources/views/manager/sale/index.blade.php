@@ -95,7 +95,7 @@
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
                                                                     <input type="text" class="form-control"
-                                                                           name="pay_debts" id="pay_debts"
+                                                                           name="pay_debts" id="pay_debts_{{$data->id}}"
                                                                            onkeyup="formatRupiah2(this)">
                                                                     <span
                                                                         class="position-absolute top-50 translate-middle-y"><i
@@ -116,7 +116,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="row mb-3" id="bankField">
+                                                        <div class="row mb-3" id="bankField_{{$data->id}}">
                                                             <label for="input42"
                                                                    class="col-sm-3 col-form-label">Bank</label>
                                                             <div class="col-sm-9">
@@ -137,13 +137,24 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <div class="row mb-3" id="penerimaField_{{$data->id}}">
+                                                            <label for="input42" class="col-sm-3 col-form-label">Penerima</label>
+                                                            <div class="col-sm-9">
+                                                                <div class="position-relative input-icon">
+                                                                    <input type="text" class="form-control"
+                                                                           name="penerima" id="penerima_{{$data->id}}">
+                                                                    <span class="position-absolute top-50 translate-middle-y"><i
+                                                                            class='bx bx-user'></i></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="row mb-3">
                                                             <label for="input42" class="col-sm-3 col-form-label"><i
                                                                     class="text-danger"></i> </label>
                                                             <div class="col-sm-9">
                                                                 <div class="position-relative input-icon">
                                                                     <input type="checkbox" class="form-check"
-                                                                           id="lainya">
+                                                                           id="lainya_{{$data->id}}">
                                                                     <span class="position-absolute top-50 translate-middle-y ms-1"> Lainya</span>
                                                                 </div>
                                                             </div>
@@ -152,7 +163,7 @@
                                                             <label for="input42"
                                                                    class="col-sm-3 col-form-label"></label>
                                                             <div class="col-sm-9">
-                                                                <textarea id="description" type="text"
+                                                                <textarea id="description_{{$data->id}}" type="text"
                                                                           class="form-control" name="description"
                                                                           placeholder="Isi Lainya pembayaran melalui apa?"></textarea>
                                                             </div>
