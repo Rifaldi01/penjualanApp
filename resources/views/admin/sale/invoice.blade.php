@@ -141,58 +141,69 @@
                         </tbody>
                     </table>
                     <div class="mb-lg-5">
-                        <div class="row">
-                            <div class="col-lg-6"></div>
-                            <div class="col-lg-6">
-                                <div class="float-end">
-                                    <table>
-                                        <tr>
-                                            <td style="vertical-align: top;">
-                                                <table class="table table-bordered">
-                                                    @if($data->nominal_in >= $data->pay)
-                                                    @else
-                                                        <tr>
-                                                            <td colspan="4" style="font-size: 10px"><strong>DIBAYAR</strong></td>
-                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->nominal_in) }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="4" style="font-size: 10px"><strong>TAGIHAN</strong></td>
-                                                            <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay - $data->nominal_in) }}</td>
-                                                        </tr>
-                                                    @endif
-                                                </table>
-                                            </td>
-                                            <td>
-                                                <table class="table table-bordered">
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>SUBTOTAL</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->total_price) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>PPN</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ppn) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>PPH</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pph) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>ONGKIR</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->ongkir) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>DISCOUNT</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->diskon) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="font-size: 10px"><strong>GRAND TOTAL</strong></td>
-                                                        <td class="text-right" style="font-size: 10px">{{ formatRupiah($data->pay) }}</td>
-                                                    </tr>
+                        <div class="print-row">
+                            <!-- Kolom kiri (Notes) -->
+                            <div class="print-col no-break">
+                                <table class="table">
+                                    <tr>
+                                        <td width="5%"><strong>Notes:</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000;" width="30%">
+                                            1. Jika Dokumen ini hilang, diubah, dan minta dibuatkan
+                                            <br>kembali, konsumen akan dikenakan biaya admin sebesar Rp.300.000,-
+                                            <br>
+                                            2. Invoice bukan pembayaran yang sah apabila kwitansi <br>tidak terlampir
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
+                            <!-- Kolom kanan (Informasi pembayaran) -->
+                            <div class="print-col no-break">
+                                <div class="d-flex justify-content-end">
+                                    <div class="me-2">
+                                        <table class="table table-bordered">
+                                            @if($data->nominal_in < $data->pay)
+                                                <tr>
+                                                    <td colspan="4" style="font-size: 10px"><strong>DIBAYAR</strong></td>
+                                                    <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->nominal_in) }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" style="font-size: 10px"><strong>TAGIHAN</strong></td>
+                                                    <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->pay - $data->nominal_in) }}</td>
+                                                </tr>
+                                            @endif
+                                        </table>
+                                    </div>
+                                    <div>
+                                        <table class="table table-bordered">
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>SUBTOTAL</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->total_price) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>PPN</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->ppn) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>PPH</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->pph) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>ONGKIR</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->ongkir) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>DISCOUNT</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->diskon) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" style="font-size: 10px"><strong>GRAND TOTAL</strong></td>
+                                                <td class="text-end" style="font-size: 10px">{{ formatRupiah($data->pay) }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -200,24 +211,19 @@
                     <div class="mt-5">
                         <table class="table">
                             <tr>
-                                <td ><strong>Notes :	</strong>	</td>
+                                <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td class="text-center" style="border: none;">Hormat Kami,</td>
                             </tr>
                             <tr>
-                                <td style="border-left: 1px solid #000; border-right: 1px solid #000;" width="50%">1. Jika Dokumen ini hilang, diubah, dan minta dibuatkan kembali, konsumen
-                                    akan dikenakan biaya admin sebesar Rp.300.000,-
-                                    <br>
-                                    2. Invoice bukan pembayaran yang sah apabila kwitansi tidak terlampir
-                                </td>
+                                <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                             </tr>
                             <tr>
-                                <td style="border: none;">
-                                   </td>
+                                <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
@@ -241,7 +247,7 @@
                                 <td style="border: none;"></td>
                             </tr>
                             <tr>
-                                <td style="border: none;"> </td>
+                                <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
                                 <td style="border: none;"></td>
@@ -330,6 +336,25 @@
 
         .modal-invoice {
             padding: 15mm;
+        }
+    </style>
+    <style>
+        @media print {
+            .print-row {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .print-col {
+                flex: 1;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
         }
     </style>
 @endpush
