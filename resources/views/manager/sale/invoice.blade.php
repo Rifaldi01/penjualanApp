@@ -105,9 +105,8 @@
                     <!-- Tabel detail item -->
                     <table class="table table-bordered">
                         <thead>
-                        <thead>
                         <tr>
-                            <th colspan="5" class="text-center bg-secondary bg-opacity-50 sjg" style="font-size: 13px;">
+                            <th colspan="5" class="text-center  sjg" style="font-size: 13px; background-color: #ff8400;">
                                 <strong>INVOICE</strong>
                             </th>
                         </tr>

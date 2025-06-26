@@ -105,9 +105,8 @@
                     <!-- Tabel detail item -->
                     <table class="table table-bordered">
                         <thead>
-                        <thead>
                         <tr>
-                            <th colspan="5" class="text-center bg-secondary bg-opacity-50 sjg" style="font-size: 13px;">
+                            <th colspan="5" class="text-center bg-dnd" style="font-size: 13px; background-color: #ff8400;">
                                 <strong>INVOICE</strong>
                             </th>
                         </tr>
@@ -328,6 +327,10 @@
                 font-size: 12px;
             }
 
+            .bg-dnd{
+                background-color: #ff8400;
+            }
+
         }
 
         .print-img {
@@ -357,6 +360,16 @@
             }
         }
     </style>
+    <style>
+        @media print {
+            .bg-dnd {
+                background-color: #ff8400 !important; /* Atau warna putih untuk menghilangkan warna */
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+
 @endpush
 @push('js')
     <script>
