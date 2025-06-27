@@ -22,6 +22,7 @@
                        <th class="text-center" width="5%">Deadlines</th>
                        <th>Customer</th>
                        <th class="text-center" width="5%">Total Item</th>
+                       <th class="text-center" width="5%">Uang Masuk</th>
                        <th class="text-center" width="5%">Total Price</th>
                        <th class="text-center" width="5%">Diskon</th>
                        <th class="text-center" width="5%">Ongkir</th>
@@ -32,13 +33,14 @@
                    </thead>
                    <tbody>
                    @foreach($sales as $key => $data)
-                       @if($data->nominal_in == $data->pay)
+                       @if($data->nominal_in >= $data->pay)
                        @else
                            <tr>
                                <td data-index="{{ $key + 1 }}">{{$key +1}}</td>
                                <td>{{dateId($data->deadlines)}}</td>
                                <td>{{$data->customer->name}}</td>
                                <td class="text-center">{{$data->total_item}}</td>
+                               <td>{{formatRupiah($data->nominal_in)}}</td>
                                <td>{{formatRupiah($data->total_price)}}</td>
                                <td>{{formatRupiah($data->diskon)}}</td>
                                <td>{{formatRupiah($data->ongkir)}}</td>
