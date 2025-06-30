@@ -23,8 +23,9 @@
                         <th width="4%">No</th>
                         <th>No Seri</th>
                         <th>Name Item</th>
-                        <th></th>
+                        <th>Divisi</th>
                         <th>Price</th>
+                        <th width="5%">status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -35,6 +36,15 @@
                             <td>{{$data->name}}</td>
                             <td>{{$data->divisi->name}}</td>
                             <td>{{formatRupiah($data->price)}}</td>
+                            <td>
+                                @if($data->status == 0)
+                                    <span class="badge bg-success">Redy</span>
+                                @elseif($data->status == 1)
+                                    <span class="badge bg-danger">Reject</span>
+                                @else
+                                    <span class="badge bg-primary">Khusus</span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
