@@ -110,36 +110,28 @@
                             return;
                         }
 
-                        var reportBody = $('#report-body');
-                        reportBody.empty(); // Clear existing data
+                        table.clear().draw(); // Hapus semua data di DataTables
 
                         var totalIncome = response.income;
                         $('#total-income').text(formatRupiah(totalIncome));
-                        var profit = response.profit;
-                        $('#profit').text(formatRupiah(profit));
-                        var totalDiskon = response.diskon;
-                        $('#diskon').text(formatRupiah(totalDiskon));
-                        var totalOngkir = response.ongkir;
-                        $('#ongkir').text(formatRupiah(totalOngkir));
-                        var totalppn = response.ppn;
-                        $('#ppn').text(formatRupiah(totalppn));
-                        var totalpph = response.pph;
-                        $('#pph').text(formatRupiah(totalpph));
+                        $('#profit').text(formatRupiah(response.profit));
+                        $('#diskon').text(formatRupiah(response.diskon));
+                        $('#ongkir').text(formatRupiah(response.ongkir));
+                        $('#ppn').text(formatRupiah(response.ppn));
+                        $('#pph').text(formatRupiah(response.pph));
 
                         response.report.forEach(function (data, index) {
-                            // Generate list of item sales as a vertical list
                             var itemSalesList = '<ul>';
                             if (data.itemSales && data.itemSales.length > 0) {
-                                data.itemSales.forEach(function(item) {
+                                data.itemSales.forEach(function (item) {
                                     itemSalesList += `<li>${item}</li>`;
                                 });
                             }
                             itemSalesList += '</ul>';
 
-                            // Generate list of accessories as a vertical list
                             var accessoriesList = '<ul>';
                             if (data.accessories && data.accessories.length > 0) {
-                                data.accessories.forEach(function(accessory) {
+                                data.accessories.forEach(function (accessory) {
                                     accessoriesList += `<li>${accessory.name} - (${accessory.pivot.qty})</li>`;
                                 });
                             }
@@ -147,34 +139,30 @@
 
                             var debtList = '<ul>';
                             if (data.debt && data.debt.length > 0) {
-                                data.debt.forEach(function(debt) {
-                                    // Sesuaikan properti yang ingin ditampilkan
+                                data.debt.forEach(function (debt) {
                                     var bankName = debt.bank ? debt.bank.name : '';
                                     var description = debt.description ? debt.description : '';
                                     var datePay = debt.date_pay ? debt.date_pay : 'Tanggal tidak tersedia';
-
                                     debtList += `<li>${datePay} - ${bankName || description}</li>`;
                                 });
                             }
                             debtList += '</ul>';
 
-                            var row = `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${formatDate(data.created_at)}</td>
-                                <td>${data.invoice}</td>
-                                <td>${data.customer ? data.customer.name : 'N/A'}</td>
-                                <td>${itemSalesList}</td>
-                                <td>${accessoriesList}</td>
-                                <td class="text-center">${data.total_item}</td>
-                                <td>${formatRupiah(data.total_price)}</td>
-                                <td>${formatRupiah(data.diskon)}</td>
-                                <td>${formatRupiah(data.ongkir)}</td>
-                                <td>${formatRupiah(data.pay)}</td>
-                                <td>${debtList}</td>
-                            </tr>
-                        `;
-                            reportBody.append(row);
+                            // Tambahkan ke DataTable, bukan ke DOM
+                            table.row.add([
+                                index + 1,
+                                formatDate(data.created_at),
+                                data.invoice,
+                                data.customer ? data.customer.name : 'N/A',
+                                itemSalesList,
+                                accessoriesList,
+                                data.total_item,
+                                formatRupiah(data.total_price),
+                                formatRupiah(data.diskon),
+                                formatRupiah(data.ongkir),
+                                formatRupiah(data.pay),
+                                debtList
+                            ]).draw(false);
                         });
                     },
                     error: function (xhr) {
@@ -210,100 +198,214 @@
 
             var table = $('#filter-table').DataTable({
                 lengthChange: false,
+                paginate: false,
                 buttons: [
                     {
-                        extend: 'pdf',
+                        extend: 'excel',
+                        title: 'Laporan Transaksi',
+                        text: 'Excel',
                         exportOptions: {
-                            stripHtml: false,
+                            stripHtml: false
                         },
-                        customize: function(doc) {
-                            doc.content = [];
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            var $sheet = $(sheet);
 
-                            doc.pageSize = {
-                                width: 842,
-                                height: 595
-                            };
-                            doc.pageOrientation = 'landscape';
+                            // Hapus tag HTML <ul> dan <li> dari setiap cell
+                            $('row c is t', sheet).each(function () {
+                                var cell = $(this);
+                                var text = cell.text();
 
-                            doc.pageMargins = [20, 20, 20, 20];
+                                // Hapus tag HTML <ul> dan <li>
+                                text = text
+                                    .replace(/<\/?ul>/g, '')     // hapus <ul> dan </ul>
+                                    .replace(/<\/?li>/g, '')     // hapus <li> dan </li>
+                                    .replace(/\n/g, '')          // hapus newline jika ada
+                                    .trim();                     // hapus spasi di awal/akhir
 
-                            var thead = $('#filter-table thead').clone();
-                            var headers = [];
-                            thead.find('th').each(function() {
-                                headers.push({ text: $(this).text(), style: 'tableHeader' });
+                                cell.text(text);
                             });
 
-                            var tableBody = [];
+                            // Tambahkan footer income manual
+                            function getFooterText(id) {
+                                return document.getElementById(id).innerText || '0';
+                            }
+
+                            function addFooterRow(label, value, rowNumber) {
+                                var row =
+                                    `<row r="${rowNumber}">
+                                        <c t="inlineStr" r="A${rowNumber}">
+                                            <is><t>${label}</t></is>
+                                        </c>
+                                        <c t="inlineStr" r="B${rowNumber}">
+                                            <is><t>${value}</t></is>
+                                        </c>
+                                    </row>`;
+                                $sheet.find('sheetData').append(row);
+                            }
+
+                            var rowStart = $sheet.find('sheetData row').length + 1;
+                            addFooterRow('Total Income', getFooterText('total-income'), rowStart++);
+                            addFooterRow('Profit', getFooterText('profit'), rowStart++);
+                            addFooterRow('PPN', getFooterText('ppn'), rowStart++);
+                            addFooterRow('PPH', getFooterText('pph'), rowStart++);
+                            addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
+                            addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
+                        }
+
+                    }, {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        exportOptions: {
+                            page: 'all',
+                            columns: ':visible'
+                        },
+                        customize: function (doc) {
+                            doc.pageSize = 'A4';
+                            doc.pageOrientation = 'landscape';
+                            doc.pageMargins = [20, 20, 20, 20];
+
+                            let headers = [];
+                            let widths = [];
+                            $('#filter-table thead th').each(function (index) {
+                                let headerText = $(this).text().trim();
+                                headers.push({text: headerText, style: 'tableHeader'});
+
+                                if (index === 0) widths.push(15); // No
+                                else if (['Total Price', 'Diskon', 'Ongkir', 'Tanggal'].includes(headerText)) {
+                                    widths.push(50); // Perkecil kolom uang
+                                } else if (headerText === 'Invoice') {
+                                    widths.push(90);
+                                } else if (headerText === 'Total Item') {
+                                    widths.push(20);
+                                } else {
+                                    widths.push('*'); // Kolom lainnya fleksibel
+                                }
+                            });
+
+
+                            let tableBody = [];
                             tableBody.push(headers);
 
-                            $('#filter-table tbody tr').each(function() {
-                                var row = [];
-                                $(this).find('td').each(function() {
-                                    var cellText = $(this).text();
-                                    if ($(this).find('ul').length > 0) {
-                                        cellText = $(this).find('ul').html().replace(/<\/?li>/g, '');
-                                        cellText = cellText.split('</li>').filter(item => item).map(item => ({ text: item.trim() }));
-                                    }
-                                    row.push({ text: cellText, style: 'tableCell' });
+                            $('#filter-table tbody tr').each(function () {
+                                let row = [];
+
+                                $(this).find('td').each(function () {
+                                    let htmlContent = $(this).html();
+
+                                    // Hapus tag <ul>, <li>, dan spasi kosong berlebihan
+                                    let cleanedHtml = htmlContent
+                                        .replace(/<\/?(ul|li)>/gi, '')  // hapus tag
+                                        .replace(/\s+/g, ' ')          // hapus spasi berlebih
+                                        .trim();                       // hapus spasi depan belakang
+
+                                    // Ambil teks bersih
+                                    let cleanText = $('<div>').html(cleanedHtml).text();
+
+                                    row.push({text: cleanText, style: 'tableCell'});
+                                });
+
+                                while (row.length < headers.length) {
+                                    row.push({text: '', style: 'tableCell'});
+                                }
+
+                                tableBody.push(row);
+                            });
+
+                            // Footer (jika ada)
+                            $('#filter-table tfoot tr').each(function () {
+                                let row = [];
+                                $(this).find('th, td').each(function () {
+                                    let text = $(this).text().trim();
+                                    row.push({text: text, style: 'tableCell'});
                                 });
                                 while (row.length < headers.length) {
-                                    row.push({ text: '' });
+                                    row.push({text: '', style: 'tableCell'});
                                 }
                                 tableBody.push(row);
                             });
 
-                            var tfoot = $('#filter-table tfoot').clone();
-                            if (tfoot.length) {
-                                var footerRow = [];
-                                tfoot.find('th').each(function() {
-                                    footerRow.push({ text: $(this).text(), style: 'tableCell' });
-                                });
-                                while (footerRow.length < headers.length) {
-                                    footerRow.push({ text: '' });
-                                }
-                                tableBody.push(footerRow);
-                            }
-
-                            doc.content.push({
+                            doc.content = [{
                                 table: {
                                     headerRows: 1,
-                                    body: tableBody,
-                                    widths: Array(headers.length).fill('*'),
-                                    style: 'table'
+                                    widths: widths,
+                                    body: tableBody
                                 },
-                                layout: 'lightHorizontalLines'
-                            });
+                                layout: {
+                                    hLineWidth: function () { return 0.5; },
+                                    vLineWidth: function () { return 0.5; },
+                                    hLineColor: function () { return '#aaa'; },
+                                    vLineColor: function () { return '#aaa'; },
+                                    paddingLeft: function () { return 4; },
+                                    paddingRight: function () { return 4; },
+                                    paddingTop: function () { return 3; },
+                                    paddingBottom: function () { return 3; }
+                                }
+                            }];
 
                             doc.styles = {
-                                table: {
-                                    margin: [5, 5, 5, 5],  // Mengurangi margin agar tabel lebih kecil
-                                    fontSize: 7  // Mengurangi ukuran font tabel untuk menghemat ruang
-                                },
                                 tableHeader: {
                                     bold: true,
-                                    fontSize: 8,  // Ukuran font lebih kecil untuk header
-                                    fillColor: '#f2f2f2'
+                                    fontSize: 6,
+                                    fillColor: '#eeeeee',
+                                    alignment: 'center'
                                 },
                                 tableCell: {
-                                    fontSize: 6  // Ukuran font lebih kecil untuk sel tabel
+                                    fontSize: 5,
+                                    alignment: 'left'
                                 }
                             };
-
                         }
                     },
                     {
                         extend: 'print',
+                        text: 'Print',
                         exportOptions: {
                             stripHtml: false,
+                            columns: ':visible'
                         },
-                        customize: function(win) {
-                            $(win.document.body).find('table').addClass('compact').css('font-size', '10px');
-                            var bodyContent = $('#filter-table tbody').clone();
-                            $(win.document.body).find('table').append(bodyContent);
-                            var footerContent = $('#filter-table tfoot').clone();
-                            $(win.document.body).find('table').append(footerContent);
+                        customize: function (win) {
+                            // Set landscape orientation
+                            const css = '@page { size: landscape; margin: 10mm; }';
+                            const head = win.document.head || win.document.getElementsByTagName('head')[0];
+                            const style = win.document.createElement('style');
+                            style.type = 'text/css';
+                            style.media = 'print';
+                            style.appendChild(win.document.createTextNode(css));
+                            head.appendChild(style);
+
+                            // Atur ukuran font dan style
+                            $(win.document.body).css('font-size', '10px');
+                            const $table = $(win.document.body).find('table');
+
+                            $table
+                                .addClass('compact')
+                                .css({
+                                    'font-size': '10px',
+                                    'border-collapse': 'collapse',
+                                    'width': '100%'
+                                });
+
+                            // Hapus tbody dan tfoot default
+                            $table.find('tbody').remove();
+                            $table.find('tfoot').remove();
+
+                            // Tambahkan tbody dari halaman utama
+                            const tbody = $('#filter-table tbody').clone();
+                            $table.append(tbody);
+
+                            // Tambahkan footer (tfoot) sebagai div terpisah di akhir body, bukan dalam table
+                            const footerHtml = $('<div>')
+                                .css({
+                                    'margin-top': '20px',
+                                    'font-size': '10px'
+                                })
+                                .append($('#filter-table tfoot').clone());
+
+                            $(win.document.body).append(footerHtml);
                         }
                     }
+
                 ]
             });
 
