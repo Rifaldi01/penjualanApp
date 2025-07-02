@@ -84,16 +84,10 @@
                                     <a href="{{route('manager.pembelian.edit', $data->id)}}"
                                        class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
                                        data-bs-placement="top" title="Edit Data"></a>
-                                    <form action="{{ route('manager.pembelian.destroy', $data->id) }}" method="POST"
-                                          style="display:inline-block;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm bx bx-trash"
-                                                data-confirm-delete="true" data-bs-toggle="tooltip"
-                                                data-bs-placement="top" title="hapus Data">
-
-                                        </button>
-                                    </form>
+                                    <a href="{{ route('manager.pembelian.destroy', $data->id) }}" data-confirm-delete="true"
+                                       class="btn btn-danger btn-sm bx bx-trash" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Delete">
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

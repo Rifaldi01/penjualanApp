@@ -131,9 +131,11 @@ class AccesoriesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'price' => 'required'
+            'price' => 'required',
+            'stok' => 'required'
         ], [
             'name.required' => 'Nama Accessories Wajib Diisi',
+            'stok.required' => 'Stok Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
         ]);
 
@@ -159,6 +161,7 @@ class AccesoriesController extends Controller
         // Update data accessories
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
+        $acces->stok = $request->input('stok');
         $acces->capital_price = $request->input('capital_price');
         $acces->divisi_id = $request->input('divisi_id');
 

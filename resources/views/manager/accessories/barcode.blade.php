@@ -54,6 +54,11 @@
                     </select>
                 </div>
                 <div class=" mb-2">
+                    <label class="col-form-label">Stok</label>
+                        <input type="number" name="stok" class="form-control"
+                               value="{{isset($acces) ? $acces->stok : null}}" placeholder="0">
+                </div>
+                <div class=" mb-2">
                     <label class="col-form-label">Capital Price</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="capital_price" class="form-control" onkeyup="formatRupiah(this)"
