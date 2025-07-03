@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Accessories;
 use App\Models\ItemSale;
 use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -61,8 +62,13 @@ class ReportController extends Controller
 
         // Filter tanggal jika disediakan
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            // Tambahkan waktu awal dan akhir ke tanggal
+            $start = Carbon::parse($startDate)->startOfDay(); // 00:00:00
+            $end = Carbon::parse($endDate)->endOfDay();       // 23:59:59
+
+            $query->whereBetween('created_at', [$start, $end]);
         }
+
 
         $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')->get();
 
