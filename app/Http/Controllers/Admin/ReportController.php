@@ -20,6 +20,7 @@ class ReportController extends Controller
         $report = Sale::where('divisi_id', Auth::user()->divisi_id)
             ->whereYear('created_at', $currentYear)
             ->with('customer', 'accessories', 'itemSales', 'debt.bank')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $report->each(function ($sale) {
@@ -80,7 +81,9 @@ class ReportController extends Controller
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')->get();
+        $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         $totalIncome = 0;
         $totalCapital = 0;

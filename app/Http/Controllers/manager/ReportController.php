@@ -18,6 +18,7 @@ class ReportController extends Controller
         // Ambil laporan untuk tahun berjalan tanpa filter divisi
         $report = Sale::whereYear('created_at', $currentYear)
             ->with('customer', 'accessories', 'itemSales', 'debt.bank')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $report->each(function ($sale) {
@@ -70,7 +71,9 @@ class ReportController extends Controller
         }
 
 
-        $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')->get();
+        $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         $totalIncome = 0;
         $totalCapital = 0;
