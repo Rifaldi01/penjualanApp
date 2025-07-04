@@ -91,7 +91,8 @@
                             </td>
                             <td width="10%" class="text-start">Tanggal</td>
                             <td width="2%" class="text-center">:</td>
-                            <td><strong>{{tanggal($data->created_at)}}</strong></td>
+                            <td><strong>{{ \Carbon\Carbon::parse($data->created_at)->translatedFormat('j F Y') }}
+                                </strong></td>
                         </tr>
                         <tr>
                             <td>
