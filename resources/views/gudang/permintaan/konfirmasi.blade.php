@@ -28,14 +28,14 @@
                            <td>{{ $permintaan->kode }}</td>
                            <td>
                                @forelse($permintaan->detailAccessories as $detail)
-                                   {{ $detail->accessories->name }}<br>
+                                   {{ $detail->accessories?->name ?? '-' }}<br>
                                @empty
                                    -
                                @endforelse
                            </td>
                            <td>
                                @forelse($permintaan->detailAccessories as $accessory)
-                                   <li>{{ $accessory->qty }}</li>
+                                   <li>{{ $accessory->qty ?? '-' }}</li>
                                @empty
                                    -
                                @endforelse
