@@ -95,12 +95,12 @@
                             <tbody>
                             @foreach($permintaan->detailAccessories as $key => $item)
                                 <tr>
-                                    <td width="1%" class="text-center"
-                                        style="border-left-width:1px;">{{ $key + 1 }}</td>
-                                    <td>{{ $item->accessories->name }}</td>
-                                    <td class="text-right">{{ $item->qty }}</td>
+                                    <td width="1%" class="text-center" style="border-left-width:1px;">{{ $key + 1 }}</td>
+                                    <td>{{ $item->accessories?->name ?? '-' }}</td>
+                                    <td class="text-right">{{ $item->qty ?? '-' }}</td>
                                 </tr>
                             @endforeach
+
                             <tr>
                                 <th colspan="2">
                                     <div class="float-end">
