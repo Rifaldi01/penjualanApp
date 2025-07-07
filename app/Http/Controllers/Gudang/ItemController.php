@@ -158,6 +158,9 @@ class ItemController extends Controller
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
         ]);
 
+        // Ambil divisi login
+        $divisiId = Auth::user()->divisi_id;
+
         // Simpan atau update data di tabel `items`
         $item = Item::updateOrCreate(
             ['id' => $id],
@@ -166,13 +169,13 @@ class ItemController extends Controller
                 'name' => $request->input('name'),
                 'no_seri' => $request->input('no_seri'),
                 'created_at' => $request->input('created_at'),
-                'divisi_id' => Auth::user()->divisi_id,
+                'divisi_id' => $divisiId,
             ]
         );
 
         // Update atau buat data di tabel `item_ins`
         ItemIn::updateOrCreate(
-            ['no_seri' => $item->no_seri], // Cari berdasarkan `no_seri`
+            ['no_seri' => $item->no_seri],
             [
                 'itemcategory_id' => $item->itemcategory_id,
                 'divisi_id' => $item->divisi_id,
@@ -182,14 +185,17 @@ class ItemController extends Controller
             ]
         );
 
-        // Cek apakah invoice sudah ada di tabel `pembelian`
+        // Cek apakah invoice dengan divisi yang sama sudah ada di tabel `pembelian`
         $invoice = $request->input('kode_msk');
-        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
 
-        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+        $existingPembelian = Pembelian::where('invoice', $invoice)
+            ->where('divisi_id', $divisiId)
+            ->first();
+
+        // Jika tidak ada, buat entri baru
         if (!$existingPembelian && $invoice) {
             Pembelian::create([
-                'divisi_id' => $item->divisi_id,
+                'divisi_id' => $divisiId,
                 'invoice' => $invoice,
                 'status' => '1',
             ]);
@@ -198,6 +204,7 @@ class ItemController extends Controller
         Alert::success('Success', 'Data berhasil disimpan');
         return redirect()->route('gudang.item.index');
     }
+
 
     public function download(Item $item)
     {
