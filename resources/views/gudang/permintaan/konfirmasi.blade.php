@@ -27,15 +27,20 @@
                            <td>{{ tanggal($permintaan->created_at) }}</td>
                            <td>{{ $permintaan->kode }}</td>
                            <td>
-                               @foreach($permintaan->detailAccessories as $detail)
-                                   {{ $detail->accessories->name }}
-                               @endforeach
+                               @forelse($permintaan->detailAccessories as $detail)
+                                   {{ $detail->accessories->name }}<br>
+                               @empty
+                                   -
+                               @endforelse
                            </td>
                            <td>
-                               @foreach($permintaan->detailAccessories as $accessory)
+                               @forelse($permintaan->detailAccessories as $accessory)
                                    <li>{{ $accessory->qty }}</li>
-                               @endforeach
+                               @empty
+                                   -
+                               @endforelse
                            </td>
+
                            <td>{{ $permintaan->divisiTujuan->name }}</td>
                            <td>{{ $permintaan->jumlah }}</td>
                            <td>

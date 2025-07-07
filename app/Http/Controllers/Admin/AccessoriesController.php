@@ -18,8 +18,9 @@ class AccessoriesController extends Controller
         $userDivisi = auth()->user()->divisi->name; // Asumsikan user memiliki relasi ke divisi
         $acces = Accessories::with('divisi')->get();
         $divisi = Divisi::all();
+        $accessories = Accessories::where('divisi_id', Auth::user()->divisi_id)->get();
 
-        return view('admin.accessories.index', compact('acces', 'divisi', 'userDivisi'));
+        return view('admin.accessories.index', compact('acces', 'divisi', 'userDivisi', 'accessories'));
     }
 
     public function sale()
