@@ -113,7 +113,7 @@ class ItemController extends Controller
 
         // Update atau buat data di tabel `item_ins`
         ItemIn::updateOrCreate(
-            ['no_seri' => $item->no_seri], // Cari berdasarkan `no_seri`
+            ['no_seri' => $item->no_seri],
             [
                 'itemcategory_id' => $item->itemcategory_id,
                 'name' => $item->name,
@@ -124,14 +124,19 @@ class ItemController extends Controller
             ]
         );
 
-        // Cek apakah invoice sudah ada di tabel `pembelian`
+        // Ambil invoice dari request
         $invoice = $request->input('kode_msk');
-        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+        $divisiId = Auth::user()->divisi_id;
 
-        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
+        // Cek apakah invoice dengan divisi yang sama sudah ada
+        $existingPembelian = Pembelian::where('invoice', $invoice)
+            ->where('divisi_id', $divisiId)
+            ->first();
+
+        // Jika tidak ada pembelian dengan invoice & divisi yang sama, buat baru
         if (!$existingPembelian && $invoice) {
             Pembelian::create([
-                'divisi_id' => Auth::user()->divisi_id,
+                'divisi_id' => $divisiId,
                 'invoice' => $invoice,
                 'status' => '1',
             ]);
@@ -139,6 +144,7 @@ class ItemController extends Controller
 
         return redirect()->route('admin.item.editItem')->withSuccess('Data berhasil disimpan');
     }
+
 
     /**
      * Remove the specified resource from storage.
