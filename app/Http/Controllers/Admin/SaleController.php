@@ -58,7 +58,8 @@ class SaleController extends Controller
         $accessories = Accessories::all();
         $item = Item::all();
         $customer = Customer::where('divisi_id', Auth::user()->divisi_id)->get();
-        return view('admin.sale.create', compact('accessories', 'item', 'customer'));
+        $bank = Bank::all();
+        return view('admin.sale.create', compact('accessories', 'item', 'customer', 'bank'));
     }
 
     /**
@@ -99,6 +100,30 @@ class SaleController extends Controller
             'bayar' => 'required|numeric|min:0',
             'accessories' => 'nullable|array',
             'items' => 'nullable|array'
+        ], [
+            'customer_id.required' => 'Pelanggan wajib diisi.',
+            'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
+
+            'total_item.required' => 'Total item wajib diisi.',
+            'total_item.integer' => 'Total item harus berupa angka.',
+            'total_item.min' => 'Total item minimal harus 1.',
+
+            'total_price.required' => 'Total harga wajib diisi.',
+            'total_price.numeric' => 'Total harga harus berupa angka.',
+            'total_price.min' => 'Total harga tidak boleh kurang dari 0.',
+
+            'ongkir.required' => 'Ongkos kirim wajib diisi.',
+            'ongkir.numeric' => 'Ongkos kirim harus berupa angka.',
+            'ongkir.min' => 'Ongkos kirim tidak boleh kurang dari 0.',
+
+            'diskon.required' => 'Diskon wajib diisi.',
+            'diskon.numeric' => 'Diskon harus berupa angka.',
+            'diskon.min' => 'Diskon tidak boleh kurang dari 0.',
+
+            'bayar.required' => 'Jumlah bayar wajib diisi.',
+            'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
+            'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
+
         ]);
 
         DB::beginTransaction();
@@ -117,6 +142,7 @@ class SaleController extends Controller
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
                 'no_po' => $request->no_po,
+                'fee' => $request->fee,
                 'user_id' => Auth::id(),
                 'divisi_id' => Auth::user()->divisi_id,
                 'invoice' => $invoiceNumber
@@ -127,6 +153,9 @@ class SaleController extends Controller
                 Debt::create([
                     'sale_id' => $sale->id,
                     'pay_debts' => $request->nominal_in,
+                    'bank_id' => $request->bank_id,
+                    'penerima' => $request->penerima,
+                    'description' => $request->description,
                     'date_pay' => now()
                 ]);
             }

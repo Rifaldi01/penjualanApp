@@ -66,7 +66,8 @@ class SaleController extends Controller
         $item = Item::all();
         $customer = Customer::all();
         $divisi = Divisi::all();
-        return view('manager.sale.create', compact('accessories', 'item', 'customer', 'divisi'));
+        $bank = Bank::all();
+        return view('manager.sale.create', compact('accessories', 'item', 'customer', 'divisi', 'bank'));
     }
 
     /**
@@ -157,6 +158,7 @@ class SaleController extends Controller
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
                 'no_po' => $request->no_po,
+                'fee' => $request->fee,
                 'user_id' => Auth::id(),
                 'divisi_id' => $validated['divisi_id'],
                 'created_at' => $validated['created_at'],
@@ -168,6 +170,9 @@ class SaleController extends Controller
                 Debt::create([
                     'sale_id' => $sale->id,
                     'pay_debts' => $request->nominal_in,
+                    'bank_id' => $request->bank_id,
+                    'penerima' => $request->penerima,
+                    'description' => $request->description,
                     'date_pay' => now()
                 ]);
             }
@@ -263,13 +268,14 @@ class SaleController extends Controller
     public function edit($id) //ieu fungsi jang ngambil form edit?enya
     {
         if (\request()->ajax()){
-            $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories'])->findOrFail($id);
+            $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'debt.bank'])->findOrFail($id);
             return response()->json($sale);
         }
         $customers = Customer::all();
-        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'divisi'])->findOrFail($id);
+        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'divisi', 'debt.bank'])->findOrFail($id);
         $divisi = Divisi::all();
-        return view('manager.sale.edit', compact('sale', 'customers', 'divisi'));
+        $bank = Bank::all();
+        return view('manager.sale.edit', compact('sale', 'customers', 'divisi', 'bank'));
     }
 
     /**
@@ -295,6 +301,7 @@ class SaleController extends Controller
             $sale->created_at = $request->created_at;
             $sale->no_po = $request->no_po;
             $sale->divisi_id = $request->divisi_id;
+            $sale->fee = str_replace('.', '', $request->bayar); // Bayar tanpa titik
             $sale->pay = str_replace('.', '', $request->bayar); // Bayar tanpa titik
             $sale->ppn = str_replace('.', '', $request->ppn); // Bayar tanpa titik
             $sale->pph = str_replace('.', '', $request->pph); // Bayar tanpa titik
@@ -315,6 +322,9 @@ class SaleController extends Controller
                 if ($debt) {
                     // Jika ada, perbarui hutang
                     $debt->pay_debts = $request->nominal_in;
+                    $debt->bank_id = $request->bank_id;
+                    $debt->penerima = $request->penerima;
+                    $debt->description = $request->description;
                     $debt->date_pay = now();
                     $debt->save();
                 } else {
@@ -322,6 +332,9 @@ class SaleController extends Controller
                     Debt::create([
                         'sale_id' => $sale->id,
                         'pay_debts' => $request->nominal_in,
+                        'bank_id' => $request->bank_id,
+                        'penerima' => $request->penerima,
+                        'description' => $request->description,
                         'date_pay' => now(),
                     ]);
                 }

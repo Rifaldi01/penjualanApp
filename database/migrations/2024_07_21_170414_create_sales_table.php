@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('diskon')->default(0);
             $table->string('pay');
             $table->string('nominal_in');
+            $table->string('fee');
             $table->date('deadlines')->nullable();
             $table->integer('user_id');
             $table->integer('divisi_id');

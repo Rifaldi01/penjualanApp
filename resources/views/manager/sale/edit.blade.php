@@ -96,6 +96,10 @@
                                 <label for="">PPH</label>
                                 <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)" value="{{$sale->pph}}">
                             </div>
+                            <div class="mt-4">
+                                <label for="">Penerima</label>
+                                <input type="text" class="form-control" name="penerima" id="penerima" value="{{$sale->debt->first()->penerima}}">
+                            </div>
                         </div>
                         <div class=" col-lg-4 float-end">
                             <div class="mt-2">
@@ -107,6 +111,28 @@
                                 <label for="">Pay Plan</label>
                                 <input type="text" class="form-control datepicker" name="deadlines" id="deadlines"
                                        value="{{$sale->deadlines}}">
+                            </div>
+                            @php
+                                $selectedBankId = $sale->debt->first()->bank_id ?? null;
+                            @endphp
+
+                            <div class="mt-4">
+                                <label for="">Bank</label>
+                                <select name="bank_id" id="bank"
+                                        data-placeholder="--Pilih Bank--"
+                                        class="form-control accessory-select">
+                                    <option value=""></option>
+                                    @foreach($bank as $data)
+                                        <option value="{{ $data->id }}" {{ $selectedBankId == $data->id ? 'selected' : '' }}>
+                                            {{ $data->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="mt-2">
+                                <label for="">Lainya</label>
+                                <textarea class="form-control datepicker" name="description" id="description">{{$sale->debt->first()->description}}</textarea>
                             </div>
                         </div>
                     </div>
@@ -181,6 +207,13 @@
             $('#invoice').select2({
                 theme: 'bootstrap-5',
                 placeholder: "--Pilih Invoice--",
+                width: '100%'
+            });
+        });
+        $(document).ready(function () {
+            $('#bank').select2({
+                theme:'bootstrap-5',
+                placeholder: "--Pilih Bank--",
                 width: '100%'
             });
         });
@@ -455,6 +488,7 @@
                         _token: '{{ csrf_token() }}',
                         customer_id: $('select[name="customer_id"]').val(),
                         divisi_id: $('select[name="divisi_id"]').val(),
+                        bank_id: $('select[name="bank_id"]').val(),
                         total_item: $('#total_item').val(),
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
@@ -464,6 +498,8 @@
                         no_po: $('#no_po').val(),
                         ppn: $('#ppn').val(),
                         pph: $('#pph').val(),
+                        penerima: $('#penerima').val(),
+                        description: $('#description').val(),
                         created_at: $('#created_at').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,

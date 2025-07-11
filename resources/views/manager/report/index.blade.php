@@ -52,10 +52,17 @@
                         <th>Item</th>
                         <th>Accessories</th>
                         <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Total Price</th>
+                        <th class="text-center" width="5%">Total Invoice</th>
+                        <th class="text-center" width="5%">PPN</th>
+                        <th class="text-center" width="5%">PPH</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
-                        <th class="text-center" width="5%">Total Pay</th>
+                        <th class="text-center" width="5%">Diterima</th>
+                        <th class="text-center" width="5%">Piutang</th>
+                        <th class="text-center" width="5%">Total Bayar</th>
+                        <th class="text-center" width="5%">Fee</th>
+                        <th class="text-center" width="5%">Modal</th>
+                        <th class="text-center" width="5%">Laba Untung Rugi</th>
                         <th class="text-center" width="5%">Tgl Pembayaran</th>
                     </tr>
                     </thead>
@@ -141,6 +148,26 @@
                             }
                             accessoriesList += '</ul>';
 
+                            var modalAccessories = 0;
+                            if (data.accessories && data.accessories.length > 0) {
+                                data.accessories.forEach(function (accessory) {
+                                    var capital = parseFloat(accessory.capital_price ?? 0);
+                                    var qty = parseFloat(accessory.pivot?.qty ?? 1);
+                                    modalAccessories += capital * qty;
+                                });
+                            }
+
+                            var modalItems = 0;
+                            if (data.itemSales && data.itemSales.length > 0) {
+                                data.itemSales.forEach(function (item) {
+                                    var capital = parseFloat(item.capital_price ?? 0);
+                                    modalItems += capital;
+                                });
+                            }
+
+                            var totalModal = modalAccessories + modalItems;
+
+
                             var debtList = '<ul>';
                             if (data.debt && data.debt.length > 0) {
                                 data.debt.forEach(function (debt) {
@@ -155,18 +182,26 @@
                             // Tambahkan ke DataTable, bukan ke DOM
                             table.row.add([
                                 index + 1,
-                                formatDate(data.created_at),
-                                data.invoice,
-                                data.customer ? data.customer.name : 'N/A',
-                                itemSalesList,
-                                accessoriesList,
-                                data.total_item,
-                                formatRupiah(data.total_price),
-                                formatRupiah(data.diskon),
-                                formatRupiah(data.ongkir),
-                                formatRupiah(data.pay),
-                                debtList
+                                formatDate(data.created_at ?? ''),
+                                data.invoice ?? 'N/A',
+                                data.customer?.name ?? 'N/A',
+                                itemSalesList ?? 'N/A',
+                                accessoriesList ?? 'N/A',
+                                data.total_item ?? 0,
+                                formatRupiah(data.total_price ?? 0),
+                                formatRupiah(data.ppn ?? 0),
+                                formatRupiah(data.pph ?? 0),
+                                formatRupiah(data.diskon ?? 0),
+                                formatRupiah(data.ongkir ?? 0),
+                                formatRupiah(data.nominal_in ?? 0),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
+                                formatRupiah(data.pay ?? 0),
+                                formatRupiah(data.fee ?? 0),
+                                formatRupiah(totalModal ?? 0),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalModal), 0)),
+                                debtList ?? 'N/A'
                             ]).draw(false);
+
                         });
                     },
                     error: function (xhr) {
