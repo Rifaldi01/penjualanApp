@@ -161,11 +161,12 @@
                             if (data.itemSales && data.itemSales.length > 0) {
                                 data.itemSales.forEach(function (item) {
                                     var capital = parseFloat(item.capital_price ?? 0);
-                                    modalItems += capital;
+                                    modalItems += capital; // Tidak perlu qty karena tiap baris = 1 item
                                 });
                             }
 
-                            var totalModal = modalAccessories + modalItems;
+                            var totalModal = modalItems + modalAccessories;
+
 
 
                             var debtList = '<ul>';
