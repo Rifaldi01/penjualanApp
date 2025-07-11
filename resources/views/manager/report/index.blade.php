@@ -174,7 +174,7 @@
                                     var bankName = debt.bank ? debt.bank.name : '';
                                     var description = debt.description ? debt.description : '';
                                     var datePay = debt.date_pay ? debt.date_pay : 'Tanggal tidak tersedia';
-                                    debtList += `<li>${datePay} - ${bankName || description}</li>`;
+                                    debtList += `<li>${datePay} - ${bankName || description || 'Tunai'}</li>`;
                                 });
                             }
                             debtList += '</ul>';
