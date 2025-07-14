@@ -229,7 +229,7 @@
                 loadData(); // akan kirim nilai kosong
             });
             function formatRupiah(amount) {
-                return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+                return new Intl.NumberFormat('id-ID').format(amount);
             }
 
             function formatDate(dateString) {
@@ -287,9 +287,9 @@
                             }
 
                             var rowStart = $sheet.find('sheetData row').length + 1;
-                            addFooterRow('Total Invoice', getFooterText('total-income'), rowStart++);
-                            addFooterRow('Total Bersih', getFooterText('profit'), rowStart++);
-                            addFooterRow('Laba Untung Rugi', getFooterText('totalprice'), rowStart++);
+                            addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
+                            addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
+                            addFooterRow('Laba Untung Rugi', getFooterText('profit'), rowStart++);
                             addFooterRow('PPN', getFooterText('ppn'), rowStart++);
                             addFooterRow('PPH', getFooterText('pph'), rowStart++);
                             addFooterRow('Fee', getFooterText('fee'), rowStart++);
