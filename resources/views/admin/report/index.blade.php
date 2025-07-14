@@ -75,7 +75,7 @@
                         <th colspan="6" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Laba Untung Rugi</th>
+                        <th colspan="6" class="text-center">Laba-Rugi</th>
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
@@ -185,7 +185,7 @@
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
                                 formatRupiah(totalCapital?.[data.id]),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]), 0)),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
                                 debtList ?? 'N/A'
                             ]).draw(false);
                         });
@@ -212,7 +212,7 @@
             });
 
             function formatRupiah(amount) {
-                return new Intl.NumberFormat('id-ID').format(amount);
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
             }
 
             function formatDate(dateString) {
@@ -272,7 +272,7 @@
                             var rowStart = $sheet.find('sheetData row').length + 1;
                             addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
                             addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
-                            addFooterRow('Laba Untung Rugi', getFooterText('profit'), rowStart++);
+                            addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
                             addFooterRow('PPN', getFooterText('ppn'), rowStart++);
                             addFooterRow('PPH', getFooterText('pph'), rowStart++);
                             addFooterRow('Fee', getFooterText('fee'), rowStart++);

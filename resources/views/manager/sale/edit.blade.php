@@ -98,7 +98,7 @@
                             </div>
                             <div class="mt-4">
                                 <label for="">Penerima</label>
-                                <input type="text" class="form-control" name="penerima" id="penerima" value="{{$sale->debt->first()->penerima}}">
+                                <input type="text" class="form-control" name="penerima" id="penerima" value="{{$sale->debt->first()->penerima ?? null}}">
                             </div>
                         </div>
                         <div class=" col-lg-4 float-end">
@@ -132,7 +132,7 @@
 
                             <div class="mt-2">
                                 <label for="">Lainya</label>
-                                <textarea class="form-control datepicker" name="description" id="description">{{$sale->debt->first()->description}}</textarea>
+                                <textarea class="form-control datepicker" name="description" id="description">{{$sale->debt->first()->description ?? null}}</textarea>
                             </div>
                         </div>
                     </div>
