@@ -212,7 +212,7 @@
             });
 
             function formatRupiah(amount) {
-                return new Intl.NumberFormat('id-ID').format(amount);
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
             }
 
             function formatDate(dateString) {
