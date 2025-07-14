@@ -30,7 +30,7 @@ class Sale extends Model
 
     public function itemSales()
     {
-        return $this->hasMany(ItemSale::class, 'sale_id', 'id');
+        return $this->hasMany(ItemSale::class, 'sale_id', );
     }
 
     public function debt()

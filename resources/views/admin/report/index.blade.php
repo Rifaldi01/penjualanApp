@@ -48,10 +48,17 @@
                         <th>Item</th>
                         <th>Accessories</th>
                         <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Total Price</th>
+                        <th class="text-center" width="5%">Total Invoice</th>
+                        <th class="text-center" width="5%">PPN</th>
+                        <th class="text-center" width="5%">PPH</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
-                        <th class="text-center" width="5%">Total Pay</th>
+                        <th class="text-center" width="5%">Diterima</th>
+                        <th class="text-center" width="5%">Piutang</th>
+                        <th class="text-center" width="5%">Total Bayar</th>
+                        <th class="text-center" width="5%">Fee</th>
+                        <th class="text-center" width="5%">Modal</th>
+                        <th class="text-center" width="5%">Laba Untung Rugi</th>
                         <th class="text-center" width="5%">Tgl Pembayaran</th>
                     </tr>
                     </thead>
@@ -60,11 +67,15 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th colspan="6" class="text-center">Total Income</th>
+                        <th colspan="6" class="text-center">Total Invoice</th>
+                        <th colspan="6" class="text-center" id="total-bersih">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Total Bersih</th>
                         <th colspan="6" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Profit</th>
+                        <th colspan="6" class="text-center">Laba Untung Rugi</th>
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
@@ -74,6 +85,10 @@
                     <tr>
                         <th colspan="6" class="text-center">PPH</th>
                         <th colspan="6" class="text-center" id="pph">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Fee</th>
+                        <th colspan="6" class="text-center" id="fee">0</th>
                     </tr>
                     <tr>
                         <th colspan="6" class="text-center">Diskon</th>
@@ -119,7 +134,10 @@
                         $('#ongkir').text(formatRupiah(response.ongkir));
                         $('#ppn').text(formatRupiah(response.ppn));
                         $('#pph').text(formatRupiah(response.pph));
+                        $('#fee').text(formatRupiah(response.fee));
+                        $('#total-bersih').text(formatRupiah(response.totalprice));
 
+                        let totalCapital = response.totalCapital; // <- pastikan ini tidak undefined
                         response.report.forEach(function (data, index) {
                             var itemSalesList = '<ul>';
                             if (data.itemSales && data.itemSales.length > 0) {
@@ -143,7 +161,7 @@
                                     var bankName = debt.bank ? debt.bank.name : '';
                                     var description = debt.description ? debt.description : '';
                                     var datePay = debt.date_pay ? debt.date_pay : 'Tanggal tidak tersedia';
-                                    debtList += `<li>${datePay} - ${bankName || description}</li>`;
+                                    debtList += `<li>${datePay} - ${bankName || description || 'Tunai'}</li>`;
                                 });
                             }
                             debtList += '</ul>';
@@ -151,17 +169,24 @@
                             // Tambahkan ke DataTable, bukan ke DOM
                             table.row.add([
                                 index + 1,
-                                formatDate(data.created_at),
-                                data.invoice,
-                                data.customer ? data.customer.name : 'N/A',
-                                itemSalesList,
-                                accessoriesList,
-                                data.total_item,
-                                formatRupiah(data.total_price),
-                                formatRupiah(data.diskon),
-                                formatRupiah(data.ongkir),
-                                formatRupiah(data.pay),
-                                debtList
+                                formatDate(data.created_at ?? ''),
+                                data.invoice ?? 'N/A',
+                                data.customer?.name ?? 'N/A',
+                                itemSalesList ?? 'N/A',
+                                accessoriesList ?? 'N/A',
+                                data.total_item ?? 0,
+                                formatRupiah(data.total_price ?? 0),
+                                formatRupiah(data.ppn ?? 0),
+                                formatRupiah(data.pph ?? 0),
+                                formatRupiah(data.diskon ?? 0),
+                                formatRupiah(data.ongkir ?? 0),
+                                formatRupiah(data.nominal_in ?? 0),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
+                                formatRupiah(data.pay ?? 0),
+                                formatRupiah(data.fee ?? 0),
+                                formatRupiah(totalCapital?.[data.id]),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]), 0)),
+                                debtList ?? 'N/A'
                             ]).draw(false);
                         });
                     },

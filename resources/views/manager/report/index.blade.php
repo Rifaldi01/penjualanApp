@@ -18,13 +18,23 @@
             <div class="row">
                 <form id="filter" method="GET">
                     <div class="row">
-                        <div class="col-5 ms-2 mt-2">
+                        <div class="col-sm-4 ms-5 mt-2">
                             <label class="form-label">Start Date</label>
                             <input type="date" class="form-control" name="start_date" id="starDate">
                         </div>
-                        <div class="col-6 mt-2">
+                        <div class="col-sm-4 mt-2">
                             <label class="form-label">End Date</label>
                             <input type="date" class="form-control" name="end_date" id="endDate">
+                        </div>
+                        <div class="col-sm-3 mt-2">
+                            <label class="form-label">Divisi</label>
+                            <select name="divisi_id" id="single-select-optgroup-field"
+                                    data-placeholder="--Semua Divisi--" class="form-control accessory-select">
+                                <option value=""></option>
+                                @foreach($divisi as $data)
+                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-1 pt-2 float-end me-5">
@@ -71,11 +81,15 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th colspan="6" class="text-center">Total Income</th>
+                        <th colspan="6" class="text-center">Total Invoice</th>
+                        <th colspan="6" class="text-center" id="total-bersih">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Total Bersih</th>
                         <th colspan="6" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Profit</th>
+                        <th colspan="6" class="text-center">Laba Untung Rugi</th>
                         <th colspan="6" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
@@ -85,6 +99,10 @@
                     <tr>
                         <th colspan="6" class="text-center">PPH</th>
                         <th colspan="6" class="text-center" id="pph">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Fee</th>
+                        <th colspan="6" class="text-center" id="fee">0</th>
                     </tr>
                     <tr>
                         <th colspan="6" class="text-center">Diskon</th>
@@ -107,13 +125,14 @@
 @push('js')
     <script>
         $(document).ready(function () {
-            function loadData(startDate = '', endDate = '') {
+            function loadData(startDate = '', endDate = '', divisiId ='') {
                 $.ajax({
                     url: '{{ route("manager.report.filter") }}',
                     method: 'GET',
                     data: {
                         start_date: startDate,
-                        end_date: endDate
+                        end_date: endDate,
+                        divisi_id: divisiId
                     },
                     success: function (response) {
                         if (response.error) {
@@ -130,7 +149,10 @@
                         $('#ongkir').text(formatRupiah(response.ongkir));
                         $('#ppn').text(formatRupiah(response.ppn));
                         $('#pph').text(formatRupiah(response.pph));
+                        $('#fee').text(formatRupiah(response.fee));
+                        $('#total-bersih').text(formatRupiah(response.totalprice));
 
+                        let totalCapital = response.totalCapital; // <- pastikan ini tidak undefined
                         response.report.forEach(function (data, index) {
                             var itemSalesList = '<ul>';
                             if (data.itemSales && data.itemSales.length > 0) {
@@ -147,27 +169,6 @@
                                 });
                             }
                             accessoriesList += '</ul>';
-
-                            var modalAccessories = 0;
-                            if (data.accessories && data.accessories.length > 0) {
-                                data.accessories.forEach(function (accessory) {
-                                    var capital = parseFloat(accessory.capital_price ?? 0);
-                                    var qty = parseFloat(accessory.pivot?.qty ?? 1);
-                                    modalAccessories += capital * qty;
-                                });
-                            }
-
-                            var modalItems = 0;
-                            if (data.itemSales && data.itemSales.length > 0) {
-                                data.itemSales.forEach(function (item) {
-                                    var capital = parseFloat(item.capital_price ?? 0);
-                                    modalItems += capital; // Tidak perlu qty karena tiap baris = 1 item
-                                });
-                            }
-
-                            var totalModal = modalItems + modalAccessories;
-
-
 
                             var debtList = '<ul>';
                             if (data.debt && data.debt.length > 0) {
@@ -198,8 +199,8 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(totalModal ?? 0),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalModal), 0)),
+                                formatRupiah(totalCapital?.[data.id]),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]), 0)),
                                 debtList ?? 'N/A'
                             ]).draw(false);
 
@@ -216,16 +217,17 @@
             $('#filter-btn').on('click', function () {
                 var startDate = $('input[name="start_date"]').val();
                 var endDate = $('input[name="end_date"]').val();
+                var divisiId = $('select[name="divisi_id"]').val(); // Ambil nilai dari dropdown
 
-                loadData(startDate, endDate);
+                loadData(startDate, endDate, divisiId);
             });
 
             $('#reset-btn').click(function () {
                 $('#starDate').val('');
                 $('#endDate').val('');
-                loadData();
+                $('#single-select-optgroup-field').val('').trigger('change');
+                loadData(); // akan kirim nilai kosong
             });
-
             function formatRupiah(amount) {
                 return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
             }

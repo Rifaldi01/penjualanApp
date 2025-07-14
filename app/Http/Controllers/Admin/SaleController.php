@@ -148,17 +148,28 @@ class SaleController extends Controller
                 'invoice' => $invoiceNumber
             ]);
 
-            // Simpan data hutang jika ada nominal_in
-            if (!empty($request->nominal_in) && $request->nominal_in > 0) {
-                Debt::create([
-                    'sale_id' => $sale->id,
-                    'pay_debts' => $request->nominal_in,
-                    'bank_id' => $request->bank_id,
-                    'penerima' => $request->penerima,
-                    'description' => $request->description,
-                    'date_pay' => now()
-                ]);
-            }
+//            // Simpan data hutang jika ada nominal_in
+//            $nominalIn = (int) str_replace('.', '', $request->nominal_in);
+//            $bayar = (int) $validated['bayar'];
+//
+//            if ($nominalIn >= 0 && $nominalIn <= $bayar) {
+//                Debt::create([
+//                    'sale_id' => $sale->id,
+//                    'pay_debts' => $nominalIn,
+//                    'bank_id' => $request->bank_id,
+//                    'penerima' => $request->penerima,
+//                    'description' => $request->description,
+//                    'date_pay' => now()
+//                ]);
+//            }
+            Debt::create([
+                'sale_id' => $sale->id,
+                'pay_debts' => $sale->nominal_in,
+                'bank_id' => $request->bank_id,
+                'penerima' => $request->penerima,
+                'description' => $request->description,
+                'date_pay' => now()
+            ]);
 
             // Simpan accessories sale dan update stok
             if ($request->has('accessories')) {

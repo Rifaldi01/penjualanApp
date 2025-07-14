@@ -36,25 +36,29 @@ class ReportController extends Controller
             })->implode(', ') : '-';
         });
 
-        // Hitung total income, diskon, ongkir, dan profit untuk tahun berjalan
+        // Hitung total income dan lainnya
         $income = $report->sum('pay');
         $diskon = $report->sum('diskon');
         $ongkir = $report->sum('ongkir');
         $ppn = $report->sum('ppn');
         $pph = $report->sum('pph');
+        $fee = $report->sum('fee');
 
-        $totalCapitalPriceItem = ItemSale::whereHas('sale', function ($query) use ($currentYear) {
-            $query->where('divisi_id', Auth::user()->divisi_id)
-                ->whereYear('created_at', $currentYear);
-        })->sum('capital_price');
-
-        $totalCapitalPriceAcces = Accessories::whereHas('divisi', function ($query) {
-            $query->where('divisi_id', Auth::user()->divisi_id);
-        })->sum('capital_price');
+        $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->sum('capital_price');
+        $totalCapitalPriceAcces = Accessories::sum('capital_price');
 
         $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
 
-        return view('admin.report.index', compact('report', 'income', 'profit', 'diskon', 'ongkir', 'ppn', 'pph'));
+        return view('admin.report.index', compact(
+            'report',
+            'income',
+            'profit',
+            'diskon',
+            'ongkir',
+            'ppn',
+            'pph',
+            'fee',
+        ));
     }
 
     public function filter(Request $request)
@@ -91,23 +95,28 @@ class ReportController extends Controller
         $totalOngkir = 0;
         $totalppn = 0;
         $totalpph = 0;
+        $totalfee = 0;
+        $totalCapitalPerSale = [];
 
-        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$totalppn, &$totalpph) {
+        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$totalppn, &$totalpph, &$totalCapitalPerSale, &$totalfee, &$totalprice) {
             $totalIncome += $sale->pay;
             $totalDiskon += $sale->diskon;
             $totalOngkir += $sale->ongkir;
             $totalppn += $sale->ppn;
             $totalpph += $sale->pph;
+            $totalfee += $sale->fee;
+            $totalprice += $sale->total_price;
 
             $accessoryCapital = $sale->accessories->sum(function ($accessory) {
                 return $accessory->pivot->qty * $accessory->capital_price;
             });
 
-            $itemCapital = $sale->itemSales->sum(function ($itemSale) {
-                return $itemSale->capital_price;
-            });
+            $itemCapital = $sale->itemSales->sum('capital_price');
 
-            $totalCapital += $accessoryCapital + $itemCapital;
+            $capitalPerSale = $accessoryCapital + $itemCapital;
+            $totalCapital += $capitalPerSale;
+
+            $totalCapitalPerSale[$sale->id] = $capitalPerSale;
 
             $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
             $sale->itemSales = $sale->itemSales->map(function ($itemSale) {
@@ -123,6 +132,7 @@ class ReportController extends Controller
         $profit = $totalIncome - $totalCapital;
 
         return response()->json([
+            'totalCapital' => $totalCapitalPerSale,
             'report' => $report,
             'income' => $totalIncome,
             'profit' => $profit,
@@ -130,6 +140,8 @@ class ReportController extends Controller
             'ongkir' => $totalOngkir,
             'ppn' => $totalppn,
             'pph' => $totalpph,
+            'fee' => $totalfee,
+            'totalprice' => $totalprice
         ]);
     }
 }
