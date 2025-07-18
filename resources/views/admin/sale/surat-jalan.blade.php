@@ -106,8 +106,12 @@
                             @foreach($data->accessoriesSales as $key => $accessories)
                                 <tr>
                                     <td style="border-left-width:1px;">{{ $key + 1 }}</td>
-                                    <td>{{ $accessories->accessories->name }}</td>
+
+                                    {{-- Hindari error jika relasi accessories tidak ditemukan --}}
+                                    <td>{{ optional($accessories->accessories)->name ?? 'Aksesori tidak ditemukan' }}</td>
+
                                     <td class="text-center">{{ $accessories->qty }}</td>
+
                                     <td class="text-right">-</td>
                                 </tr>
                             @endforeach
