@@ -238,7 +238,7 @@
                     },
                     {
                         data: null, searchable: false, sortable: false, render: function (data, type, row) {
-                            return `<button class="btn btn-danger btn-delete bx bx-trash" data-id="${row.id}"></button>`;
+                            return `<button class="btn btn-danger btn-delete bx bx-trash" data-id="${row.id}" data-type="${row.type}"></button>`;
                         }
                     }
                 ],
@@ -257,9 +257,11 @@
                     price: item.accessories.price,
                     accessories_id: item.accessories_id,
                     qty: item.qty,
-                    id: item.id // pastikan menggunakan item.id untuk aksesori
+                    id: item.id,
+                    type: 'accessory' // penting!
                 }).draw();
             });
+
 
             let data2 = @json($sale->itemSales);
             data2.forEach(item => {
