@@ -131,12 +131,17 @@
                         @foreach($data->accessoriesSales as $key => $accessories)
                             <tr>
                                 <td>{{ $key + 1 }}</td>
-                                <td>{{ $accessories->accessories->name }}</td>
-                                <td class="text-right">{{ formatRupiah($accessories->subtotal / $accessories->qty) }}</td>
+                                <td>
+                                    {{ $accessories->accessories ? $accessories->accessories->name : 'Aksesori tidak ditemukan' }}
+                                </td>
+                                <td class="text-right">
+                                    {{ $accessories->qty > 0 ? formatRupiah($accessories->subtotal / $accessories->qty) : 'Rp0' }}
+                                </td>
                                 <td class="text-center">{{ $accessories->qty }}</td>
                                 <td class="text-right">{{ formatRupiah($accessories->subtotal) }}</td>
                             </tr>
                         @endforeach
+
                         </tbody>
                     </table>
                     <div class="mb-lg-5">
