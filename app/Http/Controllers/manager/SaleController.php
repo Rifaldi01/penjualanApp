@@ -530,4 +530,47 @@ class SaleController extends Controller
 
         return back()->withSuccess('Pembayaran Berhasil');
     }
+    public function deleteItemSale($id)
+    {
+        try {
+            $itemSale = ItemSale::findOrFail($id);
+
+            // Buat ulang item jika perlu
+            Item::create([
+                'divisi_id' => $itemSale->divisi_id,
+                'itemcategory_id' => $itemSale->itemcategory_id,
+                'name' => $itemSale->name,
+                'price' => $itemSale->price,
+                'capital_price' => $itemSale->capital_price,
+                'no_seri' => $itemSale->no_seri,
+                'status' => 1,
+            ]);
+
+            $itemSale->delete();
+
+            return response()->json(['status' => 'success', 'message' => 'Item berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Gagal menghapus item: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteAccessorySale($id)
+    {
+        try {
+            $accessorySale = AccessoriesSale::findOrFail($id);
+
+            $accessory = Accessories::find($accessorySale->accessories_id);
+            if ($accessory) {
+                $accessory->stok += $accessorySale->qty;
+                $accessory->save();
+            }
+
+            $accessorySale->delete();
+
+            return response()->json(['status' => 'success', 'message' => 'Accessories berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Gagal menghapus accessories: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

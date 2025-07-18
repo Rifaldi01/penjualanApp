@@ -84,5 +84,10 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('/konfirmasi', [PermintaanController::class, 'konfirmasi'])->name('manager.permintaan.konfirmasi');
     Route::get('/minta/accessories/{divisi_id}', [PermintaanController::class, 'fetchAccessories'])->name('manager.permintaan.fetchAccessories');
 
+// Route untuk hapus item dari transaksi
+    Route::delete('/sale/item-sale/{id}', [SaleController::class, 'deleteItemSale'])->name('sale.item-sale.delete');
+
+// Route untuk hapus accessories dari transaksi
+    Route::delete('/sale/accessory-sale/{id}', [SaleController::class, 'deleteAccessorySale'])->name('sale.accessory-sale.delete');
 
 });

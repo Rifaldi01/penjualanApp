@@ -558,7 +558,15 @@
     </script>
     <script>
         $(document).on('click', '.btn-delete', function () {
-            let itemId = $(this).data('id'); // Gunakan ID yang benar dari itemSale atau accessorySale
+            let itemId = $(this).data('id');
+            let itemType = $(this).data('type');
+
+            let url = itemType === 'accessory'
+                ? `{{ route('sale.accessory-sale.delete', ':id') }}`
+                : `{{ route('sale.item-sale.delete', ':id') }}`;
+
+            url = url.replace(':id', itemId);
+
             Swal.fire({
                 title: 'Anda yakin?',
                 text: "Data akan dihapus dan tidak dapat dikembalikan!",
@@ -570,38 +578,27 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `{{ route('manager.sale.destroy', ':id') }}`.replace(':id', itemId),
+                        url: url,
                         method: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}'
                         },
                         success: function (response) {
                             if (response.status === 'success') {
-                                Swal.fire(
-                                    'Dihapus!',
-                                    response.message,
-                                    'success'
-                                );
-                                // Reload atau update tampilan setelah delete
+                                Swal.fire('Dihapus!', response.message, 'success');
+                                table.row($(this).parents('tr')).remove().draw();
                             } else {
-                                Swal.fire(
-                                    'Gagal!',
-                                    response.message,
-                                    'error'
-                                );
+                                Swal.fire('Gagal!', response.message, 'error');
                             }
                         },
-                        error: function (xhr) {
-                            Swal.fire(
-                                'Gagal!',
-                                'Terjadi kesalahan saat menghapus data.',
-                                'error'
-                            );
+                        error: function () {
+                            Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus data.', 'error');
                         }
                     });
                 }
             });
         });
+
 
     </script>
 @endpush
