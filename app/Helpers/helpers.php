@@ -65,7 +65,7 @@ function tanggal($date)
         'April' => 'Apr',
         'May' => 'Mei',
         'June' => 'Jun',
-        'July' => 'JUl',
+        'July' => 'Jul',
         'August' => 'Ags',
         'September' => 'Sep',
         'October' => 'Okt',
