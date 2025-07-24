@@ -297,6 +297,7 @@ class AccessoriesController extends Controller
         $accesout = AccessoriesSale::whereHas('sale.divisi', function ($query) {
             $query->where('divisi_id', Auth::user()->divisi_id);
         })
+            ->whereHas('accessories') // pastikan relasi accessories tidak null
             ->with(['accessories', 'accessories.accessoriesIn', 'sale'])
             ->get()
             ->map(function ($accessorySale) {
