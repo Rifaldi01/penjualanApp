@@ -267,7 +267,7 @@ class AccessoriesController extends Controller
     }
     public function report()
     {
-        $report = AccessoriesSale::with('sale', 'accessories')->get();
+        $report = AccessoriesSale::whereHas('accessories')->with('sale', 'accessories')->get();
         return view('gudang.report-acces.index', compact('report'));
     }
     public function accesin()
