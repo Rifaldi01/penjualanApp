@@ -58,7 +58,7 @@
                         <th class="text-center" width="5%">Total Bayar</th>
                         <th class="text-center" width="5%">Fee</th>
                         <th class="text-center" width="5%">Modal</th>
-                        <th class="text-center" width="5%">Laba Untung Rugi</th>
+                        <th class="text-center" width="5%">Laba-Rugi</th>
                         <th class="text-center" width="5%">Tgl Pembayaran</th>
                     </tr>
                     </thead>
@@ -232,6 +232,13 @@
                         exportOptions: {
                             stripHtml: false
                         },
+                        filename: function () {
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
+                        },
                         customize: function (xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var $sheet = $(sheet);
@@ -287,6 +294,13 @@
                             page: 'all',
                             columns: ':visible'
                         },
+                        filename: function () {
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
+                        },
                         customize: function (doc) {
                             doc.pageSize = 'A4';
                             doc.pageOrientation = 'landscape';
@@ -299,10 +313,10 @@
                                 headers.push({text: headerText, style: 'tableHeader'});
 
                                 if (index === 0) widths.push(15); // No
-                                else if (['Total Price', 'Diskon', 'Ongkir', 'Tanggal'].includes(headerText)) {
-                                    widths.push(50); // Perkecil kolom uang
+                                else if (['Total Price', 'Diskon', 'Ongkir', 'Tanggal', 'PPH', 'PPN', 'Diterima', 'Piutang', 'Fee', 'Modal', 'Laba-Rugi', 'Total Bayar'].includes(headerText)) {
+                                    widths.push(30); // Perkecil kolom uang
                                 } else if (headerText === 'Invoice') {
-                                    widths.push(90);
+                                    widths.push(50);
                                 } else if (headerText === 'Total Item') {
                                     widths.push(20);
                                 } else {
@@ -373,12 +387,12 @@
                             doc.styles = {
                                 tableHeader: {
                                     bold: true,
-                                    fontSize: 6,
+                                    fontSize: 4,
                                     fillColor: '#eeeeee',
                                     alignment: 'center'
                                 },
                                 tableCell: {
-                                    fontSize: 5,
+                                    fontSize: 3,
                                     alignment: 'left'
                                 }
                             };

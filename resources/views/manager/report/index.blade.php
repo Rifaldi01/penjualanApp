@@ -249,6 +249,13 @@
                         exportOptions: {
                             stripHtml: false
                         },
+                        filename: function () {
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
+                        },
                         customize: function (xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var $sheet = $(sheet);
@@ -303,6 +310,13 @@
                         exportOptions: {
                             page: 'all',
                             columns: ':visible'
+                        },
+                        filename: function () {
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
                         },
                         customize: function (doc) {
                             doc.pageSize = 'A4';
