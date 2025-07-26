@@ -168,7 +168,13 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
-                            <label for="ongkir" class="col-lg-4 control-label">Ongkir</label>
+                            <label for="fee" class="col-lg-4 control-label">Fee</label>
+                            <div class="col-lg-8">
+                                <input type="text" name="fee" id="fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label for="ongkir" class="col-lg-4 control-label">Ongkir Konsumen</label>
                             <div class="col-lg-8">
                                 <input type="number" name="ongkir" id="ongkir" class="form-control" value="{{$sale->ongkir}}">
                             </div>
@@ -478,6 +484,7 @@
                         $('#no_po').val(data.no_po);
                         $('#ppn').val(data.ppn);
                         $('#pph').val(data.pph);
+                        $('#fee').val(data.fee);
                         $('#created_at').val(data.created_at);
                         $('#deadlines').val(data.deadlines);
                     }
@@ -493,6 +500,7 @@
                         bank_id: $('select[name="bank_id"]').val(),
                         total_item: $('#total_item').val(),
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        fee:Math.floor(parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
                         nominal_in: $('#nominal_in').val(),
