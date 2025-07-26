@@ -170,7 +170,7 @@
                         <div class="form-group row mb-2">
                             <label for="fee" class="col-lg-4 control-label">Fee</label>
                             <div class="col-lg-8">
-                                <input type="text" name="fee" id="fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                                <input type="text" name="fee" id="fee" class="form-control" value="{{$sale->fee}}" onkeyup="formatRupiah(this)">
                             </div>
                         </div>
                         <div class="form-group row mb-2">

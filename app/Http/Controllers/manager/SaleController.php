@@ -303,7 +303,7 @@ class SaleController extends Controller
             $sale->created_at = $request->created_at;
             $sale->no_po = $request->no_po;
             $sale->divisi_id = $request->divisi_id;
-            $sale->fee = str_replace('.', '', $request->bayar); // Bayar tanpa titik
+            $sale->fee = str_replace('.', '', $request->fee); // Bayar tanpa titik
             $sale->pay = str_replace('.', '', $request->bayar); // Bayar tanpa titik
             $sale->ppn = str_replace('.', '', $request->ppn); // Bayar tanpa titik
             $sale->pph = str_replace('.', '', $request->pph); // Bayar tanpa titik
