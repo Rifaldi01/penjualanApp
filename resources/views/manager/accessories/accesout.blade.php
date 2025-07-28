@@ -45,6 +45,7 @@
                             <th>Divsi</th>
                             <th>Name</th>
                             <th>Price</th>
+                            <th>Capital Price</th>
                             <th class="text-center" width="10%">Qty</th>
                             <th>Subtotal</th>
                         </tr>
@@ -67,6 +68,69 @@
             var table = $('#inout').DataTable({
                 lengthChange: false,
                 buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Laporan Transaksi',
+                        text: 'Excel',
+                        exportOptions: {
+                            stripHtml: false
+                        },
+                        filename: function () {
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
+                        },
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            var $sheet = $(sheet);
+
+                            // Hapus tag HTML <ul> dan <li> dari setiap cell
+                            $('row c is t', sheet).each(function () {
+                                var cell = $(this);
+                                var text = cell.text();
+
+                                // Hapus tag HTML <ul> dan <li>
+                                text = text
+                                    .replace(/<\/?ul>/g, '')     // hapus <ul> dan </ul>
+                                    .replace(/<\/?li>/g, '')     // hapus <li> dan </li>
+                                    .replace(/\n/g, '')          // hapus newline jika ada
+                                    .trim();                     // hapus spasi di awal/akhir
+
+                                cell.text(text);
+                            });
+
+                            // Tambahkan footer income manual
+                            function getFooterText(id) {
+                                return document.getElementById(id).innerText || '0';
+                            }
+
+                            function addFooterRow(label, value, rowNumber) {
+                                var row =
+                                    `<row r="${rowNumber}">
+                                        <c t="inlineStr" r="A${rowNumber}">
+                                            <is><t>${label}</t></is>
+                                        </c>
+                                        <c t="inlineStr" r="B${rowNumber}">
+                                            <is><t>${value}</t></is>
+                                        </c>
+                                    </row>`;
+                                $sheet.find('sheetData').append(row);
+                            }
+
+                            var rowStart = $sheet.find('sheetData row').length + 1;
+                            addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
+                            addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
+                            addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
+                            addFooterRow('PPN', getFooterText('ppn'), rowStart++);
+                            addFooterRow('PPH', getFooterText('pph'), rowStart++);
+                            addFooterRow('Fee', getFooterText('fee'), rowStart++);
+                            addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
+                            addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
+                        }
+
+                    },
                     {
                         extend: 'pdf',
                         exportOptions: {
@@ -173,7 +237,7 @@
                             <tr>
                                 <td colspan="3"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
                                 <td colspan="3"><strong>Total Keluar:</strong> ${data.total_keluar}</td>
-                                <td colspan="2"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
+                                <td colspan="3"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
                             </tr>
                         `;
                             $.each(data.data, function (index, acces) {
@@ -185,6 +249,7 @@
                                     <td>${acces.accessories.divisi.name}</td>
                                     <td>${acces.accessories.name}</td>
                                     <td>${acces.accessories.price}</td>
+                                    <td>${acces.accessories.capital_price}</td>
                                     <td>${acces.qty}</td>
                                     <td>${acces.total_price}</td>
                                 </tr>`;
