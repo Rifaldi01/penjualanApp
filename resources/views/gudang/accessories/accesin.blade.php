@@ -116,6 +116,7 @@
                             <th>Code Access</th>
                             <th>Name</th>
                             <th>Price</th>
+                            <th>Capital Price</th>
                             <th class="text-center" width="10%">Qty</th>
                             <th>Subtotal</th>
                         </tr>
@@ -148,7 +149,7 @@
                             <tr>
                                 <td colspan="3"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
                                 <td colspan="2"><strong>Total Keluar:</strong> ${data.total_keluar}</td>
-                                <td colspan="2"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
+                                <td colspan="3"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
                             </tr>
                         `;
                             $.each(data.data, function (index, acces) {
@@ -159,6 +160,7 @@
                                     <td>${acces.accessories.code_acces}</td>
                                     <td>${acces.accessories.name}</td>
                                     <td>${acces.accessories.price}</td>
+                                    <td>${acces.accessories.capital_price}</td>
                                     <td>${acces.qty}</td>
                                     <td>${acces.total_price}</td>
                                 </tr>`;
