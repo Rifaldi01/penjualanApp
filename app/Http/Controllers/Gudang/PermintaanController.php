@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Gudang;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
+use App\Models\AccessoriesIn;
 use App\Models\DetailAccessories;
 use App\Models\Divisi;
+use App\Models\Pembelian;
 use App\Models\Permintaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -185,56 +187,82 @@ class PermintaanController extends Controller
         return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil dihapus.');
     }
 
-
     public function approve($id)
     {
         $permintaan = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])->findOrFail($id);
 
-        // Validasi: Pastikan user hanya dapat menyetujui jika mereka adalah divisi tujuan
         if (Auth::user()->divisi_id != $permintaan->divisi_id_tujuan) {
             return redirect()->back()->withErrors('Anda tidak berhak menyetujui permintaan ini.');
         }
 
-        // Looping setiap detailAccessories untuk memproses setiap permintaan aksesori
+        $kode_msk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
+        $total_item = 0;
+        $total_harga = 0;
+
         foreach ($permintaan->detailAccessories as $detail) {
-            // Ambil aksesori dari divisi asal
             $accessoriesAsal = Accessories::where('id', $detail->accessories_id)
                 ->where('divisi_id', $permintaan->divisi_id_asal)
                 ->first();
 
             if (!$accessoriesAsal || $accessoriesAsal->stok < $detail->qty) {
-                return redirect()->back()->withErrors('Stok divisi asal tidak mencukupi untuk aksesori ' . $accessoriesAsal->name);
+                return redirect()->back()->withErrors('Stok divisi asal tidak mencukupi untuk aksesori ' . ($accessoriesAsal->name ?? ''));
             }
 
-            // Kurangi stok di divisi asal
-            $accessoriesAsal->update(['stok' => $accessoriesAsal->stok - $detail->qty]);
+            $accessoriesAsal->decrement('stok', $detail->qty);
 
-            // Cek apakah aksesori dengan code_acces sudah ada di divisi tujuan
             $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
                 ->where('divisi_id', $permintaan->divisi_id_tujuan)
                 ->first();
 
             if ($accessoriesTujuan) {
-                // Jika sudah ada, tambahkan stoknya
-                $accessoriesTujuan->update(['stok' => $accessoriesTujuan->stok + $detail->qty]);
+                $accessoriesTujuan->increment('stok', $detail->qty);
             } else {
-                // Jika belum ada, buat aksesori baru di divisi tujuan
-                Accessories::create([
-                    'divisi_id' => $permintaan->divisi_id_tujuan,
-                    'name' => $accessoriesAsal->name,
-                    'price' => $accessoriesAsal->price,
+                $accessoriesTujuan = Accessories::create([
+                    'divisi_id'     => $permintaan->divisi_id_tujuan,
+                    'name'          => $accessoriesAsal->name,
+                    'price'         => $accessoriesAsal->price,
                     'capital_price' => $accessoriesAsal->capital_price,
-                    'code_acces' => $accessoriesAsal->code_acces,
-                    'stok' => $detail->qty,
+                    'code_acces'    => $accessoriesAsal->code_acces,
+                    'stok'          => $detail->qty,
                 ]);
             }
+
+            AccessoriesIn::create([
+                'accessories_id' => $accessoriesTujuan->id,
+                'price'          => $accessoriesTujuan->price,
+                'capital_price'  => $accessoriesTujuan->capital_price,
+                'ppn'            => 0,
+                'qty'            => $detail->qty,
+                'kode_msk'       => $kode_msk,
+                'date_in'        => now(),
+            ]);
+
+            $total_item  += $detail->qty;
+            $total_harga += $accessoriesTujuan->price * $detail->qty;
         }
 
-        // Update status permintaan menjadi 'diterima'
+        // ❗ Cek apakah kode_msk sudah ada di divisi tujuan
+        $existingPembelian = Pembelian::where('invoice', $kode_msk)
+            ->where('divisi_id', $permintaan->divisi_id_tujuan)
+            ->first();
+
+        if (!$existingPembelian) {
+            Pembelian::create([
+                'divisi_id'   => $permintaan->divisi_id_tujuan,
+                'supplier_id' => null,
+                'invoice'     => $kode_msk,
+                'total_item'  => $total_item,
+                'total_harga' => $total_harga,
+                'status'      => '1',
+            ]);
+        }
+
         $permintaan->update(['status' => 'diterima']);
 
         return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil diterima.');
     }
+
+
 
 
     public function receive($id)

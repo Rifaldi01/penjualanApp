@@ -28,7 +28,10 @@ class PembelianController extends Controller
         $pembelian = Pembelian::where('divisi_id', Auth::user()->divisi_id)->get();
 
         // Hitung total harga dari pembelian yang memiliki status 1
-        $totalHarga = Pembelian::where('status', 1)->sum('total_harga');
+        $totalHarga = Pembelian::where('status', 1)
+            ->where('divisi_id', Auth::user()->divisi_id)
+            ->sum('total_harga');
+
 
         // Kembalikan data ke view
         return view('admin.pembelian.index', compact('pembelian', 'totalHarga'));
