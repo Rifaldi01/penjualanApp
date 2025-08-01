@@ -80,24 +80,25 @@ class SaleController extends Controller
         }
 
         $currentYear = date('Y');
-        $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT); // Bulan 2 digit
+        $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT);
         $invFormat = $divisi->inv_format;
 
-// Ambil invoice terakhir yang sesuai format divisi dan tahun
+// Ambil invoice terakhir dalam tahun yang sama dan divisi yang sama, abaikan bulan
         $lastInvoice = Sale::where('divisi_id', Auth::user()->divisi_id)
             ->whereYear('created_at', $currentYear)
-            ->where('invoice', 'like', "INV/{$invFormat}/%/{$currentMonthNumber}/{$currentYear}")
-            ->orderByDesc('id') // Urutkan dari yang terbaru
+            ->where('invoice', 'like', "INV/{$invFormat}/%/%/{$currentYear}") // hanya filter tahun
+            ->orderByDesc('id')
             ->first();
 
         if ($lastInvoice) {
-            // Ambil bagian nomor urut (misal: INV/DND/0002/02/2025 -> ambil 0002)
-            preg_match('/INV\/' . $invFormat . '\/(\d{4})\/' . $currentMonthNumber . '\/' . $currentYear . '/', $lastInvoice->invoice, $matches);
+            // Ambil nomor urut dari invoice terakhir
+            preg_match('/INV\/' . preg_quote($invFormat, '/') . '\/(\d{4})\/\d{2}\/' . $currentYear . '/', $lastInvoice->invoice, $matches);
             $lastNumber = isset($matches[1]) ? (int)$matches[1] : 0;
         } else {
             $lastNumber = 0;
         }
 
+// Tambah nomor urut dan buat format invoice baru
         $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         $invoiceNumber = "INV/{$invFormat}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
 
