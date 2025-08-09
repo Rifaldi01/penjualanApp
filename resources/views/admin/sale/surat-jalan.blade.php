@@ -64,7 +64,7 @@
                             <tr>
                                 <th width="4%">Kepada</th>
                                 <th width="1%">:</th>
-                                <th>{{$data->customer->name}}</th>
+                                <th>{{optional($data->customer)->name ?? '-'}}</th>
                                 <th width="1%">No</th>
                                 <th width="1%" class="text-end">:</th>
                                 <th width="1%" class="text-end"

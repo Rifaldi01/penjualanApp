@@ -62,8 +62,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->name}}</strong> <br>
-                                <strong>{{$data->customer->company}}</strong>
+                                <strong>{{ optional($data->customer)->name ?? '-' }}</strong> <br>
+                                <strong>{{ optional($data->customer)->company ?? '-' }}</strong>
                             </td>
                             <td width="10%" class="text-start">No PO</td>
                             <td width="2%" class="text-center">:</td>
@@ -78,7 +78,7 @@
                         <tr>
                             <td>
                                 @php
-                                    $words = explode(' ', $data->customer->addres);
+                                    $words = explode(' ', optional($data->customer)->addres ?? '-');
                                     $chunks = array_chunk($words, 8);
                                 @endphp
 
@@ -99,7 +99,7 @@
                             </td>
                             <td class="text-start">No. Rekening</td>
                             <td width="1%" class="text-end">:</td>
-                            <td width="20%"><strong>{{$data->customer->divisi->no_rek}}</strong></td>
+                            <td width="20%"><strong>{{optional($data->customer)->divisi->no_rek ?? '-'}}</strong></td>
                         </tr>
                     </table>
                     <hr>
