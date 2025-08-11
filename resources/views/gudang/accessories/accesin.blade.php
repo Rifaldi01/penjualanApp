@@ -4,42 +4,13 @@
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(request()->routeIs('gudang.acces.accesin'))
                     <h4 class="text-uppercase">List Accessories In</h4>
-                @else
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h4 class="text-uppercase">List Accessories Out</h4>
-                        </div>
-                        <div class="col-sm-6">
-                            <form id="filterForm">
-                                <div class="float-end me-2">
-                                    <select name="bulan" id="bulan" class="form-control">
-                                        <option value="">Pilih Bulan</option>
-                                        @for ($i = 1; $i <= 12; $i++)
-                                            <option
-                                                value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                                <div class="float-end me-2">
-                                    <select name="tahun" id="tahun" class="form-control">
-                                        <option value="">Pilih Tahun</option>
-                                        @for ($i = now()->year - 5; $i <= now()->year; $i++)
-                                            <option value="{{ $i }}">{{ $i }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endif
+               
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="inout" class="table table-striped table-bordered" style="width:100%">
-                    @if(request()->routeIs('gudang.acces.accesin'))
                         <thead>
                         <tr>
                             <th class="text-center">Tanggal</th>
@@ -108,23 +79,6 @@
                             </tr>
                         @endforeach
                         </tbody>
-                    @else
-                        <thead>
-                        <tr>
-                            <th>No Invoice</th>
-                            <th class="text-center">Tanggal</th>
-                            <th>Code Access</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Capital Price</th>
-                            <th class="text-center" width="10%">Qty</th>
-                            <th>Subtotal</th>
-                        </tr>
-                        </thead>
-                        <tbody id="accesout-data">
-                        {{-- Data akan dimuat melalui AJAX --}}
-                        </tbody>
-                    @endif
                 </table>
             </div>
         </div>
@@ -137,56 +91,15 @@
 @push('js')
     <script>
         $(document).ready(function () {
-            function loadData(bulan = '', tahun = '') {
-                $.ajax({
-                    url: "{{ route('gudang.acces.accesout') }}",
-                    type: "GET",
-                    data: {bulan: bulan, tahun: tahun},
-                    success: function (response) {
-                        let tableRows = '';
-                        $.each(response, function (accessoryId, data) {
-                            tableRows += `
-                            <tr>
-                                <td colspan="3"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
-                                <td colspan="2"><strong>Total Keluar:</strong> ${data.total_keluar}</td>
-                                <td colspan="3"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
-                            </tr>
-                        `;
-                            $.each(data.data, function (index, acces) {
-                                tableRows += `
-                                <tr>
-                                    <td>${acces.sale.invoice}</td>
-                                    <td>${acces.acces_out}</td>
-                                    <td>${acces.accessories.code_acces}</td>
-                                    <td>${acces.accessories.name}</td>
-                                    <td>${acces.accessories.price}</td>
-                                    <td>${acces.accessories.capital_price}</td>
-                                    <td>${acces.qty}</td>
-                                    <td>${acces.total_price}</td>
-                                </tr>`;
-                            });
-
-                        });
-                        $('#accesout-data').html(tableRows);
-                    },
-                    error: function () {
-                        alert('Terjadi kesalahan saat memuat data.');
-                    }
-                });
-            }
-
-            // Panggil fungsi loadData pertama kali
-            loadData();
-
-            // Event listener untuk filter
-            $('#filterForm select').on('change', function () {
-                const bulan = $('#bulan').val();
-                const tahun = $('#tahun').val();
-                loadData(bulan, tahun);
-            });
             var table = $('#inout').DataTable({
                 lengthChange: false,
                 buttons: [
+                    {
+                        extend: 'excel',
+                        exportOptions: {
+                            
+                        }
+                    },   
                     {
                         extend: 'pdf',
                         exportOptions: {

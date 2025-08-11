@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\manager;
 
-use App\Http\Controllers\Controller;
+use Dompdf\Dompdf;
+use App\Models\Divisi;
+use Milon\Barcode\DNS1D;
 use App\Models\Accessories;
+use Illuminate\Http\Request;
 use App\Models\AccessoriesIn;
 use App\Models\AccessoriesSale;
-use App\Models\Divisi;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Dompdf\Dompdf;
-use Illuminate\Http\Request;
-use Milon\Barcode\DNS1D;
-use Picqer\Barcode\BarcodeGeneratorHTML;
+use App\Http\Controllers\Controller;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Picqer\Barcode\BarcodeGeneratorHTML;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class AccesoriesController extends Controller
@@ -282,47 +282,67 @@ class AccesoriesController extends Controller
     }
 
     public function accesout(Request $request)
-    {
-        $bulan = $request->bulan;
-        $tahun = $request->tahun;
+{
+    $bulanFilter  = $request->bulan;
+    $tahunFilter  = $request->tahun;
+    $divisiFilter = $request->divisi;
 
-        $accesout = AccessoriesSale::with(['accessories.divisi', 'accessories.accessoriesIn', 'sale'])
-            ->get()
-            ->map(function ($accessorySale) {
-                $accessorySale->total_price = $accessorySale->accessories->price * $accessorySale->qty;
-                return $accessorySale;
-            });
+    // Data semua divisi untuk dropdown filter
+    $divisiList = Divisi::all();
 
-        if ($bulan) {
-            $accesout = $accesout->filter(function ($acces) use ($bulan) {
-                return \Carbon\Carbon::parse($acces->acces_out)->format('m') == $bulan;
-            });
-        }
-
-        if ($tahun) {
-            $accesout = $accesout->filter(function ($acces) use ($tahun) {
-                return \Carbon\Carbon::parse($acces->acces_out)->format('Y') == $tahun;
-            });
-        }
-
-        $result = $accesout->groupBy('accessories_id')->map(function ($group) {
-            $stok_awal = $group->first()->accessories->accessoriesIn->sum('qty');
-            $total_keluar = $group->sum('qty');
-            $stok_sisa = $stok_awal - $total_keluar;
-
-            return [
-                'stok_awal' => $stok_awal,
-                'total_keluar' => $total_keluar,
-                'stok_sisa' => $stok_sisa,
-                'data' => $group
-            ];
+    // Ambil data AccessoriesSale dengan relasi
+    $accesout = AccessoriesSale::with(['accessories.divisi', 'accessories.accessoriesIn', 'sale'])
+        ->get()
+        ->map(function ($accessorySale) {
+            $accessorySale->total_price = $accessorySale->accessories->price * $accessorySale->qty;
+            return $accessorySale;
         });
 
-        if ($request->ajax()) {
-            return response()->json($result);
-        }
-        return view('manager.accessories.accesout', compact('accesout'));
+    // Filter bulan
+    if ($bulanFilter) {
+        $accesout = $accesout->filter(function ($acces) use ($bulanFilter) {
+            return \Carbon\Carbon::parse($acces->acces_out)->format('m') == $bulanFilter;
+        });
     }
+
+    // Filter tahun
+    if ($tahunFilter) {
+        $accesout = $accesout->filter(function ($acces) use ($tahunFilter) {
+            return \Carbon\Carbon::parse($acces->acces_out)->format('Y') == $tahunFilter;
+        });
+    }
+
+    // Filter divisi
+    if ($divisiFilter) {
+        $accesout = $accesout->filter(function ($acces) use ($divisiFilter) {
+            return $acces->accessories->divisi_id == $divisiFilter;
+        });
+    }
+
+    // Grouping berdasarkan accessories_id
+    $result = $accesout->groupBy('accessories_id')->map(function ($group) {
+        $stok_awal    = $group->first()->accessories->accessoriesIn->sum('qty');
+        $total_keluar = $group->sum('qty');
+        $stok_sisa    = $stok_awal - $total_keluar;
+
+        return [
+            'stok_awal'    => $stok_awal,
+            'total_keluar' => $total_keluar,
+            'stok_sisa'    => $stok_sisa,
+            'data'         => $group
+        ];
+    });
+
+    if ($request->ajax()) {
+        return response()->json($result);
+    }
+
+    return view('manager.accessories.accesout', [
+        'accesout' => $accesout,
+        'divisi'   => $divisiList
+    ]);
+}
+
     public function print(Request $request)
     {
         // Ambil ID accessories yang dipilih dan jumlah barcode

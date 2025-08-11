@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Gudang;
 
-use App\Http\Controllers\Controller;
-use App\Models\Accessories;
-use App\Models\AccessoriesIn;
-use App\Models\AccessoriesRejecte;
-use App\Models\AccessoriesSale;
-use App\Models\Divisi;
-use App\Models\Item;
-use App\Models\Pembelian;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Item;
+use App\Models\Divisi;
 use Milon\Barcode\DNS1D;
+use App\Models\Pembelian;
+use App\Models\Accessories;
+use Illuminate\Http\Request;
+use App\Models\AccessoriesIn;
+use App\Models\AccessoriesSale;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Picqer\Barcode\BarcodeGeneratorHTML;
+use App\Models\AccessoriesRejecte;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Picqer\Barcode\BarcodeGeneratorHTML;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class AccessoriesController extends Controller
@@ -334,7 +334,7 @@ class AccessoriesController extends Controller
             return response()->json($result);
         }
 
-        return view('gudang.accessories.accesin', compact('bulan', 'tahun'));
+        return view('gudang.accessories.accesout', compact('bulan', 'tahun'));
     }
 
     public function print(Request $request)

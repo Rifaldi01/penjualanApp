@@ -27,14 +27,6 @@
                                         @endfor
                                     </select>
                                 </div>
-                                <div class="float-end me-2">
-                                    <select name="divisi" id="divisi" class="form-control">
-                                        <option value="">Semua Divisi</option>
-                                       @foreach ($divisi as $div  )
-                                           <option value="{{ $div->id }}">{{ $div->name }}</option>
-                                       @endforeach
-                                    </select>
-                                </div>
                             </form>
                         </div>
                     </div>
@@ -78,12 +70,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script>
       $(document).ready(function () {
-        function loadData(bulan = '', tahun = '', divisi = '') {
-        $.ajax({
-            url: "{{ route('manager.acces.accesout') }}",
-            type: "GET",
-            data: { bulan: bulan, tahun: tahun, divisi: divisi },
-            success: function (response) {
+        function loadData(bulan = '', tahun = '') {
+            $.ajax({
+                url: "{{ route('gudang.acces.accesout') }}",
+                type: "GET",
+                data: { bulan: bulan, tahun: tahun },
+                success: function (response) {
                     let tableRows = '';
                     $.each(response, function (accessoryId, data) {
                         tableRows += `
@@ -119,12 +111,10 @@
         loadData();
 
         $('#filterForm select').on('change', function () {
-            const bulan  = $('#bulan').val();
-            const tahun  = $('#tahun').val();
-            const divisi = $('#divisi').val();
-            loadData(bulan, tahun, divisi);
+            const bulan = $('#bulan').val();
+            const tahun = $('#tahun').val();
+            loadData(bulan, tahun);
         });
-
 
         $('#inout').before(`
             <div class="mb-2">
@@ -164,100 +154,92 @@
             }
         });
 
-        function getFileName(baseName = "Laporan Accessories") {
-            let bulanVal   = $('#bulan').val();
-            let tahunVal   = $('#tahun').val();
-            let divisiVal  = $('#divisi').val();
+        function getFileName(baseName = "Laporan Aksesories") {
+    let bulanVal = $('#bulan').val();
+    let tahunVal = $('#tahun').val();
 
-            let bulanNama  = bulanVal ? $('#bulan option:selected').text() : '';
-            let divisiNama = divisiVal ? $('#divisi option:selected').text() : '';
+    let bulanNama = '';
+    if (bulanVal) {
+        bulanNama = $('#bulan option:selected').text();
+    }
 
-            if (bulanVal && tahunVal && divisiVal) {
-                return `${baseName} ${divisiNama} ${bulanNama} ${tahunVal}`;
-            } else if (tahunVal && divisiVal) {
-                return `${baseName} ${divisiNama} ${tahunVal}`;
-            } else if (bulanVal && divisiVal) {
-                return `${baseName} ${divisiNama} ${bulanNama}`;
-            } else if (divisiVal) {
-                return `${baseName} ${divisiNama}`;
-            } else if (bulanVal && tahunVal) {
-                return `${baseName} ${bulanNama} ${tahunVal}`;
-            } else if (tahunVal) {
-                return `${baseName} ${tahunVal}`;
-            } else if (bulanVal) {
-                return `${baseName} ${bulanNama}`;
-            }
-            return baseName;
-            }
+    if (bulanVal && tahunVal) {
+        return `${baseName} ${bulanNama} ${tahunVal}`;
+    } else if (tahunVal) {
+        return `${baseName} ${tahunVal}`;
+    } else if (bulanVal) {
+        return `${baseName} ${bulanNama}`;
+    }
+    return baseName;
+}
 
+// Export Excel
+$('#exportExcel').click(function () {
+    let table = document.getElementById("inout");
+    let wb = XLSX.utils.table_to_book(table, { sheet: "Accessories Out" });
+    let fileName = getFileName("Laporan Aksesories") + ".xlsx";
+    XLSX.writeFile(wb, fileName);
+});
 
-    // Export Excel
-    $('#exportExcel').click(function () {
-        let table = document.getElementById("inout");
-        let wb = XLSX.utils.table_to_book(table, { sheet: "Accessories Out" });
-        let fileName = getFileName("Laporan Aksesories") + ".xlsx";
-        XLSX.writeFile(wb, fileName);
+// Export PDF
+$('#exportPDF').click(function () {
+    let headers = [];
+    $('#inout thead th').each(function () {
+        headers.push($(this).text());
     });
 
-    // Export PDF
-    $('#exportPDF').click(function () {
-        let headers = [];
-        $('#inout thead th').each(function () {
-            headers.push($(this).text());
-        });
-
-        let data = [];
-    $('#accesout-data tr.data-row:visible').each(function () {
-        let row = [];
-        $(this).find('td').each(function () {
-            row.push($(this).text());
-        });
-        data.push(row);
+    let data = [];
+   $('#accesout-data tr.data-row:visible').each(function () {
+    let row = [];
+    $(this).find('td').each(function () {
+        row.push($(this).text());
     });
+    data.push(row);
+});
 
-        let fileName = getFileName("Laporan Aksesories") + ".pdf";
-        let titleText = "Accessories Out";
-        let filterName = getFileName("");
-        if (filterName) {
-            titleText += ` – ${filterName}`;
-        }
+    let fileName = getFileName("Laporan Aksesories") + ".pdf";
+    let titleText = "Accessories Out";
+    let filterName = getFileName("");
+    if (filterName) {
+        titleText += ` – ${filterName}`;
+    }
 
-        let docDefinition = {
-            pageOrientation: 'landscape',
-            content: [
-                { text: titleText, style: 'header' },
-                {
-                    table: {
-                        headerRows: 1,
-                        widths: Array(headers.length).fill('*'),
-                        body: [headers].concat(data)
-                    }
+    let docDefinition = {
+        pageOrientation: 'landscape',
+        content: [
+            { text: titleText, style: 'header' },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: Array(headers.length).fill('*'),
+                    body: [headers].concat(data)
                 }
-            ],
-            styles: {
-                header: { fontSize: 14, bold: true, margin: [0, 0, 0, 10] }
             }
-        };
-
-        pdfMake.createPdf(docDefinition).download(fileName);
-    });
-
-    // Print
-    $('#printTable').click(function () {
-        let filterName = getFileName("");
-        let titleText = "Accessories Out";
-        if (filterName) {
-            titleText += ` – ${filterName}`;
+        ],
+        styles: {
+            header: { fontSize: 14, bold: true, margin: [0, 0, 0, 10] }
         }
+    };
 
-        let printWindow = window.open('', '', 'height=600,width=900');
-        printWindow.document.write('<html><head><title>' + titleText + '</title></head><body>');
-        printWindow.document.write('<h3>' + titleText + '</h3>');
-        printWindow.document.write($('#inout')[0].outerHTML);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-    });
+    pdfMake.createPdf(docDefinition).download(fileName);
+});
+
+// Print
+$('#printTable').click(function () {
+    let filterName = getFileName("");
+    let titleText = "Accessories Out";
+    if (filterName) {
+        titleText += ` – ${filterName}`;
+    }
+
+    let printWindow = window.open('', '', 'height=600,width=900');
+    printWindow.document.write('<html><head><title>' + titleText + '</title></head><body>');
+    printWindow.document.write('<h3>' + titleText + '</h3>');
+    printWindow.document.write($('#inout')[0].outerHTML);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+});
 
     });
     </script>
