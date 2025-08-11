@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\manager;
 
-use App\Http\Controllers\Controller;
-use App\Models\Divisi;
+use Dompdf\Dompdf;
 use App\Models\Item;
-use App\Models\ItemCategory;
+use App\Models\Divisi;
 use App\Models\ItemIn;
 use App\Models\ItemSale;
-use App\Models\Pembelian;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Dompdf\Dompdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Milon\Barcode\DNS1D;
-use Picqer\Barcode\BarcodeGeneratorHTML;
+use App\Models\Pembelian;
+use App\Models\ItemCategory;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Picqer\Barcode\BarcodeGeneratorHTML;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class ItemController extends Controller
@@ -118,7 +118,13 @@ class ItemController extends Controller
      */
     public function destroy($id)
     {
-        Item::whereId($id)->delete();
+        $item = Item::findOrFail($id);
+
+        // Hapus semua item di tabel item_ins yang memiliki no_seri yang sama
+        ItemIn::where('no_seri', $item->no_seri)->delete();
+
+        // Hapus item dari tabel items
+        $item->delete();
         Alert::success('Success', 'Delet Iteme Success');
         return back();
     }
