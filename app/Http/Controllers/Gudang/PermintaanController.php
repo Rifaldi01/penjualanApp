@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Gudang;
 
-use App\Http\Controllers\Controller;
-use App\Models\Accessories;
-use App\Models\AccessoriesIn;
-use App\Models\DetailAccessories;
 use App\Models\Divisi;
 use App\Models\Pembelian;
 use App\Models\Permintaan;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Accessories;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\AccessoriesIn;
+use App\Models\DetailAccessories;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class PermintaanController extends Controller
 {
@@ -296,7 +296,11 @@ class PermintaanController extends Controller
 
     public function fetchAccessories($divisi_id)
     {
-        $accessories = Accessories::where('divisi_id', $divisi_id)->get(['id', 'name', 'price', 'stok']);
+        $accessories = Accessories::where('divisi_id', $divisi_id)
+            ->where('stok', '>', 0)
+            ->get(['id', 'name', 'price', 'stok']);
+
         return response()->json($accessories);
     }
+
 }

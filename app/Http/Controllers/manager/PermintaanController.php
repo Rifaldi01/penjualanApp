@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Manager;
 
-use App\Http\Controllers\Controller;
-use App\Models\Accessories;
 use App\Models\Divisi;
 use App\Models\Permintaan;
+use App\Models\Accessories;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class PermintaanController extends Controller
@@ -234,7 +234,9 @@ class PermintaanController extends Controller
     }
     public function fetchAccessories($divisi_id)
     {
-        $accessories = Accessories::where('divisi_id', $divisi_id)->get(['id', 'name', 'price', 'stok']);
+        $accessories = Accessories::where('divisi_id', $divisi_id)
+                    ->where('stok', '>', 0)
+                    ->get(['id', 'name', 'price', 'stok']);
         return response()->json($accessories);
     }
 }
