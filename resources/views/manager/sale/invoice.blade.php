@@ -78,7 +78,7 @@
                         <tr>
                             <td>
                                 @php
-                                    $words = explode(' ', $data->customer->addres);
+                                    $words = explode(' ', $data->customer->addres ?? '-');
                                     $chunks = array_chunk($words, 8);
                                 @endphp
 
