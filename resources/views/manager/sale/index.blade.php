@@ -37,7 +37,7 @@
                                 <td>{{tanggal($data->created_at)}}</td>
                                 <td>{{$data->divisi->name}}</td>
                                 <td>{{$data->invoice}}</td>
-                                <td>{{$data->customer->name}}</td>
+                                <td>{{$data->customer->name ?? '-'}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->nominal_in)}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
@@ -229,7 +229,7 @@
                                 <td>{{tanggal($data->created_at)}}</td>
                                 <td>{{$data->divisi->name}}</td>
                                 <td>{{$data->invoice}}</td>
-                                <td>{{$data->customer->name}}</td>
+                                <td>{{$data->customer->name ?? '-'}}</td>
                                 <td class="text-center">{{$data->total_item}}</td>
                                 <td>{{formatRupiah($data->total_price)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
