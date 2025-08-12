@@ -98,7 +98,7 @@
                             </td>
                             <td class="text-start">No. Rekening</td>
                             <td width="1%" class="text-end">:</td>
-                            <td width="20%"><strong>{{$data->customer->divisi->no_rek}}</strong></td>
+                            <td width="20%"><strong>{{$data->customer->divisi->no_rek ?? '-'}}</strong></td>
                         </tr>
                     </table>
                     <hr>
