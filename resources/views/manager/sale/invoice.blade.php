@@ -62,7 +62,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>{{$data->customer->name}}</strong> <br>
+                                <strong>{{$data->customer->name ?? '-'}}</strong> <br>
                                 <strong>{{$data->customer->company}}</strong>
                             </td>
                             <td width="10%" class="text-start">No PO</td>
