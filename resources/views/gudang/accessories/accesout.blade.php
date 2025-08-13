@@ -80,9 +80,10 @@
                     $.each(response, function (accessoryId, data) {
                         tableRows += `
                             <tr class="stok-info">
-                                <td colspan="3"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
+                                <td colspan="2"><strong>Stok Awal:</strong> ${data.stok_awal}</td>
                                 <td colspan="2"><strong>Total Keluar:</strong> ${data.total_keluar}</td>
-                                <td colspan="3"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
+                                <td colspan="2"><strong>Request:</strong> ${data.request_acces}</td>
+                                <td colspan="2"><strong>Sisa Stok:</strong> ${data.stok_sisa}</td>
                             </tr>
                         `;
                         $.each(data.data, function (index, acces) {

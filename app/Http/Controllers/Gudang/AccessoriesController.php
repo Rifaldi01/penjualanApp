@@ -319,13 +319,15 @@ class AccessoriesController extends Controller
 
         $result = $accesout->groupBy('accessories_id')->map(function ($group) {
             $stok_awal = $group->first()->accessories->accessoriesIn->sum('qty');
+            $request_acces = $group->first()->accessories->accessoriesReq->sum('qty');
             $total_keluar = $group->sum('qty');
-            $stok_sisa = $stok_awal - $total_keluar;
+            $stok_sisa = $stok_awal - $total_keluar - $request_acces;
 
             return [
                 'stok_awal' => $stok_awal,
                 'total_keluar' => $total_keluar,
                 'stok_sisa' => $stok_sisa,
+                'request_acces' => $request_acces,
                 'data' => $group
             ];
         });

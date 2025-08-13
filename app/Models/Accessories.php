@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Accessories extends Model
 {
@@ -42,5 +42,9 @@ class Accessories extends Model
     public function accessoriesIn()
     {
         return $this->hasMany(AccessoriesIn::class, 'accessories_id');
+    }
+    public function accessoriesReq()
+    {
+        return $this->hasMany(DetailAccessories::class, 'accessories_id');
     }
 }
