@@ -136,9 +136,15 @@ class PermintaanItemController extends Controller
     }
     public function fetchAccessories($divisi_id)
     {
-        $accessories = ItemIn::where('divisi_id', $divisi_id)->get();
+        $accessories = ItemIn::where('divisi_id', $divisi_id)
+            ->whereIn('no_seri', function($query) {
+                $query->select('no_seri')->from('items');
+            })
+            ->get();
+
         return response()->json($accessories);
     }
+
     public function konfirmasi(Request $request)
     {
         PermintaanItem::where('status', 'pending')
