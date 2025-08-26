@@ -104,7 +104,13 @@
                 <li>
                     <a href="{{route('manager.acces.index')}}">
                         <i class='bx bx-list-ul'></i>
-                        Accessories
+                        Accessories Redy
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('manager.accesKosong')}}">
+                        <i class='bx bx-list-ul'></i>
+                        Accessories Habis
                     </a>
                 </li>
             </ul>

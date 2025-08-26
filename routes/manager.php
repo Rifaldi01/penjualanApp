@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     //customer end
     //accessories
     Route::resource('/access', AccesoriesController::class)->names('manager.acces');
+    Route::get('/accessories', [AccesoriesController::class, 'accesKosong'])->name('manager.accesKosong');
     Route::get('edit/access', [AccesoriesController::class, 'editMultiple'])->name('manager.acces.editmultiple');
     Route::post('update/access', [AccesoriesController::class, 'updateMultiple'])->name('manager.acces.updatemultiple');
     Route::post('check/access', [AccesoriesController::class, 'checkCode'])->name('manager.acces.checkcode');

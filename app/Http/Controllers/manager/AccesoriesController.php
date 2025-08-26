@@ -28,7 +28,7 @@ class AccesoriesController extends Controller
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
-        $acces = Accessories::all(); // Mengambil data accessories terbaru dengan pagination
+        $acces = Accessories::where('stok', '>', 0)->get(); // Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
         foreach ($acces as $data) { // Loop melalui setiap accessories
@@ -397,7 +397,7 @@ class AccesoriesController extends Controller
             $quantity = $barcodeQuantities[$accessory->id] ?? 1; // Default 1 jika tidak diisi
             $barcodePaths[$accessory->id] = [];
             for ($i = 0; $i < $quantity; $i++) {
-                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128, );
+                $barcodePaths[$accessory->id][] = $generator->getBarcode($accessory->code_acces, $generator::TYPE_CODE_128);
             }
         }
 
@@ -419,6 +419,24 @@ class AccesoriesController extends Controller
         $dompdf->render();
 
         return $dompdf->stream('barcode.pdf', ['Attachment' => false]);
+    }
+    public function accesKosong()
+    {
+        {
+            $title = 'Delete Item!';
+            $text = "Are you sure you want to delete?";
+            confirmDelete($title, $text);
+            $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
+            $acces = Accessories::where('stok', '0')->get(); // Mengambil data accessories terbaru dengan pagination
+            $barcodes = []; // Array untuk menyimpan barcode
+
+            foreach ($acces as $data) { // Loop melalui setiap accessories
+                $barcode = base64_encode($generator->getBarcode($data->code_acces, $generator::TYPE_CODE_128)); // Generate barcode dan encode ke base64
+                $barcodes[$data->id] = $barcode; // Simpan barcode di array dengan ID sebagai key
+            }
+
+            return view('manager.accessories.index', compact('acces', 'barcodes'));
+        }
     }
 
 }
