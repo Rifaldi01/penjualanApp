@@ -37,7 +37,11 @@
                             <td>{{ $permintaan->kode }}</td>
                             <td>
                                 @foreach($permintaan->detailAccessories as $accessory)
-                                    <li>{{ $accessory->accessories->name }}</li>
+                                    @if($accessory->accessories)
+                                        <li>{{ $accessory->accessories->name }}</li>
+                                    @else
+                                        <li>-</li> {{-- Bisa diganti placeholder sesuai kebutuhan --}}
+                                    @endif
                                 @endforeach
                             </td>
                             <td>
