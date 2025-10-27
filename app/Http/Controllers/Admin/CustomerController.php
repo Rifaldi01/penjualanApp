@@ -111,28 +111,52 @@ class CustomerController extends Controller
 
     private function save(Request $request, $id = null)
     {
+        $divisiId = Auth::user()->divisi_id;
+
+        // Cek validasi unik berdasarkan divisi
         $validate = $request->validate([
             'name' => 'required',
-            'phone_wa' => $id ? 'nullable|numeric' : 'required|unique:customers|numeric',
+            'phone_wa' => [
+                $id ? 'nullable' : 'required',
+                'numeric',
+                // Custom rule: unik per divisi
+                function ($attribute, $value, $fail) use ($divisiId, $id) {
+                    if ($value) {
+                        $exists = \App\Models\Customer::where('phone_wa', $value)
+                            ->where('divisi_id', $divisiId)
+                            ->when($id, function ($query) use ($id) {
+                                $query->where('id', '!=', $id);
+                            })
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('Nomor WhatsApp terdaftar.');
+                        }
+                    }
+                }
+            ],
             'addres' => 'required'
-        ],[
+        ], [
             'name.required' => 'Name Customer Tidak Boleh Kosong',
             'phone_wa.required' => 'Phone Whatsapp Tidak Boleh Kosong',
-            'phone_wa.unique' => 'Phone Whatsapp Sudah Terdaftar',
             'phone_wa.numeric' => 'Phone Whatsapp Harus Angka',
             'addres.required' => 'Address Tidak Boleh Kosong',
         ]);
+
+        // Simpan data customer
         $cust = Customer::firstOrNew(['id' => $id]);
         $cust->name = $request->input('name');
         $cust->phone_wa = $request->input('phone_wa');
         $cust->phone = $request->input('phone');
         $cust->company = $request->input('company');
         $cust->addres = $request->input('addres');
-        $cust->divisi_id = Auth::user()->divisi_id;
+        $cust->divisi_id = $divisiId;
         $cust->save();
-        Alert::success('Success', 'Save Data Success');
+
+        \RealRashid\SweetAlert\Facades\Alert::success('Success', 'Save Data Success');
         return redirect()->route('admin.customer.index');
     }
+
 
     public function import(Request $request)
     {
