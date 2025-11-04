@@ -26,6 +26,7 @@
                         <th class="text-center" width="5%">Pph</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
+                        <th class="text-center" width="5%">Biaya Admin</th>
                         <th class="text-center" width="5%">Total Pay</th>
                         <th width="5%">Kasir</th>
                         <th class="text-center" width="5%">Action</th>
@@ -47,6 +48,7 @@
                                 <td>{{formatRupiah($data->pph)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
+                                <td>{{formatRupiah($data->admin_fee)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
                                 <td>{{$data->user->name}}</td>
                                 <td>
@@ -222,6 +224,7 @@
                         <th class="text-center" width="5%">Pph</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
+                        <th class="text-center" width="5%">Biaya Admin</th>
                         <th class="text-center" width="5%">Total Pay</th>
                         <th width="5%">Kasir</th>
                         <th class="text-center" width="5%">Action</th>
@@ -241,6 +244,7 @@
                                 <td>{{formatRupiah($data->pph)}}</td>
                                 <td>{{formatRupiah($data->diskon)}}</td>
                                 <td>{{formatRupiah($data->ongkir)}}</td>
+                                <td>{{formatRupiah($data->admin_fee)}}</td>
                                 <td>{{formatRupiah($data->pay)}}</td>
                                 <td>{{$data->user->name}}</td>
                                 <td>

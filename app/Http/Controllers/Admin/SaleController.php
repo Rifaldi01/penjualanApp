@@ -155,6 +155,7 @@ class SaleController extends Controller
                 'deadlines' => $request->deadlines,
                 'no_po' => $request->no_po,
                 'fee' => $request->fee,
+                'admin_fee' => $request->admin_fee,
                 'user_id' => Auth::id(),
                 'divisi_id' => Auth::user()->divisi_id,
                 'invoice' => $invoiceNumber

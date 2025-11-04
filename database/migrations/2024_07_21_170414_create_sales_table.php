@@ -29,6 +29,7 @@ return new class extends Migration
             $table->date('deadlines')->nullable();
             $table->integer('user_id');
             $table->integer('divisi_id');
+            $table->string('admin_fee')->nullable();
             $table->timestamps();
         });
     }
