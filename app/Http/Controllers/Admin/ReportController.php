@@ -108,7 +108,7 @@ class ReportController extends Controller
             $totalprice += $sale->total_price;
 
             $accessoryCapital = $sale->accessories->sum(function ($accessory) {
-                return $accessory->pivot->subtotal;
+                return $accessory->pivot->qty * $accessory->capital_price;
             });
 
             $itemCapital = $sale->itemSales->sum('capital_price');
