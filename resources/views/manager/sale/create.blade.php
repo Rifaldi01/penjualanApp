@@ -166,6 +166,12 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
+                            <label for="ongkir" class="col-lg-4 control-label">Biaya Admin</label>
+                            <div class="col-lg-8">
+                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
                             <label for="bayar" class="col-lg-4 control-label">Bayar</label>
                             <div class="col-lg-8">
                                 <input type="text" id="bayarrp" name="bayar" class="form-control" readonly>
@@ -181,8 +187,6 @@
         <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
             Save
         </button>
-    </div>
-    </div>
     </div>
 @endsection
 
@@ -290,6 +294,11 @@
                     ppn = 0;
                 }
                 bayar += ppn;
+                let admin_fee = parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(admin_fee)) {
+                    admin_fee = 0;
+                }
+                bayar -= admin_fee;
 
                 let ongkir = parseFloat($('#ongkir').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ongkir)) {
@@ -332,6 +341,9 @@
                 calculateTotal();
             });
             $('#pph').on('input', function () {
+                calculateTotal();
+            });
+            $('#admin_fee').on('input', function () {
                 calculateTotal();
             });
 
@@ -443,6 +455,7 @@
                         ongkir: Math.floor(parseFloat($('#ongkir').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         diskon: Math.floor(parseFloat($('#diskon').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         fee:Math.floor(parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        admin_fee:Math.floor(parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         nominal_in: Math.floor(parseFloat($('#nominal_in').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
