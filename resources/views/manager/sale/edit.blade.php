@@ -180,6 +180,12 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
+                            <label for="ongkir" class="col-lg-4 control-label">Biaya Admin</label>
+                            <div class="col-lg-8">
+                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
                             <label for="bayar" class="col-lg-4 control-label">Bayar</label>
                             <div class="col-lg-8">
                                 <input type="text" id="bayarrp" name="bayar" class="form-control" readonly
@@ -336,6 +342,12 @@
                 }
                 bayar += ppn;
 
+                let admin_fee = parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(admin_fee)) {
+                    admin_fee = 0;
+                }
+                bayar -= admin_fee;
+
                 $('#totalrp').val('Rp. ' + Math.floor(total).toLocaleString('id-ID'));
                 $('#bayarrp').val('Rp. ' + Math.floor(bayar).toLocaleString('id-ID'));
                 $('#nominal_in').val('' + Math.floor(bayar));
@@ -373,7 +385,9 @@
             $('#pph').on('input', function () {
                 calculateTotal();
             });
-
+            $('#admin_fee').on('input', function () {
+                calculateTotal();
+            });
             $('#code').on('keypress', function (e) {
                 if (e.which === 13) {
                     e.preventDefault();
@@ -485,6 +499,7 @@
                         $('#ppn').val(data.ppn);
                         $('#pph').val(data.pph);
                         $('#fee').val(data.fee);
+                        $('#admin_fee').val(data.admin_fee);
                         $('#created_at').val(data.created_at);
                         $('#deadlines').val(data.deadlines);
                     }
@@ -501,6 +516,7 @@
                         total_item: $('#total_item').val(),
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         fee:Math.floor(parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        admin_fee:Math.floor(parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: $('#ongkir').val(),
                         diskon: $('#diskon').val(),
                         nominal_in: $('#nominal_in').val(),
