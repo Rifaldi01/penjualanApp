@@ -57,7 +57,6 @@
                         <th class="text-center" width="5%">Piutang</th>
                         <th class="text-center" width="5%">Total Bayar</th>
                         <th class="text-center" width="5%">Fee</th>
-                        <th class="text-center" width="5%">Modal</th>
                         <th class="text-center" width="5%">Laba-Rugi</th>
                         <th class="text-center" width="5%">Tgl Pembayaran</th>
                     </tr>
@@ -184,7 +183,6 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(totalCapital?.[data.id]),
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
                                 debtList ?? 'N/A'
                             ]).draw(false);
