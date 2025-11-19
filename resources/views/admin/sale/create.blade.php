@@ -5,19 +5,40 @@
         <div class="card-head">
             <div class="container mt-3">
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <h4>New Transaction</h4>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <div class="float-end">
                             <div class="form-group row">
-                                <label for="code" class="mt-2">
-                                    <strong>No PO</strong>
-                                </label>
                                 <div class="">
                                     <div class="input-group">
                                         <input type="text" class="form-control" name="no_po" id="no_po"
                                                placeholder="Nomor PO">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="float-end">
+                            <div class="form-group row">
+                                <div class="">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control datepicker" name="date_pay" id="date_pay"
+                                               placeholder="Tanggal Pembayaran">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="float-end">
+                            <div class="form-group row">
+                                <div class="">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control datepicker" name="created_at" id="created_at"
+                                               placeholder="Tanggal Invoice">
                                     </div>
                                 </div>
                             </div>
@@ -421,6 +442,8 @@
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         deadlines: $('#deadlines').val(),
+                        date_pay: $('#date_pay').val(),
+                        created_at: $('#created_at').val(),
                         no_po: $('#no_po').val(),
                         penerima: $('#penerima').val(),
                         desciption: $('#desciption').val(),

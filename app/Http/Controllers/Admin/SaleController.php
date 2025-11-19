@@ -153,6 +153,7 @@ class SaleController extends Controller
                 'pph' => $request->pph,
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
+                'created_at' => $request->created_at,
                 'no_po' => $request->no_po,
                 'fee' => $request->fee,
                 'admin_fee' => $request->admin_fee,
@@ -183,7 +184,7 @@ class SaleController extends Controller
                     'bank_id' => $request->bank_id,
                     'penerima' => $request->penerima,
                     'description' => $request->description,
-                    'date_pay' => now()
+                    'date_pay' => $request->date_pay ?? now()
                 ]);
             }
 
