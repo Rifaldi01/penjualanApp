@@ -241,22 +241,6 @@ class PermintaanController extends Controller
             $total_harga += $accessoriesTujuan->price * $detail->qty;
         }
 
-        // ❗ Cek apakah kode_msk sudah ada di divisi tujuan
-        $existingPembelian = Pembelian::where('invoice', $kode_msk)
-            ->where('divisi_id', $permintaan->divisi_id_tujuan)
-            ->first();
-
-        if (!$existingPembelian) {
-            Pembelian::create([
-                'divisi_id'   => $permintaan->divisi_id_tujuan,
-                'supplier_id' => null,
-                'invoice'     => $kode_msk,
-                'total_item'  => $total_item,
-                'total_harga' => $total_harga,
-                'status'      => '1',
-            ]);
-        }
-
         $permintaan->update(['status' => 'diterima']);
 
         return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil diterima.');
