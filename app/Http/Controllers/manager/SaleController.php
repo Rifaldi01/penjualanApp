@@ -174,7 +174,7 @@ class SaleController extends Controller
                     'bank_id' => $request->bank_id,
                     'penerima' => $request->penerima,
                     'description' => $request->description,
-                    'date_pay' => now()
+                    'date_pay' => $request->date_pay ?? now()
                 ]);
             }
 
