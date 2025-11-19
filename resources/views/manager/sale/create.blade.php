@@ -108,10 +108,14 @@
                                 <input type="text" name="nominal_in" class="form-control" id="nominal_in" onkeyup="formatRupiah(this)">
                             </div>
                             <div class="mt-2">
+                                <label for="">Date Pay</label>
+                                <input type="text" class="form-control datepicker" name="date_pay" id="date_pay">
+                            </div>
+                            <div class="mt-4">
                                 <label for="">Pay Plan</label>
                                 <input type="text" class="form-control datepicker" name="deadlines" id="deadlines">
                             </div>
-                            <div class="mt-4">
+                            <div class="mt-2">
                                 <label for="">Nama Bank</label>
                                 <select name="bank_id" id="bank"
                                         data-placeholder="--Pilih Bank--" class="form-control accessory-select">
@@ -460,6 +464,7 @@
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         deadlines: $('#deadlines').val(),
+                        date_pay: $('#date_pay').val(),
                         no_po: $('#no_po').val(),
                         penerima: $('#penerima').val(),
                         description: $('#description').val(),
