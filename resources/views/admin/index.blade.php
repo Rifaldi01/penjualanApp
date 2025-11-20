@@ -78,7 +78,7 @@
             const days   = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
             if (days > 0) {
-                return "There are <b>" + days + "</b> days remaining until the due date.";
+                return "There are <b style='color: #f8bb86'>" + days + "</b> days remaining until the due date.";
             } else if (days === 0) {
                 return "Hari ini adalah tanggal jatuh tempo tagihan.";
             } else {
@@ -88,7 +88,7 @@
 
         Swal.fire({
             title: "Warning",
-            html: "Your hosting service will be due on <br>November  25, 2025.<br><br>"
+            html: "Your hosting service will be due on <br><b style='color: #f8bb86'>November  25, 2025.</b><br><br>"
                 + countdownDays(),
             icon: "warning",
             confirmButtonText: "Close"
