@@ -153,7 +153,7 @@ class SaleController extends Controller
                 'pph' => $request->pph,
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
-                'created_at' => $request->created_at,
+                'created_at' => $request->created_at ?? now(),
                 'no_po' => $request->no_po,
                 'fee' => $request->fee,
                 'admin_fee' => $request->admin_fee,
