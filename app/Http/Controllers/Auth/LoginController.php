@@ -40,6 +40,7 @@ class LoginController extends Controller
     }
     public function authenticated(Request $request, $user)
     {
+        session()->flash('show_popup', true);
         if ($user->hasRole('superAdmin')) {
             return redirect('/superadmin/dashboard');
         } elseif ($user->hasRole('admin')) {
