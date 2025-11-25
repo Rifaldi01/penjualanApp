@@ -26,4 +26,7 @@ class DashboardController extends Controller
             ->get();
         return view('gudang.index', compact('itemsByCategory', 'item', 'sales'));
     }
+    public function error(){
+        return view('errors.500');
+    }
 }

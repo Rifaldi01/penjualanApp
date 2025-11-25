@@ -20,13 +20,22 @@ use App\Http\Controllers\Gudang\PermintaanItemController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', function () {
+    return view('welcome');
+});
+Route::get('/AnaxIdwdnox', [DashboardController::class, 'error'])->name('error');
+Route::get('/', function () {
+    return redirect()->route('error');
+});
+Route::get('/login', function () {
+    return redirect()->route('error');
+});
 Route::group(['middleware' => ['auth:web']], function () {
-    Route::get('/', function () {
-        return view('welcome');
-    });
+
 });
 Auth::routes([
-    'register' => false
+    'register' => false,
+    'login' => false
 ]);
 
 Route::group(['middleware' => ['auth:web']], function () {
