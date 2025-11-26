@@ -23,19 +23,18 @@ use App\Http\Controllers\Gudang\PermintaanItemController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/AnaxIdwdnox', [DashboardController::class, 'error'])->name('error');
+//Route::get('/AnaxIdwdnox', [DashboardController::class, 'error'])->name('error');
 Route::get('/', function () {
-    return redirect()->route('error');
+    return redirect()->route('login');
 });
-Route::get('/login', function () {
-    return redirect()->route('error');
-});
+//Route::get('/login', function () {
+//    return redirect()->route('error');
+//});
 Route::group(['middleware' => ['auth:web']], function () {
 
 });
 Auth::routes([
     'register' => false,
-    'login' => false
 ]);
 
 Route::group(['middleware' => ['auth:web']], function () {
