@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--favicon-->
-    <link rel="icon" href="{{URL::to('assets/images/favicon-32x32.png')}}" type="image/png" />
+    <link rel="icon" href="/" type="image/png" />
     <!-- loader-->
     <link href="{{URL::to('assets/css/pace.min.css')}}'" rel="stylesheet" />
     <script src="{{URL::to('assets/js/pace.min.js')}}"></script>
@@ -18,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
     <link href="{{URL::to('assets/css/app.css')}}" rel="stylesheet">
     <link href="{{URL::to('assets/css/icons.css')}}" rel="stylesheet">
-    <title>Rocker - Bootstrap 5 Admin Dashboard Template</title>
+    <title>500 - Error</title>
 </head>
 
 <body>
