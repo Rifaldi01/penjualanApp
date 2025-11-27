@@ -134,11 +134,17 @@ class ItemController extends Controller
             'name' => 'required',
             'itemcategory_id' => 'required',
             'no_seri' => $id ? 'required' : 'required|unique:items',
+            'price' => 'nullable|numeric|min:0',
+            'capital_price' => 'nullable|numeric|min:0',
         ], [
             'name.required' => 'Nama Tidak Boleh Kosong',
             'itemcategory_id.required' => 'Pilih Category',
             'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
+
+            // Pesan error baru
+            'price.numeric' => 'Harga harus berupa angka',
+            'capital_price.numeric' => 'Harga Modal harus berupa angka',
         ]);
 
         // Simpan atau update data di tabel `items`
@@ -149,15 +155,15 @@ class ItemController extends Controller
                 'name' => $request->input('name'),
                 'no_seri' => $request->input('no_seri'),
                 'created_at' => $request->input('created_at'),
-                'price' => $request->input('price'),
-                'capital_price' => $request->input('capital_price'),
+                'price' => $request->input('price') ?? 0,
+                'capital_price' => $request->input('capital_price') ?? 0,
                 'divisi_id' => $request->input('divisi_id'),
             ]
         );
 
-        // Update atau buat data di tabel `item_ins`
+        // Update tabel `item_ins`
         ItemIn::updateOrCreate(
-            ['no_seri' => $item->no_seri], // Cari berdasarkan `no_seri`
+            ['no_seri' => $item->no_seri],
             [
                 'itemcategory_id' => $item->itemcategory_id,
                 'divisi_id' => $item->divisi_id,
@@ -169,11 +175,10 @@ class ItemController extends Controller
             ]
         );
 
-        // Cek apakah invoice sudah ada di tabel `pembelian`
+        // Cek invoice di tabel pembelian
         $invoice = $request->input('kode_msk');
         $existingPembelian = Pembelian::where('invoice', $invoice)->first();
 
-        // Jika invoice belum ada, buat entri baru di tabel `pembelian`
         if (!$existingPembelian && $invoice) {
             Pembelian::create([
                 'divisi_id' => $item->divisi_id,
@@ -184,6 +189,7 @@ class ItemController extends Controller
 
         return redirect()->route('manager.item.index')->withSuccess('Data berhasil disimpan');
     }
+
 
     public function download(Item $item)
     {
