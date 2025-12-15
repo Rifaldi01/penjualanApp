@@ -21,8 +21,15 @@ use App\Http\Controllers\Admin\PembelianController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', function () {
+    return view('welcome');
+});
+//Route::get('/AnaxIdwdnox', [DashboardController::class, 'error'])->name('error');
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
 Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], function () {
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/', [DashboardController::class, 'index']);
 
     //customer
