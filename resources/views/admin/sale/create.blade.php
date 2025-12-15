@@ -94,6 +94,10 @@
                             <label for="">Penerima</label>
                             <input type="text" class="form-control" name="penerima" id="penerima" >
                         </div>
+                        <div class="mt-4">
+                            <label for="">Invoice Manual</label>
+                            <input type="text" class="form-control" name="inv_manual" id="inv_manual" >
+                        </div>
                     </div>
                     <div class=" col-lg-4 float-end">
                         <div class="mt-2">
@@ -447,6 +451,7 @@
                         no_po: $('#no_po').val(),
                         penerima: $('#penerima').val(),
                         desciption: $('#desciption').val(),
+                        inv_manual: $('#inv_manual').val(),
                         bayar: Math.floor(parseFloat($('#bayarrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         accessories: accessoriesData,
                         items: itemsData

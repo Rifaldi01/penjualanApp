@@ -156,6 +156,7 @@ class SaleController extends Controller
                 'created_at' => $request->created_at ?? now(),
                 'no_po' => $request->no_po,
                 'fee' => $request->fee,
+                'inv_manual' => $request->inv_manual,
                 'admin_fee' => $request->admin_fee,
                 'user_id' => Auth::id(),
                 'divisi_id' => Auth::user()->divisi_id,
