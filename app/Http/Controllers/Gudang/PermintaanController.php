@@ -282,7 +282,7 @@ class PermintaanController extends Controller
     {
         $accessories = Accessories::where('divisi_id', $divisi_id)
             ->where('stok', '>', 0)
-            ->get(['id', 'name', 'price', 'stok']);
+            ->get(['id', 'code_acces', 'name', 'price', 'stok']);
 
         return response()->json($accessories);
     }
