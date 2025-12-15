@@ -94,10 +94,15 @@
                             <label for="">Penerima</label>
                             <input type="text" class="form-control" name="penerima" id="penerima" >
                         </div>
-                        <div class="mt-4">
-                            <label for="">Invoice Manual</label>
-                            <input type="text" class="form-control" name="inv_manual" id="inv_manual" >
-                        </div>
+                        @if(auth()->check() && auth()->user()->divisi_id == 3)
+                            <div class="mt-4">
+                                <label>Invoice Manual</label>
+                                <input type="text"
+                                       class="form-control"
+                                       name="inv_manual"
+                                       id="inv_manual">
+                            </div>
+                        @endif
                     </div>
                     <div class=" col-lg-4 float-end">
                         <div class="mt-2">
