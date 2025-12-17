@@ -185,7 +185,7 @@
                             table.row.add([
                                 index + 1,
                                 formatDate(data.created_at ?? ''),
-                                data.inv_maunal ?? '',
+                                data.inv_manual ?? '',
                                 data.invoice ?? 'N/A',
                                 data.customer?.name ?? 'N/A',
                                 itemSalesList ?? 'N/A',
