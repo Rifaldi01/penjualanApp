@@ -13,6 +13,12 @@
     </div>
 
     <hr/>
+    <div class="">
+        <div class="text-danger">
+            <span>* No. Invoice manual baru tersedia di Divisi PTP</span><br>
+            <span>* Divisi selain PTP masih menggunakan invoice normal</span>
+        </div>
+    </div>
     <div class="card table-timbang">
         <div class="card-header">
             <div class="row">
@@ -176,22 +182,14 @@
                             debtList += '</ul>';
 
                             // Tambahkan ke DataTable, bukan ke DOM
-                            let isPTP = response.isPTP;
-
-                            let rowData = [
+                            table.row.add([
                                 index + 1,
-                                formatDate(data.created_at ?? '')
-                            ];
-
-                            if (isPTP) {
-                                rowData.push(data.inv_maunal ?? '-');
-                            }
-
-                            rowData = rowData.concat([
-                                data.invoice ?? '-',
-                                data.customer?.name ?? '-',
-                                itemSalesList,
-                                accessoriesList,
+                                formatDate(data.created_at ?? ''),
+                                data.inv_maunal ?? '',
+                                data.invoice ?? 'N/A',
+                                data.customer?.name ?? 'N/A',
+                                itemSalesList ?? 'N/A',
+                                accessoriesList ?? 'N/A',
                                 data.total_item ?? 0,
                                 formatRupiah(data.total_price ?? 0),
                                 formatRupiah(data.ppn ?? 0),
@@ -202,12 +200,9 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id] ?? 0))),
-                                debtList
-                            ]);
-
-                            table.row.add(rowData).draw(false);
-
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
+                                debtList ?? 'N/A'
+                            ]).draw(false);
                         });
                     },
                     error: function (xhr) {
