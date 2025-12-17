@@ -14,7 +14,7 @@
 
     <hr/>
     <div class="card table-timbang">
-        <div class="card-head">
+        <div class="card-header">
             <div class="row">
                 <form id="filter" method="GET">
                     <div class="row">
@@ -39,28 +39,38 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="filter-table" class="table table-striped table-bordered" style="width:100%">
+                    @php
+                        $isPTP = auth()->user()->divisi_id == 3;
+                    @endphp
+
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th class="text-center" width="5%">Tanggal</th>
-                        <th class="text-center" width="5%"> Invoice</th>
+                        <th class="text-center">Tanggal</th>
+
+                        @if($isPTP)
+                            <th class="text-center">Invoice Manual</th>
+                        @endif
+
+                        <th class="text-center">Invoice</th>
                         <th>Customer</th>
                         <th>Item</th>
                         <th>Accessories</th>
-                        <th class="text-center" width="5%">Total Item</th>
-                        <th class="text-center" width="5%">Total Invoice</th>
-                        <th class="text-center" width="5%">PPN</th>
-                        <th class="text-center" width="5%">PPH</th>
-                        <th class="text-center" width="5%">Diskon</th>
-                        <th class="text-center" width="5%">Ongkir</th>
-                        <th class="text-center" width="5%">Diterima</th>
-                        <th class="text-center" width="5%">Piutang</th>
-                        <th class="text-center" width="5%">Total Bayar</th>
-                        <th class="text-center" width="5%">Fee</th>
-                        <th class="text-center" width="5%">Laba-Rugi</th>
-                        <th class="text-center" width="5%">Tgl Pembayaran</th>
+                        <th class="text-center">Total Item</th>
+                        <th class="text-center">Total Invoice</th>
+                        <th class="text-center">PPN</th>
+                        <th class="text-center">PPH</th>
+                        <th class="text-center">Diskon</th>
+                        <th class="text-center">Ongkir</th>
+                        <th class="text-center">Diterima</th>
+                        <th class="text-center">Piutang</th>
+                        <th class="text-center">Total Bayar</th>
+                        <th class="text-center">Fee</th>
+                        <th class="text-center">Laba-Rugi</th>
+                        <th class="text-center">Tgl Pembayaran</th>
                     </tr>
                     </thead>
+
                     <tbody id="report-body">
                     <!-- Data will be inserted here via AJAX -->
                     </tbody>
@@ -166,13 +176,22 @@
                             debtList += '</ul>';
 
                             // Tambahkan ke DataTable, bukan ke DOM
-                            table.row.add([
+                            let isPTP = response.isPTP;
+
+                            let rowData = [
                                 index + 1,
-                                formatDate(data.created_at ?? ''),
-                                data.invoice ?? 'N/A',
-                                data.customer?.name ?? 'N/A',
-                                itemSalesList ?? 'N/A',
-                                accessoriesList ?? 'N/A',
+                                formatDate(data.created_at ?? '')
+                            ];
+
+                            if (isPTP) {
+                                rowData.push(data.inv_maunal ?? '-');
+                            }
+
+                            rowData = rowData.concat([
+                                data.invoice ?? '-',
+                                data.customer?.name ?? '-',
+                                itemSalesList,
+                                accessoriesList,
                                 data.total_item ?? 0,
                                 formatRupiah(data.total_price ?? 0),
                                 formatRupiah(data.ppn ?? 0),
@@ -183,9 +202,12 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
-                                debtList ?? 'N/A'
-                            ]).draw(false);
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id] ?? 0))),
+                                debtList
+                            ]);
+
+                            table.row.add(rowData).draw(false);
+
                         });
                     },
                     error: function (xhr) {
