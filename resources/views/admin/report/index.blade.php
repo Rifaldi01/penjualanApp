@@ -45,19 +45,11 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="filter-table" class="table table-striped table-bordered" style="width:100%">
-                    @php
-                        $isPTP = auth()->user()->divisi_id == 3;
-                    @endphp
-
                     <thead>
                     <tr>
                         <th width="4%">No</th>
                         <th class="text-center">Tanggal</th>
-
-                        @if($isPTP)
-                            <th class="text-center">Invoice Manual</th>
-                        @endif
-
+                        <th class="text-center">Invoice Manual</th>
                         <th class="text-center">Invoice</th>
                         <th>Customer</th>
                         <th>Item</th>
