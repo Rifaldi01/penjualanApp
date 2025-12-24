@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manager;
 use App\Models\Divisi;
 use App\Models\Permintaan;
 use App\Models\Accessories;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -70,12 +71,32 @@ class PermintaanController extends Controller
                 return redirect()->back()->withErrors("Stok untuk {$accessory->name} di divisi {$accessory->divisi->name} hanya tersedia {$accessory->stok}.");
             }
 
+            $now   = Carbon::now();
+            $bulan = $now->format('m');
+            $tahun = $now->format('y');
+
+            $lastPermintaan = Permintaan::whereMonth('created_at', $bulan)
+                ->whereYear('created_at', $now->year)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $lastNumber = 0;
+
+            if ($lastPermintaan) {
+                // Ambil nomor dari kode sebelumnya
+                $lastNumber = (int) explode('/', $lastPermintaan->kode)[2];
+            }
+
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+
+            $kodePermintaan = "PMT/ACS/{$nextNumber}/{$bulan}/{$tahun}";
+
             // Buat permintaan jika stok mencukupi
             Permintaan::create([
                 'accessories_id' => $accessories_id,
                 'divisi_id_asal' => $divisiAsal,
                 'divisi_id_tujuan' => $request->user()->divisi_id,
-                'kode' => 'REQ-' . strtoupper(uniqid()),
+                'kode' => $kodePermintaan,
                 'jumlah' => (string) $jumlahDiminta, // Simpan jumlah sebagai string
                 'status' => 'pending',
             ]);
