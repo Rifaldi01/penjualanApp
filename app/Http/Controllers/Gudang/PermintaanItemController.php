@@ -79,9 +79,11 @@ class PermintaanItemController extends Controller
         $lastNumber = 0;
 
         if ($lastPermintaan) {
-            // Ambil nomor urut dari kode sebelumnya
-            $lastNumber = (int) explode('/', $lastPermintaan->kode)[2];
+            if (preg_match('/ITM\/(\d+)/', $lastPermintaan->kode, $matches)) {
+                $lastNumber = (int) $matches[1];
+            }
         }
+
 
         $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         $kodePermintaan = "PMT/ITM/{$nextNumber}/{$bulan}/{$tahun}";
