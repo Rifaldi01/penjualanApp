@@ -8,7 +8,6 @@ use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemIn;
 use App\Models\PermintaanItem;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,60 +53,38 @@ class PermintaanItemController extends Controller
     {
         // Validasi input
         $validated = $request->validate([
-            'divisi_id_asal'   => 'required|exists:divisis,id',
-            'item_in_id.*'     => 'required|exists:item_ins,id',
-            'jumlah.*'         => 'required|integer|min:1',
+            'divisi_id_asal' => 'required|exists:divisis,id',
+            'item_in_id.*' => 'required|exists:item_ins,id', // Memastikan ID Item yang diminta valid
+            'jumlah.*' => 'required|integer|min:1', // Validasi jumlah yang diminta
         ]);
 
-        $divisiAsal  = $validated['divisi_id_asal'];
-        $totalJumlah = array_sum($validated['jumlah']);
+        $divisiAsal = $validated['divisi_id_asal'];
+        $totalJumlah = 0; // Variabel untuk menghitung total jumlah
 
-        /** =============================
-         *  GENERATE KODE PERMINTAAN ITEM
-         *  PMT/ITM/0001/12/25
-         *  =============================
-         */
-        $now   = Carbon::now();
-        $bulan = $now->format('m');
-        $tahun = $now->format('y');
-
-        $lastPermintaan = PermintaanItem::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $now->year)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $lastNumber = 0;
-
-        if ($lastPermintaan) {
-            if (preg_match('/ITM\/(\d+)/', $lastPermintaan->kode, $matches)) {
-                $lastNumber = (int) $matches[1];
-            }
+        // Menghitung total jumlah berdasarkan jumlah per item
+        foreach ($validated['jumlah'] as $jumlahItem) {
+            $totalJumlah += $jumlahItem; // Menambahkan jumlah item ke total
         }
 
-
-        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        $kodePermintaan = "PMT/ITM/{$nextNumber}/{$bulan}/{$tahun}";
-
-        // Simpan permintaan item
+        // Membuat permintaan item dan menyimpan total jumlah
         $permintaan = PermintaanItem::create([
-            'divisi_id_asal'   => $divisiAsal,
+            'divisi_id_asal' => $divisiAsal,
             'divisi_id_tujuan' => $request->user()->divisi_id,
-            'kode'             => $kodePermintaan,
-            'jumlah'           => $totalJumlah,
-            'status'           => 'pending',
+            'kode' => 'REQ-' . strtoupper(uniqid()),
+            'jumlah' => $totalJumlah, // Mengisi kolom jumlah dengan total jumlah yang diminta
+            'status' => 'pending',
         ]);
 
-        // Simpan detail item (tanpa kolom jumlah)
-        foreach ($validated['item_in_id'] as $item_in_id) {
+        // Menyimpan detail item tanpa kolom jumlah di tabel detail_items
+        foreach ($validated['item_in_id'] as $index => $item_in_id) {
             DetailItem::create([
                 'permintaan_item_id' => $permintaan->id,
-                'item_in_id'         => $item_in_id,
+                'item_in_id' => $item_in_id, // Menyimpan ID item yang diminta
             ]);
         }
 
-        return redirect()
-            ->route('gudang.permintaanitem.index')
-            ->with('success', 'Permintaan item berhasil dibuat.');
+        // Redirect kembali dengan pesan sukses
+        return redirect()->route('gudang.permintaanitem.index')->with('success', 'Permintaan berhasil dibuat!');
     }
 
 

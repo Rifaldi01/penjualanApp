@@ -6,7 +6,6 @@ use App\Models\Divisi;
 use App\Models\Pembelian;
 use App\Models\Permintaan;
 use App\Models\Accessories;
-use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\AccessoriesIn;
@@ -57,83 +56,55 @@ class PermintaanController extends Controller
     {
         // Validasi input
         $validated = $request->validate([
-            'divisi_id_asal'   => 'required|exists:divisis,id',
-            'accessories_id.*'=> 'required|exists:accessories,id',
-            'jumlah.*'        => 'required|integer|min:1',
+            'divisi_id_asal' => 'required|exists:divisis,id',
+            'accessories_id.*' => 'required|exists:accessories,id',
+            'jumlah.*' => 'required|integer|min:1',
         ]);
 
-        $divisiAsal  = $validated['divisi_id_asal'];
-        $totalJumlah = 0;
+        $divisiAsal = $validated['divisi_id_asal'];
+        $totalJumlah = 0; // Variabel untuk menghitung total jumlah
 
-        // Validasi stok
         foreach ($validated['accessories_id'] as $index => $accessories_id) {
             $jumlahDiminta = $validated['jumlah'][$index];
 
+            // Ambil stok dari divisi asal
             $accessory = Accessories::where('id', $accessories_id)
                 ->where('divisi_id', $divisiAsal)
                 ->first();
 
             if (!$accessory) {
-                return back()->withErrors("Accessories ID {$accessories_id} tidak ditemukan di divisi {$divisiAsal}.");
+                return redirect()->back()->withErrors("Accessories dengan ID $accessories_id tidak ditemukan di divisi {$divisiAsal}.");
             }
 
             if ($accessory->stok < $jumlahDiminta) {
-                return back()->withErrors(
-                    "Stok {$accessory->name} di divisi {$divisiAsal} hanya tersedia {$accessory->stok}."
-                );
+                return redirect()->back()->withErrors("Stok untuk {$accessory->name} di divisi {$divisiAsal} hanya tersedia {$accessory->stok}.");
             }
 
+            // Tambahkan jumlah diminta ke total jumlah
             $totalJumlah += $jumlahDiminta;
         }
 
-        /** =============================
-         *  GENERATE KODE PERMINTAAN
-         *  PMT/ACS/0001/12/25
-         *  =============================
-         */
-        $now   = Carbon::now();
-        $bulan = $now->format('m');
-        $tahun = $now->format('y');
-
-        $lastPermintaan = Permintaan::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $now->year)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $lastNumber = 0;
-
-        if ($lastPermintaan) {
-            if (preg_match('/ACS\/(\d+)/', $lastPermintaan->kode, $matches)) {
-                $lastNumber = (int) $matches[1];
-            }
-        }
-
-
-        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-
-        $kodePermintaan = "PMT/ACS/{$nextNumber}/{$bulan}/{$tahun}";
-
-        // Simpan data permintaan
+        // Buat permintaan setelah semua validasi selesai
         $permintaan = Permintaan::create([
-            'divisi_id_asal'   => $divisiAsal,
+            'divisi_id_asal' => $divisiAsal,
             'divisi_id_tujuan' => $request->user()->divisi_id,
-            'kode'             => $kodePermintaan,
-            'jumlah'           => $totalJumlah,
-            'status'           => 'pending',
+            'kode' => 'REQ-' . strtoupper(uniqid()),
+            'jumlah' => $totalJumlah, // Simpan total jumlah di sini
+            'status' => 'pending',
         ]);
 
-        // Simpan detail accessories
         foreach ($validated['accessories_id'] as $index => $accessories_id) {
+            $jumlahDiminta = $validated['jumlah'][$index];
+
+            // Buat entri detail aksesori
             DetailAccessories::create([
-                'permintaan_id'  => $permintaan->id,
+                'permintaan_id' => $permintaan->id,
                 'accessories_id' => $accessories_id,
-                'qty'            => $validated['jumlah'][$index],
+                'qty' => (string) $jumlahDiminta,
             ]);
         }
 
-        return redirect()
-            ->route('gudang.permintaan.index')
-            ->with('success', 'Permintaan berhasil dibuat.');
+        return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil dibuat!');
     }
 
 
