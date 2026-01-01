@@ -12,14 +12,14 @@ class AccessoriesSale extends Model
 
     public function sale()
     {
-        return $this->belongsTo(Sale::class, 'sale_id', 'id');
+        return $this->belongsTo(Sale::class, 'sale_id', 'id')->withTrashed();
     }
     public function accessories()
     {
-        return $this->belongsTo(Accessories::class, 'accessories_id', 'id');
+        return $this->belongsTo(Accessories::class, 'accessories_id', 'id')->withTrashed();
     }
     public function accessoriesIn()
     {
-        return $this->hasMany(AccessoriesIn::class, 'accessories_id');
+        return $this->hasMany(AccessoriesIn::class, 'accessories_id')->withTrashed();
     }
 }
