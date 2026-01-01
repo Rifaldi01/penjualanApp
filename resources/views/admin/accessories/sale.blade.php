@@ -30,9 +30,9 @@
                         <tr>
                             <td>{{$key +1}}</td>
                             <td>{{$data->sale->invoice}}</td>
-                            <td>{{$data->accessories->code_acces}}</td>
-                            <td>{{$data->accessories->name}}</td>
-                            <td>{{formatRupiah($data->accessories->price)}}</td>
+                            <td>{{ optional($data->accessories)->code_acces ?? '-' }}</td>
+                            <td>{{ optional($data->accessories)->name ?? '-' }}</td>
+                            <td>{{ formatRupiah(optional($data->accessories)->price ?? 0) }}</td>
                             <td>{{$data->qty}}</td>
                             <td>{{formatRupiah($data->subtotal)}}</td>
                             <td>{{$data->sale->customer->name}}</td>

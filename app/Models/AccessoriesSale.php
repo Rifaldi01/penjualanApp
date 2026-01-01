@@ -12,7 +12,7 @@ class AccessoriesSale extends Model
 
     public function sale()
     {
-        return $this->belongsTo(Sale::class, 'sale_id', 'id')->withTrashed();
+        return $this->belongsTo(Sale::class, 'sale_id', 'id');
     }
     public function accessories()
     {
@@ -20,6 +20,6 @@ class AccessoriesSale extends Model
     }
     public function accessoriesIn()
     {
-        return $this->hasMany(AccessoriesIn::class, 'accessories_id')->withTrashed();
+        return $this->hasMany(AccessoriesIn::class, 'accessories_id');
     }
 }
