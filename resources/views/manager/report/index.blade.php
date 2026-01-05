@@ -67,6 +67,7 @@
                         <th class="text-center" width="5%">PPH</th>
                         <th class="text-center" width="5%">Diskon</th>
                         <th class="text-center" width="5%">Ongkir</th>
+                        <th class="text-center" width="5%">Biaya Admin</th>
                         <th class="text-center" width="5%">Diterima</th>
                         <th class="text-center" width="5%">Piutang</th>
                         <th class="text-center" width="5%">Total Bayar</th>
@@ -103,6 +104,10 @@
                     <tr>
                         <th colspan="6" class="text-center">Fee</th>
                         <th colspan="6" class="text-center" id="fee">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Biaya Admin</th>
+                        <th colspan="6" class="text-center" id="admin">0</th>
                     </tr>
                     <tr>
                         <th colspan="6" class="text-center">Diskon</th>
@@ -149,6 +154,7 @@
                         $('#ongkir').text(formatRupiah(response.ongkir));
                         $('#ppn').text(formatRupiah(response.ppn));
                         $('#pph').text(formatRupiah(response.pph));
+                        $('#admin').text(formatRupiah(response.admin_fee));
                         $('#fee').text(formatRupiah(response.fee));
                         $('#total-bersih').text(formatRupiah(response.totalprice));
 
@@ -195,6 +201,7 @@
                                 formatRupiah(data.pph ?? 0),
                                 formatRupiah(data.diskon ?? 0),
                                 formatRupiah(data.ongkir ?? 0),
+                                formatRupiah(data.admin_fee ?? 0),
                                 formatRupiah(data.nominal_in ?? 0),
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
@@ -299,6 +306,7 @@
                             addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
                             addFooterRow('PPN', getFooterText('ppn'), rowStart++);
                             addFooterRow('PPH', getFooterText('pph'), rowStart++);
+                            addFooterRow('Biaya Admin', getFooterText('admin'), rowStart++);
                             addFooterRow('Fee', getFooterText('fee'), rowStart++);
                             addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
                             addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);

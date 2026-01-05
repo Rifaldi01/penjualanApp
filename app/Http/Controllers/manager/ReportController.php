@@ -43,6 +43,7 @@ class ReportController extends Controller
         $ongkir = $report->sum('ongkir');
         $ppn = $report->sum('ppn');
         $pph = $report->sum('pph');
+        $admin_fee = $report->sum('admin_fee');
         $fee = $report->sum('fee');
 
         $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->sum('capital_price');
@@ -53,6 +54,7 @@ class ReportController extends Controller
         return view('manager.report.index', compact(
             'report',
             'income',
+            'admin_fee',
             'profit',
             'diskon',
             'ongkir',
@@ -101,12 +103,13 @@ class ReportController extends Controller
         $totalfee = 0;
         $totalCapitalPerSale = [];
 
-        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$totalppn, &$totalpph, &$totalCapitalPerSale, &$totalfee, &$totalprice) {
+        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$admin_fee, &$totalppn, &$totalpph, &$totalCapitalPerSale, &$totalfee, &$totalprice) {
             $totalIncome += $sale->pay;
             $totalDiskon += $sale->diskon;
             $totalOngkir += $sale->ongkir;
             $totalppn += $sale->ppn;
             $totalpph += $sale->pph;
+            $admin_fee += $sale->admin_fee;
             $totalfee += $sale->fee;
             $totalprice += $sale->total_price;
 
@@ -137,6 +140,7 @@ class ReportController extends Controller
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
             'report' => $report,
+            'admin_fee' => $admin_fee,
             'income' => $totalIncome,
             'profit' => $profit,
             'diskon' => $totalDiskon,
