@@ -289,6 +289,11 @@
                     admin_fee = 0;
                 }
                 bayar -= admin_fee;
+                let fee = parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
+                if (isNaN(admin_fee)) {
+                    fee = 0;
+                }
+                bayar -= fee;
 
                 let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ppn)) {
@@ -337,6 +342,9 @@
                 calculateTotal();
             });
             $('#admin_fee').on('input', function () {
+                calculateTotal();
+            });
+            $('#fee').on('input', function () {
                 calculateTotal();
             });
 
