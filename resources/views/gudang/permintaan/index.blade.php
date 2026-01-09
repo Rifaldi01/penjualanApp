@@ -22,6 +22,7 @@
                         <th>Tanggal</th>
                         <th>Kode</th>
                         <th>Barang</th>
+                        <th>Kode Acces</th>
                         <th>Qty</th>
                         <th>Asal Divisi</th>
                         <th width="2%">Jumlah Barang</th>
@@ -39,6 +40,15 @@
                                 @foreach($permintaan->detailAccessories as $accessory)
                                     @if($accessory->accessories)
                                         <li>{{ $accessory->accessories->name }}</li>
+                                    @else
+                                        <li>-</li> {{-- Bisa diganti placeholder sesuai kebutuhan --}}
+                                    @endif
+                                @endforeach
+                            </td>
+                            <td>
+                                @foreach($permintaan->detailAccessories as $accessory)
+                                    @if($accessory->accessories)
+                                        <li>{{ $accessory->accessories->code_acces }}</li>
                                     @else
                                         <li>-</li> {{-- Bisa diganti placeholder sesuai kebutuhan --}}
                                     @endif

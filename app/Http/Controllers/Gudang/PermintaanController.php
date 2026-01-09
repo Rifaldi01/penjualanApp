@@ -189,61 +189,77 @@ class PermintaanController extends Controller
 
     public function approve($id)
     {
-        $permintaan = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])->findOrFail($id);
+        $permintaan = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])
+            ->findOrFail($id);
 
         if (Auth::user()->divisi_id != $permintaan->divisi_id_tujuan) {
             return redirect()->back()->withErrors('Anda tidak berhak menyetujui permintaan ini.');
         }
 
-        $kode_msk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
-        $total_item = 0;
-        $total_harga = 0;
-
+        // 1. VALIDASI STOK TERLEBIH DAHULU
         foreach ($permintaan->detailAccessories as $detail) {
             $accessoriesAsal = Accessories::where('id', $detail->accessories_id)
                 ->where('divisi_id', $permintaan->divisi_id_asal)
                 ->first();
 
             if (!$accessoriesAsal || $accessoriesAsal->stok < $detail->qty) {
-                return redirect()->back()->withErrors('Stok divisi asal tidak mencukupi untuk aksesori ' . ($accessoriesAsal->name ?? ''));
+                return redirect()->back()->withErrors(
+                    'Stok tidak mencukupi untuk accessories: ' . ($accessoriesAsal->name ?? '-')
+                );
             }
+        }
 
-            $accessoriesAsal->decrement('stok', $detail->qty);
+        // 2. JALANKAN PROSES DALAM TRANSACTION
+        DB::transaction(function () use ($permintaan) {
 
-            $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
-                ->where('divisi_id', $permintaan->divisi_id_tujuan)
-                ->first();
+            $kode_msk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
 
-            if ($accessoriesTujuan) {
-                $accessoriesTujuan->increment('stok', $detail->qty);
-            } else {
-                $accessoriesTujuan = Accessories::create([
-                    'divisi_id'     => $permintaan->divisi_id_tujuan,
-                    'name'          => $accessoriesAsal->name,
-                    'price'         => $accessoriesAsal->price,
-                    'capital_price' => $accessoriesAsal->capital_price,
-                    'code_acces'    => $accessoriesAsal->code_acces,
-                    'stok'          => $detail->qty,
+            foreach ($permintaan->detailAccessories as $detail) {
+
+                $accessoriesAsal = Accessories::where('id', $detail->accessories_id)
+                    ->where('divisi_id', $permintaan->divisi_id_asal)
+                    ->first();
+
+                // Kurangi stok divisi asal
+                $accessoriesAsal->decrement('stok', $detail->qty);
+
+                // Cari / buat accessories di divisi tujuan
+                $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
+                    ->where('divisi_id', $permintaan->divisi_id_tujuan)
+                    ->first();
+
+                if ($accessoriesTujuan) {
+                    $accessoriesTujuan->increment('stok', $detail->qty);
+                } else {
+                    $accessoriesTujuan = Accessories::create([
+                        'divisi_id'     => $permintaan->divisi_id_tujuan,
+                        'name'          => $accessoriesAsal->name,
+                        'price'         => $accessoriesAsal->price,
+                        'capital_price' => $accessoriesAsal->capital_price,
+                        'code_acces'    => $accessoriesAsal->code_acces,
+                        'stok'          => $detail->qty,
+                    ]);
+                }
+
+                // Catat accessories masuk
+                AccessoriesIn::create([
+                    'accessories_id' => $accessoriesTujuan->id,
+                    'price'          => $accessoriesTujuan->price,
+                    'capital_price'  => $accessoriesTujuan->capital_price,
+                    'ppn'            => 0,
+                    'qty'            => $detail->qty,
+                    'kode_msk'       => $kode_msk,
+                    'date_in'        => now(),
                 ]);
             }
 
-            AccessoriesIn::create([
-                'accessories_id' => $accessoriesTujuan->id,
-                'price'          => $accessoriesTujuan->price,
-                'capital_price'  => $accessoriesTujuan->capital_price,
-                'ppn'            => 0,
-                'qty'            => $detail->qty,
-                'kode_msk'       => $kode_msk,
-                'date_in'        => now(),
-            ]);
+            // Update status permintaan
+            $permintaan->update(['status' => 'diterima']);
+        });
 
-            $total_item  += $detail->qty;
-            $total_harga += $accessoriesTujuan->price * $detail->qty;
-        }
-
-        $permintaan->update(['status' => 'diterima']);
-
-        return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil diterima.');
+        return redirect()
+            ->route('gudang.permintaan.index')
+            ->with('success', 'Permintaan berhasil diterima.');
     }
 
 
