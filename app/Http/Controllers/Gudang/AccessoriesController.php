@@ -141,39 +141,41 @@ class AccessoriesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-        ],[
+        ], [
             'name.required' => 'Nama Accessories Wajib Diisi',
         ]);
 
         if ($id === null) {
-            // Tahun dan bulan format: YYMM
-            $currentYearMonth = date('ym'); // contoh: 2512
 
-            // Cari akses terakhir dengan prefix tahun+bulan
-            $lastAcces = Accessories::where('code_acces', 'like', 'P-' . $currentYearMonth . '%')
-                ->orderByDesc('id')
+            // Prefix: P-YYMM
+            $prefix = 'P-' . date('ym');
+
+            // Ambil code_acces terakhir BERDASARKAN ANGKA TERBESAR
+            $lastAcces = Accessories::where('code_acces', 'like', $prefix . '%')
+                ->orderByRaw('CAST(SUBSTRING(code_acces, 7) AS UNSIGNED) DESC')
                 ->first();
 
             if ($lastAcces) {
-                // Ambil 3 digit terakhir nomor urut
-                preg_match('/P-' . $currentYearMonth . '(\d{3})/', $lastAcces->code_acces, $matches);
-                $lastNumber = isset($matches[1]) ? (int)$matches[1] : 0;
+                // Ambil nomor urut terakhir
+                $lastNumber = (int) substr($lastAcces->code_acces, 6);
             } else {
                 $lastNumber = 0;
             }
 
-            // Nomor urut berikutnya (3 digit)
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-
-            // Format final: P-YYMMXXX
-            $codeAcces = 'P-' . $currentYearMonth . $newNumber;
+            // Generate code baru & pastikan benar-benar unik
+            do {
+                $lastNumber++;
+                $codeAcces = $prefix . str_pad($lastNumber, 3, '0', STR_PAD_LEFT);
+            } while (
+                Accessories::where('code_acces', $codeAcces)->exists()
+            );
         }
 
         $acces = Accessories::firstOrNew(['id' => $id]);
-        $acces->name          = $request->input('name');
+        $acces->name          = $request->name;
         $acces->price         = 0;
-        $acces->divisi_id     = Auth::user()->divisi_id;
         $acces->capital_price = 0;
+        $acces->divisi_id     = Auth::user()->divisi_id;
 
         if ($id === null) {
             $acces->code_acces = $codeAcces;
