@@ -292,11 +292,15 @@ class AccesoriesController extends Controller
 
     // Ambil data AccessoriesSale dengan relasi
     $accesout = AccessoriesSale::with(['accessories.divisi', 'accessories.accessoriesIn', 'sale'])
+        ->whereHas('accessories') // ⬅️ PENTING
         ->get()
         ->map(function ($accessorySale) {
-            $accessorySale->total_price = $accessorySale->accessories->price * $accessorySale->qty;
+            $accessorySale->total_price =
+                $accessorySale->accessories->price * $accessorySale->qty;
+
             return $accessorySale;
         });
+
 
     // Filter bulan
     if ($bulanFilter) {
