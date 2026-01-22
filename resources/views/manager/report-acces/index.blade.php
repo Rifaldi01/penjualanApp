@@ -27,7 +27,7 @@
                     <tbody>
                     @foreach ($report as $key => $data)
                         <tr>
-                            <td>{{$key +1}}</td>
+                            <td>{{$data->id}}</td>
                             <td>{{ $data->accessories?->code_acces ?? 'kosong' }}</td>
                             <td>{{ $data->accessories?->name ?? '-' }}</td>
                             <td>{{ formatRupiah($data->accessories?->price ?? 0) }}</td>
