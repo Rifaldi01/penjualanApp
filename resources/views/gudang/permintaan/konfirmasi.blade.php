@@ -13,6 +13,7 @@
                        <th>Tanggal</th>
                        <th>Kode</th>
                        <th>Barang</th>
+                       <th>Kode Acces</th>
                        <th>Qty</th>
                        <th>Divisi Tujuan</th>
                        <th width="2%">Jumlah Barang</th>
@@ -29,6 +30,12 @@
                            <td>
                                @forelse($permintaan->detailAccessories as $detail)
                                    {{ $detail->accessories?->name ?? '-' }}<br>
+                               @empty
+                                   -
+                               @endforelse
+                           </td> <td>
+                               @forelse($permintaan->detailAccessories as $detail)
+                                   {{ $detail->accessories?->code_acces ?? '-' }}<br>
                                @empty
                                    -
                                @endforelse
