@@ -51,9 +51,9 @@
                     <tr>
                         <th>Nama Barang</th>
                         <th>Kode</th>
-                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
-                            <th>Harga Beli</th>
-                        @endif
+{{--                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))--}}
+{{--                            <th>Harga Beli</th>--}}
+{{--                        @endif--}}
                         <th>Harga Jual</th>
                         @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
                             <th>PPN</th>
@@ -72,9 +72,9 @@
                     <tr>
                         <th>Nama Barang</th>
                         <th>Kode</th>
-                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
-                            <th>Harga Beli</th>
-                        @endif
+{{--                        @if(in_array(Auth::user()->divisi->kode, ['001', '002']))--}}
+{{--                            <th>Harga Beli</th>--}}
+{{--                        @endif--}}
                         <th>Harga Jual</th>
                         @if(in_array(Auth::user()->divisi->kode, ['001', '002']))
                             <th>PPN</th>
@@ -126,7 +126,7 @@
                         <input type="text" name="items[${itemIndex}][no_seri]" class="form-control"
                             value="${item.no_seri ?? ''}" required readonly>
                     </td>
-                     ${userHasAccess ? `<td><input type="number" name="items[${itemIndex}][capital_price]" class="form-control" value="${item.capital_price ?? ''}"></td>` : ''}
+
                     <td>
                         <input type="number" name="items[${itemIndex}][price]" class="form-control"
                             value="${item.price ?? ''}" required>
