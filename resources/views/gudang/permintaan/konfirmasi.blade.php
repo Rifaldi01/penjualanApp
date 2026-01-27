@@ -69,10 +69,10 @@
                                    </form>
                                @endif
                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'disetujui' || $permintaan->status == 'diterima' )
-                                       <button class="btn btn-dnd lni lni-files btn-sm" data-bs-toggle="modal"
-                                               data-bs-target="#exampleExtraLargeModal{{$permintaan->id}}" data-bs-tool="tooltip"
-                                               data-bs-placement="top" title="Print Surat Jalan">
-                                       </button>
+{{--                                       <button class="btn btn-dnd lni lni-files btn-sm" data-bs-toggle="modal"--}}
+{{--                                               data-bs-target="#exampleExtraLargeModal{{$permintaan->id}}" data-bs-tool="tooltip"--}}
+{{--                                               data-bs-placement="top" title="Print Surat Jalan">--}}
+{{--                                       </button>--}}
 
                                @endif
                                    @include('gudang.permintaan.surat-penerimaan')

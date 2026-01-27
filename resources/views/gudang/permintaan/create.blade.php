@@ -136,11 +136,25 @@
         }
 
         // Fungsi untuk mendapatkan opsi aksesori dalam bentuk HTML
+        function formatTanggal(tanggal) {
+            const date = new Date(tanggal);
+
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
         function getAccessoriesOptions() {
             return accessoriesData.map(item => {
-                return `<option value="${item.id}">${item.code_acces} - ${item.name} (Stok: ${item.stok})</option>`;
+                return `<option value="${item.id}">
+            [${formatTanggal(item.created_at)}]
+            ${item.code_acces} - ${item.name} (Stok: ${item.stok})
+        </option>`;
             }).join('');
         }
+
 
         // Fungsi untuk inisialisasi Select2
         function initializeSelect2() {
