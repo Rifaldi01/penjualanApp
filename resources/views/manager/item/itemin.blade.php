@@ -48,7 +48,7 @@
                                     -{{ $item->no_seri }}
                                 </td>
                                 <td>
-                                    {{ $item->divisi->name }}
+                                    {{ $item->divisi?->name ?? '-' }}
                                 </td>
                                 <td>
                                     <a class="text-dark">{{ $item->name }}</a>
@@ -66,7 +66,7 @@
                                 <td class="text-center">{{ tanggal($item->created_at) }}</td>
                                 <td>{{ $item->itemCategory->name}}-{{ $item->no_seri }}</td>
                                 <td>
-                                    {{ $item->divisi->name }}
+                                    {{ $item->divisi?->name ?? '-' }}
                                 </td>
                                 <td><a class="text-dark">{{ $item->name }}</a></td>
                                 <td>{{$item->itemCategory->name}}</td>
