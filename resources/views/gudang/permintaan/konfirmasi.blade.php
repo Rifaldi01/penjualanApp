@@ -60,6 +60,10 @@
                                @endif
                            </td>
                            <td>
+                               <button class="btn btn-dnd lni lni-files btn-sm" data-bs-toggle="modal"
+                                       data-bs-target="#exampleExtraLargeModal{{$permintaan->id}}" data-bs-tool="tooltip"
+                                       data-bs-placement="top" title="Print Surat Jalan">
+                               </button>
                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_asal && $permintaan->status == 'pending')
                                    <!-- Tombol Terima -->
                                    <form action="{{ route('gudang.permintaan.receive', $permintaan->id) }}" method="POST">
