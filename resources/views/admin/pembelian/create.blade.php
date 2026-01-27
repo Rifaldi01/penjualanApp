@@ -161,7 +161,7 @@
                         <input type="text" name="acces[${accesIndex}][code_acces]" class="form-control"
                             value="${acces.accessories?.code_acces ?? ''}" required readonly>
                     </td>
-                    ${userHasAccess ? `<td><input type="number" name="acces[${accesIndex}][capital_price]" class="form-control" value="${acces.capital_price ?? ''}"></td>` : ''}
+
                     <td>
                         <input type="number" name="acces[${accesIndex}][price]" class="form-control"
                             value="${acces.price ?? ''}" required>
