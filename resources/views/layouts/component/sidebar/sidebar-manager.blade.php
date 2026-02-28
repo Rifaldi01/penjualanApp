@@ -37,12 +37,12 @@
                         Transaction
                     </a>
                 </li>
-                <li>
-                    <a href="{{route('manager.retur-sales.index')}}">
-                        <i class='bx bx-refresh'></i>
-                        Retur Transaction
-                    </a>
-                </li>
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.retur-sales.index')}}">--}}
+{{--                        <i class='bx bx-refresh'></i>--}}
+{{--                        Retur Transaction--}}
+{{--                    </a>--}}
+{{--                </li>--}}
             </ul>
         </li>
         <li>
