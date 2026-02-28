@@ -10,6 +10,7 @@ use App\Http\Controllers\Gudang\AccessoriesController;
 use App\Http\Controllers\EditController;
 use App\Http\Controllers\Gudang\PermintaanController;
 use App\Http\Controllers\Gudang\PermintaanItemController;
+use App\Http\Controllers\Gudang\AccessoriesBalanceController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -94,6 +95,10 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::get('/konfirmasi-item', [PermintaanItemController::class, 'konfirmasi'])->name('gudang.permintaanitem.konfirmasi');
     Route::get('/minta/item/{divisi_id}', [PermintaanItemController::class, 'fetchAccessories'])->name('gudang.permintaan.fetchItems');
 
-
+    //Balance Accessories
+    Route::get('/accessories-balance', [AccessoriesBalanceController::class, 'index'])->name('gudang.balance.index');
+    Route::post('/accessories-balance/generate', [AccessoriesBalanceController::class, 'generateMissingYearlyBalances'])->name('accessories.balance.generate-missing');
+    Route::get('/accessories-balance/data', [AccessoriesBalanceController::class, 'data'])->name('gudang.accessories.balance.data');
+    Route::get('balance/{id}/detail', [AccessoriesBalanceController::class, 'show'])->name('gudang.balance.show');
 
 });

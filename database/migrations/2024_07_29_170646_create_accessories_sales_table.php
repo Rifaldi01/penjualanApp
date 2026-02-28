@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('subtotal');
             $table->date('acces_out');
             $table->timestamps();
+            $table->softDeletes();
+
         });
     }
 

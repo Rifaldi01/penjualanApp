@@ -12,6 +12,8 @@ use App\Http\Controllers\manager\ReportController;
 use App\Http\Controllers\manager\PembelianController;
 use App\Http\Controllers\manager\SupllierController;
 use App\Http\Controllers\manager\PermintaanController;
+use App\Http\Controllers\manager\ReturController;
+use App\Http\Controllers\manager\AccessoriesBalanceController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -85,10 +87,23 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('/konfirmasi', [PermintaanController::class, 'konfirmasi'])->name('manager.permintaan.konfirmasi');
     Route::get('/minta/accessories/{divisi_id}', [PermintaanController::class, 'fetchAccessories'])->name('manager.permintaan.fetchAccessories');
 
-// Route untuk hapus item dari transaksi
+    // Route untuk hapus item dari transaksi
     Route::delete('/sale/item-sale/{id}', [SaleController::class, 'deleteItemSale'])->name('sale.item-sale.delete');
 
-// Route untuk hapus accessories dari transaksi
+    // Route untuk hapus accessories dari transaksi
     Route::delete('/sale/accessory-sale/{id}', [SaleController::class, 'deleteAccessorySale'])->name('sale.accessory-sale.delete');
+
+    //Retur Sale
+    Route::get('/retur-sales', [ReturController::class, 'index'])->name('manager.retur-sales.index');
+    Route::get('/retur-sales/{id}', [ReturController::class, 'show'])->name('retur-sales.show');
+    Route::get('/retur/{id}/print', [ReturController::class, 'print'])->name('retur.print');
+    Route::get('/retur/{id}/pdf', [ReturController::class, 'exportPdf'])->name('retur.pdf');
+    Route::get('/retur/{id}/excel', [ReturController::class, 'exportExcel'])->name('retur.excel');
+
+    //Balance Accessories
+    Route::get('/accessories-balance', [AccessoriesBalanceController::class, 'index'])->name('manager.balance.index');
+    Route::post('/accessories-balance/generate', [AccessoriesBalanceController::class, 'generateMissingYearlyBalances'])->name('accessories.balance.generate-missing');
+    Route::get('/accessories-balance/data', [AccessoriesBalanceController::class, 'data'])->name('accessories.balance.data');
+    Route::get('balance/{id}/detail', [AccessoriesBalanceController::class, 'show'])->name('manager.balance.show');
 
 });

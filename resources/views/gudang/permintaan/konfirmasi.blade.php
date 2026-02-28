@@ -6,7 +6,7 @@
               <h4>DAFTAR PERMINTAAN</h4>
           </div>
            <div class="card-body">
-               <table class="table table-bordered table-striped" id="example2">
+               <table class="table table-bordered table-striped" id="konfir">
                    <thead>
                    <tr>
                        <th width="2%">No</th>
@@ -84,8 +84,21 @@
                            </td>
                        </tr>
                    @endforeach
-
                    </tbody>
+                   <tfoot>
+                   <tr>
+                       <th></th>
+                       <th></th>
+                       <th></th>
+                       <th></th>
+                       <th></th>
+                       <th></th>
+                       <th colspan="" class="text-end">Total</th>
+                       <th></th>
+                       <th colspan=""></th>
+                       <th colspan=""></th>
+                   </tr>
+                   </tfoot>
                </table>
            </div>
        </div>
@@ -117,5 +130,88 @@
                     }, false)
                 })
         })()
+
+        if (!$.fn.DataTable.isDataTable('#konfir')) {
+
+            function formatDatePdf() {
+                const date = new Date();
+                const day   = String(date.getDate()).padStart(2, '0');
+                const month = date.toLocaleString('en-US', { month: 'short' });
+                const year  = String(date.getFullYear()).slice(-2);
+                return `${day} ${month} ${year}`;
+            }
+
+            var table2 = $('#konfir').DataTable({
+                lengthChange: false,
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        footer: true,
+                        filename: function () {
+                            return 'Report Accessories ' + formatDatePdf();
+                        },
+                        exportOptions: { columns: [0,1,2,3,4,5,6] },
+                        customize: function (doc) {
+
+                            doc.defaultStyle.fontSize = 8;
+                            doc.styles.tableHeader.fontSize = 9;
+                            doc.pageMargins = [20, 20, 20, 20];
+
+                            // Cari table node secara aman
+                            var tableNode;
+                            doc.content.forEach(function (item) {
+                                if (item.table) {
+                                    tableNode = item;
+                                }
+                            });
+
+                            if (tableNode) {
+                                tableNode.table.widths = [
+                                    '5%', '20%', '30%', '20%', '5%', '15%', '5%'
+                                ];
+                            }
+                        }
+
+                    },
+                    {
+                        extend: 'print',
+                        footer: true,
+                        exportOptions: { columns: [0,1,2,3,4,5,6] }
+                    }
+                ],
+
+                footerCallback: function (row, data, start, end, display) {
+                    var api = this.api();
+
+                    var intVal = function (i) {
+                        return typeof i === 'string'
+                            ? i.replace(/[^0-9]/g, '') * 1
+                            : typeof i === 'number'
+                                ? i
+                                : 0;
+                    };
+
+                    var totalQty = api
+                        .column(7, { search: 'applied' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return a + intVal(b);
+                        }, 0);
+
+                    $(api.column(7).footer()).html(totalQty);
+                }
+            });
+
+            table2.buttons().container()
+                .appendTo('#konfir_wrapper .col-md-6:eq(0)');
+
+            table2.on('order.dt search.dt', function () {
+                let i = 1;
+                table2.cells(null, 0, { search: 'applied', order: 'applied' })
+                    .every(function () {
+                        this.data(i++);
+                    });
+            }).draw();
+        }
     </script>
 @endpush

@@ -11,6 +11,7 @@ use App\Models\Debt;
 use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemSale;
+use App\Models\ReturSale;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -429,59 +430,77 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
-        DB::beginTransaction(); // Mulai transaksi database
+        DB::beginTransaction();
 
         try {
-            // Ambil data sale berdasarkan id
             $sale = Sale::findOrFail($id);
 
-            // Proses pengembalian item_sales ke table items
-            $itemSales = ItemSale::where('sale_id', $id)->get();
+            // ===============================
+            // 1. BUAT DATA RETUR SALES
+            // ===============================
+            $invoiceRetur = str_replace('INV', 'INR', $sale->invoice);
+
+            ReturSale::create([
+                'invoice_retur' => $invoiceRetur,
+                'sales_id'      => $sale->id,
+                'user_id'       => auth()->id(),
+                'divisi_id'     => $sale->divisi_id,
+            ]);
+
+            // ===============================
+            // 2. KEMBALIKAN ITEM SERIAL
+            // ===============================
+            $itemSales = ItemSale::where('sale_id', $sale->id)->get();
+
             foreach ($itemSales as $itemSale) {
-                // Buat ulang data item berdasarkan item_sales
                 Item::create([
-                    'divisi_id' => $itemSale->divisi_id,
+                    'divisi_id'        => $itemSale->divisi_id,
                     'itemcategory_id' => $itemSale->itemcategory_id,
-                    'name' => $itemSale->name,
-                    'price' => $itemSale->price,
-                    'capital_price' => $itemSale->capital_price,
-                    'no_seri' => $itemSale->no_seri,
-                    'status' => 1, // Ubah status item ke tersedia
+                    'name'            => $itemSale->name,
+                    'price'           => $itemSale->price,
+                    'capital_price'   => $itemSale->capital_price,
+                    'no_seri'         => $itemSale->no_seri,
+                    'status'          => 1, // tersedia
                 ]);
 
-                // Hapus data dari item_sales
                 $itemSale->delete();
             }
 
-            // Proses pengembalian stok accessories
-            $accessoriesSales = AccessoriesSale::where('sale_id', $id)->get();
-            foreach ($accessoriesSales as $accessorySale) {
-                // Tambahkan stok kembali di tabel accessories
-                $accessory = Accessories::find($accessorySale->accessories_id);
-                if ($accessory) {
-                    $accessory->stok += $accessorySale->qty;
-                    $accessory->save();
-                }
+            // ===============================
+            // 3. KEMBALIKAN STOK ACCESSORIES
+            // ===============================
+            $accessoriesSales = AccessoriesSale::where('sale_id', $sale->id)->get();
 
-                // Hapus data dari accessories_sales
+            foreach ($accessoriesSales as $accessorySale) {
+                Accessories::where('id', $accessorySale->accessories_id)
+                    ->increment('stok', $accessorySale->qty);
+
                 $accessorySale->delete();
             }
 
-            // Hapus data dari tabel debts yang memiliki sale_id yang sama
-            Debt::where('sale_id', $id)->delete();
+            // ===============================
+            // 4. HAPUS DEBT
+            // ===============================
+            Debt::where('sale_id', $sale->id)->delete();
 
-            // Hapus data sale
-            $sale->delete();
+            // ===============================
+            // 5. HAPUS SALE
+            // ===============================
+            $sale->delete(); // soft delete jika pakai SoftDeletes
 
-            DB::commit(); // Commit transaksi jika semua berhasil
+            DB::commit();
 
-            // Kembalikan respons JSON untuk AJAX
-            return response()->json(['success' => true, 'message' => 'Transaksi berhasil dibatalkan']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil dibatalkan dan dicatat sebagai retur'
+            ]);
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback transaksi jika ada error
+            DB::rollBack();
 
-            // Kembalikan respons JSON untuk error
-            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat membatalkan transaksi: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 

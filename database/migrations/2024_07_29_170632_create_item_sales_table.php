@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('capital_price')->nullable();
             $table->date('date_in');
             $table->timestamps();
+            $table->softDeletes();
+
         });
     }
 

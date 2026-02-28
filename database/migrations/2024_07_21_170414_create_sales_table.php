@@ -31,6 +31,8 @@ return new class extends Migration
             $table->integer('divisi_id');
             $table->string('admin_fee')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
         });
     }
 
