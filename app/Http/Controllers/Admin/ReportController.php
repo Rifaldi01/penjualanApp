@@ -47,7 +47,7 @@ class ReportController extends Controller
         $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->sum('capital_price');
         $totalCapitalPriceAcces = Accessories::sum('capital_price');
 
-        $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
+        $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces - $fee;
 
         return view('admin.report.index', compact(
             'report',
@@ -129,7 +129,7 @@ class ReportController extends Controller
             })->implode(', ') : '-';
         });
 
-        $profit = $totalIncome - $totalCapital;
+        $profit = $totalIncome - $totalCapital - $totalfee;
 
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
@@ -138,9 +138,9 @@ class ReportController extends Controller
             'profit' => $profit,
             'diskon' => $totalDiskon,
             'ongkir' => $totalOngkir,
-            'ppn' => $totalppn,
-            'pph' => $totalpph,
-            'fee' => $totalfee,
+            'ppn'    => $totalppn,
+            'pph'    => $totalpph,
+            'fee'    => $totalfee,
             'totalprice' => $totalprice
         ]);
     }
