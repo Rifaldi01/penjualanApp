@@ -107,7 +107,6 @@ class ItemController extends Controller
                 'no_seri' => $request->input('no_seri'),
                 'created_at' => $request->input('created_at'),
                 'price' => $request->input('price'),
-                'capital_price' => $request->input('capital_price'),
             ]
         );
 
@@ -118,7 +117,6 @@ class ItemController extends Controller
                 'itemcategory_id' => $item->itemcategory_id,
                 'name' => $item->name,
                 'price' => $item->price,
-                'capital_price' => $item->capital_price,
                 'created_at' => $item->created_at,
                 'kode_msk' => $request->input('kode_msk'),
             ]

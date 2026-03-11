@@ -73,12 +73,10 @@ class AccessoriesController extends Controller
 
         $acces = Accessories::firstOrNew(['id' => $id]);
         $oldPrice = $acces->price; // Simpan harga lama
-        $oldCapitalPrice = $acces->capital_price; // Simpan harga modal lama
 
         // Update data accessories
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
-        $acces->capital_price = $request->input('capital_price');
 
 
         $acces->save();
@@ -88,7 +86,6 @@ class AccessoriesController extends Controller
             AccessoriesIn::where('accessories_id', $id)
                 ->update([
                     'price' => $request->input('price'),
-                    'capital_price' => $request->input('capital_price')
                 ]);
         }
 
