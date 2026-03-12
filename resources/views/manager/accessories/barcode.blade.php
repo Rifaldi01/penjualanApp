@@ -45,7 +45,7 @@
                         @foreach($divisi as $div)
                             @if(isset($acces))
                                 <option
-                                    value="{{ $div->id }}" {{ $div->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                                    value="{{ $div->id }}" {{ $acces->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
                             @else
                                 <option value=""></option>
                                 <option value="{{ $div->id }}">{{ $div->name }}</option>

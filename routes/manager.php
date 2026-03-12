@@ -42,6 +42,8 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::post('/item/print', [ItemController::class, 'print'])->name('manager.item.print');
     Route::get('/itmein', [ItemController::class, 'itemin'])->name('manager.item.itemin');
     Route::get('/itmeout', [ItemController::class, 'itemout'])->name('manager.item.itemout');
+    Route::get('/item/edit-price/{no_seri}', [ItemController::class, 'editPrice'])->name('manager.item.editPrice');
+    Route::put('/item/update-price/{no_seri}', [ItemController::class, 'updatePrice'])->name('manager.item.updatePrice');
 
     //item end
 

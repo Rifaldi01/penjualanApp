@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\Divisi;
 use App\Models\ItemIn;
 use App\Models\ItemSale;
+use Illuminate\Support\Facades\DB;
 use Milon\Barcode\DNS1D;
 use App\Models\Pembelian;
 use App\Models\ItemCategory;
@@ -312,6 +313,40 @@ class ItemController extends Controller
         $dompdf->render();
 
         return $dompdf->stream('barcode-item.pdf', ['Attachment' => false]);
+    }
+    public function editPrice($no_seri)
+    {
+        $item = ItemIn::where('no_seri', $no_seri)->firstOrFail();
+        $divisi = Divisi::all();
+        $cat = ItemCategory::all();
+
+        return view('manager.item.edit-price', compact('item', 'divisi', 'cat'));
+    }
+
+    public function updatePrice(Request $request, $no_seri)
+    {
+        $request->validate([
+            'price' => 'required|numeric',
+            'capital_price' => 'required|numeric'
+        ]);
+
+        DB::transaction(function () use ($request, $no_seri) {
+
+            ItemIn::where('no_seri', $no_seri)->update([
+                'price' => $request->price,
+                'capital_price' => $request->capital_price
+            ]);
+
+            ItemSale::where('no_seri', $no_seri)->update([
+                'price' => $request->price,
+                'capital_price' => $request->capital_price
+            ]);
+
+        });
+
+        return redirect()
+            ->route('manager.report.index', $no_seri)
+            ->with('success', 'Price berhasil diperbarui');
     }
 
 }

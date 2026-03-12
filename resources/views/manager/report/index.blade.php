@@ -129,6 +129,10 @@
 
 @push('js')
     <script>
+        let accesEditUrl = "{{ route('manager.acces.edit', ':id') }}";
+        let itemEditUrl = "{{ route('manager.item.editPrice', ':no_seri') }}";
+    </script>
+    <script>
         $(document).ready(function () {
             function loadData(startDate = '', endDate = '', divisiId ='') {
                 $.ajax({
@@ -158,43 +162,107 @@
                         $('#fee').text(formatRupiah(response.fee));
                         $('#total-bersih').text(formatRupiah(response.totalprice));
 
-                        let totalCapital = response.totalCapital; // <- pastikan ini tidak undefined
-                        response.report.forEach(function (data, index) {
-                            var itemSalesList = '<ul>';
-                            if (data.itemSales && data.itemSales.length > 0) {
-                                data.itemSales.forEach(function (item) {
-                                    itemSalesList += `<li>${item}</li>`;
-                                });
-                            }
-                            itemSalesList += '</ul>';
+                        let totalCapital = response.totalCapital;
 
-                            var accessoriesList = '<ul>';
-                            if (data.accessories && data.accessories.length > 0) {
-                                data.accessories.forEach(function (accessory) {
-                                    accessoriesList += `<li>${accessory.name} - (${accessory.pivot.qty})</li>`;
+                        response.report.forEach(function (data, index) {
+
+                            // ================= ITEM SALES =================
+                            var itemSalesList = '<ul>';
+
+                            if (data.itemSales && data.itemSales.length > 0) {
+
+                                data.itemSales.forEach(function (item) {
+
+                                    // Ambil no_seri dari format: "Nama Item - (NO_SERI)"
+                                    let matches = [...item.matchAll(/\((.*?)\)/g)];
+
+                                    let noSeri = '';
+
+                                    if (matches.length > 0) {
+
+                                        // jika kurung pertama adalah "khusus"
+                                        if (matches[0][1].toLowerCase() === 'khusus' && matches.length > 1) {
+                                            noSeri = matches[1][1];
+                                        } else {
+                                            noSeri = matches[0][1];
+                                        }
+
+                                    }
+
+                                    let itemLink = itemEditUrl.replace(':no_seri', noSeri);
+
+                                    itemSalesList += `
+            <li>
+                <a href="${itemLink}" class="text-dark">
+                    ${item}
+                </a>
+            </li>
+        `;
                                 });
+
                             }
+
+                            itemSalesList += '</ul>';
+                            // ================= ACCESSORIES =================
+                            var accessoriesList = '<ul>';
+
+                            if (data.accessories && data.accessories.length > 0) {
+
+                                data.accessories.forEach(function (accessory) {
+
+                                    let accesLink = accesEditUrl.replace(':id', accessory.id);
+
+                                    accessoriesList += `
+                <li>
+                    <a href="${accesLink}" class="text-dark">
+                        ${accessory.name} - (${accessory.pivot.qty})
+                    </a>
+                </li>
+            `;
+                                });
+
+                            } else {
+
+                                accessoriesList += ``;
+
+                            }
+
                             accessoriesList += '</ul>';
 
+
+
+                            // ================= DEBT =================
                             var debtList = '<ul>';
+
                             if (data.debt && data.debt.length > 0) {
+
                                 data.debt.forEach(function (debt) {
+
                                     var bankName = debt.bank ? debt.bank.name : '';
                                     var description = debt.description ? debt.description : '';
                                     var datePay = debt.date_pay ? debt.date_pay : 'Tanggal tidak tersedia';
+
                                     debtList += `<li>${datePay} - ${bankName || description || 'Tunai'}</li>`;
                                 });
+
+                            } else {
+
+                                debtList += `<li>-</li>`;
+
                             }
+
                             debtList += '</ul>';
 
-                            // Tambahkan ke DataTable, bukan ke DOM
+
+
+                            // ================= DATATABLE =================
                             table.row.add([
                                 index + 1,
                                 formatDate(data.created_at ?? ''),
                                 data.invoice ?? 'N/A',
                                 data.customer?.name ?? 'N/A',
-                                itemSalesList ?? 'N/A',
-                                accessoriesList ?? 'N/A',
+                                itemSalesList,
+                                accessoriesList,
                                 data.total_item ?? 0,
                                 formatRupiah(data.total_price ?? 0),
                                 formatRupiah(data.ppn ?? 0),
@@ -206,9 +274,9 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(totalCapital?.[data.id]),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
-                                debtList ?? 'N/A'
+                                formatRupiah(totalCapital?.[data.id] ?? 0),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id] ?? 0), 0)),
+                                debtList
                             ]).draw(false);
 
                         });
