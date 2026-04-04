@@ -23,8 +23,8 @@
                         <th>Divisi</th>
                         <th>Name</th>
                         <th>No Seri</th>
-                        <th>Price Cost</th>
-                        <th>Sale Price</th>
+                        <th>Harga Bottom</th>
+                        <th>Harga Jual</th>
                         <th class="text-center" width="15%">Action</th>
                     </tr>
                     </thead>
@@ -39,7 +39,7 @@
                                 <a class="text-dark">{{$item->name}}</a>
                             </td>
                             <td>{{$item->cat->name}}-{{$item->no_seri}}</td>
-                            <td>{{formatRupiah($item->capital_price)}},-</td>
+                            <td>{{formatRupiah($item->price_bottom)}},-</td>
                             <td>{{formatRupiah($item->price)}},-</td>
                             <td class="text-center">
                                 <a href="{{route('admin.item.edit', $item->id)}}"

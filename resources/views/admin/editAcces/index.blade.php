@@ -30,8 +30,8 @@
                                 <th width="2%">Code </th>
                                 <th>Name</th>
                                 <th>Divisi</th>
-                                <th>Price Cost</th>
-                                <th>Sale Price</th>
+                                <th>Harga Bottom</th>
+                                <th>Harga Jual</th>
                                 <th class="text-center" width="10%">Stok</th>
                                 <th class="text-center" width="10%">Action</th>
                             </tr>
@@ -45,7 +45,7 @@
                                     <td>{{ $data->code_acces }}</td>
                                     <td>{{ $data->name }}</td>
                                     <td>{{ $data->divisi->name }}</td>
-                                    <td>{{ is_numeric($data->capital_price) ? formatRupiah($data->capital_price, 0, '.', '.') : '0' }},-</td>
+                                    <td>{{ is_numeric($data->price_bottom) ? formatRupiah($data->price_bottom, 0, '.', '.') : '0' }},-</td>
                                     <td>{{ formatRupiah($data->price) }},-</td>
                                     <td class="text-center">{{ $data->stok }}</td>
                                     <td class="text-center">

@@ -87,30 +87,42 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validate = $request->validate([
+        $item = Item::findOrFail($id);
+
+        // Bersihkan format rupiah (WAJIB)
+        $price = str_replace('.', '', $request->price);
+        $request->merge([
+            'price' => $price
+        ]);
+
+        // Ambil price_bottom dari data lama
+        $priceBottom = $item->price_bottom ?? 0;
+
+        $request->validate([
             'name' => 'required',
             'itemcategory_id' => 'required',
-            'no_seri' => $id ? 'required' : 'required|unique:items',
+            'no_seri' => 'required|unique:items,no_seri,' . $id,
+            'price' => 'required|numeric|min:' . $priceBottom,
         ], [
             'name.required' => 'Nama Tidak Boleh Kosong',
             'itemcategory_id.required' => 'Pilih Category',
             'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
+            'price.required' => 'Price tidak boleh kosong',
+            'price.numeric' => 'Price harus berupa angka',
+            'price.min' => 'Price tidak boleh lebih kecil dari price bottom (' . number_format($priceBottom) . ')',
         ]);
 
-        // Simpan atau update data di tabel `items`
-        $item = Item::updateOrCreate(
-            ['id' => $id],
-            [
-                'itemcategory_id' => $request->input('itemcategory_id'),
-                'name' => $request->input('name'),
-                'no_seri' => $request->input('no_seri'),
-                'created_at' => $request->input('created_at'),
-                'price' => $request->input('price'),
-            ]
-        );
+        // Update data item
+        $item->update([
+            'itemcategory_id' => $request->itemcategory_id,
+            'name' => $request->name,
+            'no_seri' => $request->no_seri,
+            'created_at' => $request->created_at,
+            'price' => $request->price,
+        ]);
 
-        // Update atau buat data di tabel `item_ins`
+        // Update / create item_ins
         ItemIn::updateOrCreate(
             ['no_seri' => $item->no_seri],
             [
@@ -118,20 +130,18 @@ class ItemController extends Controller
                 'name' => $item->name,
                 'price' => $item->price,
                 'created_at' => $item->created_at,
-                'kode_msk' => $request->input('kode_msk'),
+                'kode_msk' => $request->kode_msk,
             ]
         );
 
-        // Ambil invoice dari request
-        $invoice = $request->input('kode_msk');
+        // Handle pembelian
+        $invoice = $request->kode_msk;
         $divisiId = Auth::user()->divisi_id;
 
-        // Cek apakah invoice dengan divisi yang sama sudah ada
         $existingPembelian = Pembelian::where('invoice', $invoice)
             ->where('divisi_id', $divisiId)
             ->first();
 
-        // Jika tidak ada pembelian dengan invoice & divisi yang sama, buat baru
         if (!$existingPembelian && $invoice) {
             Pembelian::create([
                 'divisi_id' => $divisiId,
@@ -140,7 +150,8 @@ class ItemController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.item.editItem')->withSuccess('Data berhasil disimpan');
+        return redirect()->route('admin.item.editItem')
+            ->withSuccess('Data berhasil disimpan');
     }
 
 

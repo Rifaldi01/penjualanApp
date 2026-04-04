@@ -62,35 +62,36 @@ class AccessoriesController extends Controller
     }
 
     public function update(Request $request, $id){
+        $acces = Accessories::findOrFail($id);
+
+        // Bersihkan format rupiah
+        $price = str_replace('.', '', $request->price);
+        $request->merge([
+            'price' => $price
+        ]);
+
         $request->validate([
             'name' => 'required',
-            'price' => 'required'
+            'price' => 'required|numeric|min:' . $acces->price_bottom,
         ], [
             'name.required' => 'Nama Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
+            'price.numeric' => 'Price harus berupa angka',
+            'price.min' => 'Price tidak boleh lebih kecil dari price bottom (' . number_format($acces->price_bottom) . ')',
         ]);
 
+        $oldPrice = $acces->price;
 
-        $acces = Accessories::firstOrNew(['id' => $id]);
-        $oldPrice = $acces->price; // Simpan harga lama
-
-        // Update data accessories
         $acces->name = $request->input('name');
         $acces->price = $request->input('price');
-
-
         $acces->save();
 
-        // Jika data accessories berhasil diupdate, update juga accessories_ins
-        if ($id !== null) {
-            AccessoriesIn::where('accessories_id', $id)
-                ->update([
-                    'price' => $request->input('price'),
-                ]);
-        }
+        AccessoriesIn::where('accessories_id', $id)
+            ->update([
+                'price' => $request->input('price'),
+            ]);
 
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('admin.acces.editAcces');
     }
-
 }

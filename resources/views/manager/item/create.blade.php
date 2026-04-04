@@ -105,6 +105,14 @@
                            value="{{isset($item) ? $item->capital_price : null}}" placeholder="0">
                 </div>
             </div>
+            <div class="mt-3 mb-2">
+                <label class="col-form-label">Price Bottom</label>
+                <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
+                    <input type="text" name="price_bottom" class="form-control" onkeyup="formatRupiah(this)"
+                           value="{{isset($item) ? $item->price_bottom : null}}" placeholder="0">
+                </div>
+            </div>
+
             <div class="mb-2">
                 <label class="col-form-label">Price</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>

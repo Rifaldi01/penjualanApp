@@ -158,6 +158,7 @@ class ItemController extends Controller
                 'created_at' => $request->input('created_at'),
                 'price' => $request->input('price') ?? 0,
                 'capital_price' => $request->input('capital_price') ?? 0,
+                'price_bottom' => $request->input('price_bottom') ?? 0,
                 'divisi_id' => $request->input('divisi_id'),
             ]
         );
@@ -171,6 +172,7 @@ class ItemController extends Controller
                 'name' => $item->name,
                 'price' => $item->price,
                 'capital_price' => $item->capital_price,
+                'price_bottom' => $item->price_bottom,
                 'created_at' => $item->created_at,
                 'kode_msk' => $request->input('kode_msk'),
             ]

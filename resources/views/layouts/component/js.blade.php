@@ -116,10 +116,13 @@
             // Hapus titik dari input harga
             let priceInput = $('input[name="price"]');
             let priceInput2 = $('input[name="capital_price"]');
+            let priceInput3 = $('input[name="price_bottom"]');
             let priceValue = priceInput.val().replace(/\./g, '');
             priceInput.val(priceValue);
             let priceValue2 = priceInput2.val().replace(/\./g, '');
             priceInput2.val(priceValue2);
+            let priceValue3 = priceInput3.val().replace(/\./g, '');
+            priceInput3.val(priceValue3);
 
             // Kirim form secara manual
             $('#myForm').submit();

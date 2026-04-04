@@ -163,6 +163,7 @@ class AccesoriesController extends Controller
         $acces->price = $request->input('price');
         $acces->stok = $request->input('stok');
         $acces->capital_price = $request->input('capital_price');
+        $acces->price_bottom = $request->input('price_bottom');
         $acces->divisi_id = $request->input('divisi_id');
 
         if ($id === null) {
@@ -176,7 +177,8 @@ class AccesoriesController extends Controller
             AccessoriesIn::where('accessories_id', $id)
                 ->update([
                     'price' => $request->input('price'),
-                    'capital_price' => $request->input('capital_price')
+                    'capital_price' => $request->input('capital_price'),
+                    'price_bottom' => $request->input('price_bottom')
                 ]);
         }
 

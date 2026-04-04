@@ -36,7 +36,13 @@
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
-
+                <div class="mb-2">
+                    <label class="col-form-label">Harga Bottom</label>
+                    <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
+                        <input type="text" name="price_bottom" class="form-control" readonly
+                               value="{{formatRupiah($acces->price_bottom )}}" placeholder="0">
+                    </div>
+                </div>
                 <div class="mb-2">
                     <label class="col-form-label">Harga Jual</label>
                     <div class="input-group">
@@ -45,7 +51,7 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Simpan<i class="bx bx-save"></i> </button>
+                    <button type="submit" class="btn btn-dnd float-end" >Simpan<i class="bx bx-save"></i> </button>
                 </div>
             </form>
         </div>
