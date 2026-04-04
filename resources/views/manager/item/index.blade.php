@@ -78,6 +78,19 @@
                         </tr>
                     @endforeach
                     </tbody>
+                    <tfoot>
+                    <tr>
+
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th colspan="" class="text-end">Total</th>
+                        <th></th>
+                        <th colspan=""></th>
+                        <th colspan=""></th>
+                    </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -99,7 +112,39 @@
                 lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
                 pageLength: 10, // Default halaman pertama
                 // Untuk tampilan responsif
+
+                footerCallback: function (row, data, start, end, display) {
+                    var api = this.api();
+
+                    var intVal = function (i) {
+                        return typeof i === 'string'
+                            ? i.replace(/[^0-9]/g, '') * 1
+                            : typeof i === 'number'
+                                ? i
+                                : 0;
+                    };
+
+                    var totalQty = api
+                        .column(7, { search: 'applied' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return a + intVal(b);
+                        }, 0);
+
+                    $(api.column(7).footer()).html(totalQty);
+                }
             });
+
+            exampleI.buttons().container()
+                .appendTo('#konfir_wrapper .col-md-6:eq(0)');
+
+            exampleI.on('order.dt search.dt', function () {
+                let i = 1;
+                exampleI.cells(null, 0, { search: 'applied', order: 'applied' })
+                    .every(function () {
+                        this.data(i++);
+                    });
+            }).draw();
         });
     </script>
 @endpush
