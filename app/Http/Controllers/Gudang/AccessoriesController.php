@@ -35,7 +35,7 @@ class AccessoriesController extends Controller
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
         $acces = Accessories::whereHas('divisi', function ($query){
             $query->where('divisi_id', Auth::user()->divisi_id);
-        })
+        })->where('stok', '>', 0)
             ->with('divisi')
             ->get();// Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
@@ -514,6 +514,23 @@ class AccessoriesController extends Controller
 
         return back()->with('success', 'Accessories Berhasil Diedit');
     }
+    public function accesKosong()
+    {
+        {
+            $title = 'Delete Item!';
+            $text = "Are you sure you want to delete?";
+            confirmDelete($title, $text);
+            $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
+            $acces = Accessories::where('stok', '0')->get(); // Mengambil data accessories terbaru dengan pagination
+            $barcodes = []; // Array untuk menyimpan barcode
 
+            foreach ($acces as $data) { // Loop melalui setiap accessories
+                $barcode = base64_encode($generator->getBarcode($data->code_acces, $generator::TYPE_CODE_128)); // Generate barcode dan encode ke base64
+                $barcodes[$data->id] = $barcode; // Simpan barcode di array dengan ID sebagai key
+            }
+
+            return view('gudang.accessories.index', compact('acces', 'barcodes'));
+        }
+    }
 
 }

@@ -139,7 +139,13 @@
                     <li>
                         <a href="{{route('gudang.acces.index')}}">
                             <i class='bx bx-list-ul'></i>
-                            Accessories
+                            Accessories Redy
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{route('gudang.accesKosong')}}">
+                            <i class='bx bx-list-ul'></i>
+                            Accessories Habis
                         </a>
                     </li>
                 </ul>

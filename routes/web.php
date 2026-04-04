@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
 
     //accessories
     Route::resource('/access', AccessoriesController::class)->names('gudang.acces');
+    Route::get('/accessories', [AccessoriesController::class, 'accesKosong'])->name('gudang.accesKosong');
     Route::get('edit/access', [AccessoriesController::class, 'editMultiple'])->name('gudang.acces.editmultiple');
     Route::post('update/access', [AccessoriesController::class, 'updateMultiple'])->name('gudang.acces.updatemultiple');
     Route::post('check/access', [AccessoriesController::class, 'checkCode'])->name('gudang.acces.checkcode');
