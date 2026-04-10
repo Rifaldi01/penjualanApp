@@ -173,33 +173,25 @@
 
                                 data.itemSales.forEach(function (item) {
 
-                                    // Ambil no_seri dari format: "Nama Item - (NO_SERI)"
-                                    let matches = [...item.matchAll(/\((.*?)\)/g)];
-
                                     let noSeri = '';
 
-                                    if (matches.length > 0) {
+                                    // Ambil kurung setelah strip (-)
+                                    let match = item.match(/-\s*\(([^)]+)\)\s*$/);
 
-                                        // jika kurung pertama adalah "khusus"
-                                        if (matches[0][1].toLowerCase() === 'khusus' && matches.length > 1) {
-                                            noSeri = matches[1][1];
-                                        } else {
-                                            noSeri = matches[0][1];
-                                        }
-
+                                    if (match) {
+                                        noSeri = match[1];
                                     }
 
                                     let itemLink = itemEditUrl.replace(':no_seri', noSeri);
 
                                     itemSalesList += `
-            <li>
-                <a href="${itemLink}" class="text-dark">
-                    ${item}
-                </a>
-            </li>
-        `;
+    <li>
+        <a href="${itemLink}" class="text-dark">
+            ${item}
+        </a>
+    </li>
+`;
                                 });
-
                             }
 
                             itemSalesList += '</ul>';
