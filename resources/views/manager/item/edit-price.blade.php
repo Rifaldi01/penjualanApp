@@ -103,7 +103,7 @@
                            value="{{isset($item) ? $item->price : null}}" placeholder="0">
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Save<i
+                    <button type="submit" class="btn btn-dnd float-end">Save<i
                             class="bx bx-save"></i></button>
                     @if(isset($item))
                         <a href="{{route('manager.report.index')}}" class="btn btn-warning float-end me-2"><i

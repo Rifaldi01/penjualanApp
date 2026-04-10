@@ -327,21 +327,25 @@ class ItemController extends Controller
 
     public function updatePrice(Request $request, $no_seri)
     {
-        $request->validate([
-            'price' => 'required|numeric',
-            'capital_price' => 'required|numeric'
-        ]);
+        // Bersihkan input jadi angka saja
+        $price = preg_replace('/[^0-9]/', '', $request->price);
+        $capital_price = preg_replace('/[^0-9]/', '', $request->capital_price);
 
-        DB::transaction(function () use ($request, $no_seri) {
+        // Validasi setelah dibersihkan
+        if (!is_numeric($price) || !is_numeric($capital_price)) {
+            return back()->withErrors('Format harga tidak valid');
+        }
+
+        DB::transaction(function () use ($price, $capital_price, $no_seri) {
 
             ItemIn::where('no_seri', $no_seri)->update([
-                'price' => $request->price,
-                'capital_price' => $request->capital_price
+                'price' => $price,
+                'capital_price' => $capital_price
             ]);
 
             ItemSale::where('no_seri', $no_seri)->update([
-                'price' => $request->price,
-                'capital_price' => $request->capital_price
+                'price' => $price,
+                'capital_price' => $capital_price
             ]);
 
         });
@@ -350,5 +354,4 @@ class ItemController extends Controller
             ->route('manager.report.index', $no_seri)
             ->with('success', 'Price berhasil diperbarui');
     }
-
 }
