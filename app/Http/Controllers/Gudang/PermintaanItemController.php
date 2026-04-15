@@ -132,7 +132,15 @@ class PermintaanItemController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $permintaan = PermintaanItem::findOrFail($id);
+
+        // Hapus semua item di tabel item_ins yang memiliki no_seri yang sama
+        DetailItem::where('permintaan_item_id', $permintaan->id)->delete();
+
+        // Hapus item dari tabel items
+        $permintaan->delete();
+        return back()->with('success', 'Permintaan berhasil dibatalkan.');
+
     }
     public function fetchAccessories($divisi_id)
     {

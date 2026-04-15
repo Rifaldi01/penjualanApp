@@ -71,6 +71,22 @@
                                 @endif
                             </td>
                             <td>
+                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'pending')
+                                    <!-- Tombol Setujui -->
+                                    <form id="delete-form-{{ $permintaan->id }}"
+                                          action="{{ route('gudang.permintaan.destroy', $permintaan->id) }}"
+                                          method="POST"
+                                          style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                    <a href="javascript:void(0)"
+                                       data-id="{{ $permintaan->id }}"
+                                       class="btn btn-danger btn-sm btn-delete bx bx-trash"
+                                       data-bs-toggle="tooltip"
+                                       title="Batal">
+                                    </a>
+                                @endif
                                 @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'disetujui')
                                     <!-- Tombol Setujui -->
                                     <form action="{{ route('gudang.permintaan.approve', $permintaan->id) }}" method="POST">
@@ -210,6 +226,28 @@
                     });
             }).draw();
         }
+    </script>
+    <script>
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function () {
+                let id = this.getAttribute('data-id');
+
+                Swal.fire({
+                    title: 'Yakin ingin Membatalkan?',
+                    text: "Data tidak bisa dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                });
+            });
+        });
     </script>
 @endpush
 

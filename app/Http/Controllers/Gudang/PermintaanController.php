@@ -183,10 +183,16 @@ class PermintaanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Permintaan $permintaan)
+    public function destroy($id)
     {
+        $permintaan = Permintaan::findOrFail($id);
+
+        // Hapus semua item di tabel item_ins yang memiliki no_seri yang sama
+        DetailAccessories::where('permintaan_id', $permintaan->id)->delete();
+
+        // Hapus item dari tabel items
         $permintaan->delete();
-        return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil dihapus.');
+        return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil dibatalkan.');
     }
 
     public function approve($id)
