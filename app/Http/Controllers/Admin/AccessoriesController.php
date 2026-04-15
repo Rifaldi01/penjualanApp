@@ -72,8 +72,8 @@ class AccessoriesController extends Controller
 
         $request->validate([
             'name' => 'required',
-            'price' => 'required|numeric|min:' . $acces->price_bottom,
-        ], [
+            'price' => 'required|numeric|min:' . ($acces->price_bottom ?? 0),
+            ], [
             'name.required' => 'Nama Accessories Wajib Diisi',
             'price.required' => 'Price Accessories Wajib Diisi',
             'price.numeric' => 'Price harus berupa angka',
