@@ -71,7 +71,8 @@
                                 @endif
                             </td>
                             <td>
-                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'pending')
+                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan
+                                   && in_array($permintaan->status, ['pending', 'disetujui']))
                                     <!-- Tombol Setujui -->
                                     <form id="delete-form-{{ $permintaan->id }}"
                                           action="{{ route('gudang.permintaan.destroy', $permintaan->id) }}"
@@ -92,7 +93,7 @@
                                     <form action="{{ route('gudang.permintaan.approve', $permintaan->id) }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-success btn-sm " data-bs-toggle="tooltip" data-bs-placement="top" title="Diterima">Diterima</button>
+                                        <button type="submit" class="btn btn-success btn-sm bx bx-check" data-bs-toggle="tooltip" data-bs-placement="top" title="Diterima"></button>
                                     </form>
                                 @endif
                             </td>

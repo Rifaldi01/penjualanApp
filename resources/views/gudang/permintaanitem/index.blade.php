@@ -9,7 +9,8 @@
                     </div>
                     <div class="col-sm">
                         <div class="float-end">
-                            <a href="{{route('gudang.permintaanitem.create')}}" class="btn btn-dnd bx bx-file" data-bs-toggle="tooltip" data-bs-placement="top" title="Meminta Accessories"></a>
+                            <a href="{{route('gudang.permintaanitem.create')}}" class="btn btn-dnd bx bx-file"
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="Meminta Accessories"></a>
                         </div>
                     </div>
                 </div>
@@ -23,7 +24,7 @@
                         <th>Kode</th>
                         <th>Barang</th>
                         <th>No Seri</th>
-                        <th>Jumlah </th>
+                        <th>Jumlah</th>
                         <th>Asal Divisi</th>
                         <th width="2%">Status</th>
                         <th width="2%">Aksi</th>
@@ -58,7 +59,8 @@
                                 @endif
                             </td>
                             <td>
-                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'pending')
+                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan
+                                    && in_array($permintaan->status, ['pending', 'disetujui']))
                                     <!-- Tombol Setujui -->
                                     <form id="delete-form-{{ $permintaan->id }}"
                                           action="{{ route('gudang.permintaanitem.destroy', $permintaan->id) }}"
@@ -76,10 +78,13 @@
                                 @endif
                                 @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'disetujui')
                                     <!-- Tombol Setujui -->
-                                    <form action="{{ route('gudang.permintaanitem.approve', $permintaan->id) }}" method="POST">
+                                    <form action="{{ route('gudang.permintaanitem.approve', $permintaan->id) }}"
+                                          method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-success btn-sm " data-bs-toggle="tooltip" data-bs-placement="top" title="Diterima">Diterima</button>
+                                        <button type="submit" class="btn btn-success btn-sm bx bx-check" data-bs-toggle="tooltip"
+                                                data-bs-placement="top" title="Diterima">
+                                        </button>
                                     </form>
                                 @endif
                             </td>
