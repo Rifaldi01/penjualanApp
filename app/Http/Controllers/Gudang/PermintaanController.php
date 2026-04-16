@@ -270,9 +270,6 @@ class PermintaanController extends Controller
             ->with('success', 'Permintaan berhasil diterima.');
     }
 
-
-
-
     public function receive($id)
     {
         $permintaan = Permintaan::findOrFail($id);

@@ -79,12 +79,17 @@
                                 @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'disetujui')
                                     <!-- Tombol Setujui -->
                                     <form action="{{ route('gudang.permintaanitem.approve', $permintaan->id) }}"
-                                          method="POST">
+                                          method="POST" class="approve-form">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-success btn-sm bx bx-check" data-bs-toggle="tooltip"
-                                                data-bs-placement="top" title="Diterima">
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm bx bx-check btnApprove"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="Diterima">
                                         </button>
+
                                     </form>
                                 @endif
                             </td>
@@ -145,6 +150,28 @@
                     }
                 });
             });
+        });
+
+    </script>
+    <script>
+        document.querySelectorAll('.approve-form').forEach(form => {
+
+            form.addEventListener('submit', function(e) {
+
+                let btn = form.querySelector('.btnApprove');
+
+                if (btn.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '';
+                btn.classList.remove('bx-check');
+                btn.innerText = '...';
+
+            });
+
         });
     </script>
 @endpush

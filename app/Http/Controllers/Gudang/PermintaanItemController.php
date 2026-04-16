@@ -202,7 +202,7 @@ class PermintaanItemController extends Controller
         $permintaan->update(['status' => 'diterima']);
 
         // Redirect ke halaman permintaan dengan pesan sukses
-        return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil diterima.');
+        return redirect()->route('gudang.permintaanitem.index')->with('success', 'Permintaan berhasil diterima.');
     }
 
 
