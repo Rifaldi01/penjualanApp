@@ -78,6 +78,7 @@
                                 <th></th>
                                 <th></th>
                                 <th></th>
+                                <th></th>
                                 <th colspan="" class="text-end">Total</th>
                                 <th></th>
                                 <th colspan=""></th>
@@ -132,13 +133,13 @@
                             };
 
                             var totalQty = api
-                                .column(7, { search: 'applied' })
+                                .column(8, { search: 'applied' })
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + intVal(b);
                                 }, 0);
 
-                            $(api.column(7).footer()).html(totalQty);
+                            $(api.column(8).footer()).html(totalQty);
                         }
                     });
 

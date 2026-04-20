@@ -41,6 +41,7 @@
                         <th>Name</th>
                         <th>No Seri</th>
                         <th>Price Cost</th>
+                        <th>Price Bottom</th>
                         <th>Sale Price</th>
                         <th class="text-center" width="5%">Jumalah Barcode</th>
                         <th class="text-center" width="15%">Action</th>
@@ -61,6 +62,7 @@
                             </td>
                             <td>{{$item->cat->name}}-{{$item->no_seri}}</td>
                             <td>{{formatRupiah($item->capital_price)}},-</td>
+                            <td>{{formatRupiah($item->price_bottom)}},-</td>
                             <td>{{formatRupiah($item->price)}},-</td>
                             <td class="text-center">
                                 <input type="number" class="form-control" value="1" readonly>
@@ -81,6 +83,7 @@
                     <tfoot>
                     <tr>
 
+                        <th></th>
                         <th></th>
                         <th></th>
                         <th></th>
@@ -125,13 +128,13 @@
                     };
 
                     var totalQty = api
-                        .column(7, { search: 'applied' })
+                        .column(8, { search: 'applied' })
                         .data()
                         .reduce(function (a, b) {
                             return a + intVal(b);
                         }, 0);
 
-                    $(api.column(7).footer()).html(totalQty);
+                    $(api.column(8).footer()).html(totalQty);
                 }
             });
 
