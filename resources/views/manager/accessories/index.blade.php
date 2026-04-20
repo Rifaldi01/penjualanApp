@@ -38,6 +38,7 @@
                                 <th>Name</th>
                                 <th>Divisi</th>
                                 <th>Price Cost</th>
+                                <th>Price Bottom</th>
                                 <th>Sale Price</th>
                                 <th class="text-center">Jmlh Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
@@ -54,6 +55,7 @@
                                     <td>{{ $data->name }}</td>
                                     <td>{{ $data->divisi->name }}</td>
                                     <td>{{ is_numeric($data->capital_price) ? formatRupiah($data->capital_price, 0, '.', '.') : '0' }},-</td>
+                                    <td>{{ formatRupiah($data->price_bottom) }},-</td>
                                     <td>{{ formatRupiah($data->price) }},-</td>
                                     <td class="text-center">
                                         <input type="number" name="barcode_quantity[{{ $data->id }}]" placeholder="Jumlah Barcode" class="form-control" min="1">                                    </td>

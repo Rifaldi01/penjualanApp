@@ -40,7 +40,8 @@
                         <th width="4%">No</th>
                         <th>Nama Accessories</th>
                         <th>Divisi</th>
-                        <th>Price</th>
+                        <th>Harga Bottom</th>
+                        <th>Harga Jual</th>
                         <th>Code Accessories</th>
                         <th>Stok</th>
                     </tr>
@@ -51,6 +52,7 @@
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $data->name }}</td>
                             <td>{{ $data->divisi->name }}</td>
+                            <td>{{ is_numeric($data->price_bottom) ? formatRupiah($data->price_bottom, 0, '.', '.') : '0' }},-</td>
                             <td>{{ formatRupiah($data->price) }}</td>
                             <td>{{ $data->code_acces }}</td>
                             <td>{{ $data->stok }}</td>
@@ -79,7 +81,8 @@
                         <th width="4%">No</th>
                         <th>Nama Accessories</th>
                         <th>Divisi</th>
-                        <th>Price</th>
+                        <th>Harga Bottom</th>
+                        <th>Harga Jual</th>
                         <th>Code Accessories</th>
                         <th>Stok</th>
                     </tr>
@@ -90,6 +93,7 @@
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $data->name }}</td>
                             <td>{{ $data->divisi->name }}</td>
+                            <td>{{ formatRupiah($data->price_bottom) }}</td>
                             <td>{{ formatRupiah($data->price) }}</td>
                             <td>{{ $data->code_acces }}</td>
                             <td>{{ $data->stok }}</td>

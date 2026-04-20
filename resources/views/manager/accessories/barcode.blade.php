@@ -36,7 +36,8 @@
                 @endisset
                 <div class="mb-2">
                     <label class="col-form-label">Nama Aksesori</label>
-                    <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
+                    <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}"
+                           placeholder="Masukkan Nama Aksesori">
                 </div>
                 <div class="mt-3 mb-2">
                     <label for="single-select-field" class="form-label">Divisi</label>
@@ -55,8 +56,8 @@
                 </div>
                 <div class=" mb-2">
                     <label class="col-form-label">Stok</label>
-                        <input type="number" name="stok" class="form-control"
-                               value="{{isset($acces) ? $acces->stok : null}}" placeholder="0">
+                    <input type="number" name="stok" class="form-control"
+                           value="{{isset($acces) ? $acces->stok : null}}" placeholder="0">
                 </div>
                 <div class=" mb-2">
                     <label class="col-form-label">Capital Price</label>
@@ -69,18 +70,21 @@
                     <label class="col-form-label">Price Bottom</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="price_bottom" class="form-control" onkeyup="formatRupiah(this)"
-                               value="{{isset($item) ? $item->price_bottom : null}}" placeholder="0">
+                               value="{{isset($acces) ? $acces->price_bottom : null}}" placeholder="0">
                     </div>
                 </div>
                 <div class="mb-2">
                     <label class="col-form-label">Harga</label>
                     <div class="input-group">
                         <span class="input-group-text" id="basic-addon1">Rp.</span>
-                        <input type="text" name="price" class="form-control" value="{{isset($acces) ? $acces->price : null}}" placeholder="Masukkan Harga" onkeyup="formatRupiah(this)">
+                        <input type="text" name="price" class="form-control"
+                               value="{{isset($acces) ? $acces->price : null}}" placeholder="Masukkan Harga"
+                               onkeyup="formatRupiah(this)">
                     </div>
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Simpan<i class="bx bx-save"></i> </button>
+                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Simpan<i class="bx bx-save"></i>
+                    </button>
                 </div>
             </form>
         </div>

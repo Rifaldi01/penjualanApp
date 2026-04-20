@@ -24,7 +24,8 @@
                         <th>No Seri</th>
                         <th>Name Item</th>
                         <th>Divisi</th>
-                        <th>Price</th>
+                        <th>Harga Bottom</th>
+                        <th>Harga Jual</th>
                         <th width="5%">status</th>
                     </tr>
                     </thead>
@@ -35,6 +36,7 @@
                             <td>{{$data->no_seri}}</td>
                             <td>{{$data->name}}</td>
                             <td>{{$data->divisi->name}}</td>
+                            <td>{{formatRupiah($data->price_bottom)}},-</td>
                             <td>{{formatRupiah($data->price)}}</td>
                             <td>
                                 @if($data->status == 0)
