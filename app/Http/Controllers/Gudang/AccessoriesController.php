@@ -37,6 +37,7 @@ class AccessoriesController extends Controller
             $query->where('divisi_id', Auth::user()->divisi_id);
         })->where('stok', '>', 0)
             ->with('divisi')
+            ->orderBy('name', 'ASC')
             ->get();// Mengambil data accessories terbaru dengan pagination
         $barcodes = []; // Array untuk menyimpan barcode
 
