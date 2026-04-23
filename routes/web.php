@@ -57,6 +57,8 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::post('khusus/item/{id}', [ItemController::class, 'khusus'])->name('gudang.item.khusus');
     Route::post('setting/item/', [ItemController::class, 'setting'])->name('gudang.item.setting');
     Route::post('setting/item/{id}', [ItemController::class, 'settingUpd'])->name('gudang.item.settingupd');
+    Route::post('/gudang/item/bulk-delete', [ItemController::class, 'bulkDelete'])
+        ->name('gudang.item.bulkDelete');
     //Item end
 
     //Item Category
