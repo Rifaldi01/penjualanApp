@@ -38,6 +38,20 @@
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
+                <div class="mb-2">
+                    <label class="col-form-label">Asal Pembelian</label>
+                    <select name="region" id="region" class="form-control">
+                        <option></option>
+                        <option value="Dalam Negeri"
+                            {{ isset($acces) && $acces->region == 'Dalam Negeri' ? 'selected' : '' }}>
+                            DN
+                        </option>
+                        <option value="Luar Negeri"
+                            {{ isset($acces) && $acces->region == 'Luar Negeri' ? 'selected' : '' }}>
+                            LN
+                        </option>
+                    </select>
+                </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-dnd float-end" id="submitBtnAcces">Simpan<i class="bx bx-save"></i> </button>
                 </div>
@@ -75,5 +89,12 @@
             rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
             element.value = rupiah;
         }
+        $(document).ready(function () {
+            $('#region').select2({
+                theme:'bootstrap-5',
+                placeholder: "--Pilih Region--",
+                width: '100%'
+            });
+        });
     </script>
 @endpush

@@ -174,6 +174,7 @@ class AccessoriesController extends Controller
 
         $acces = Accessories::firstOrNew(['id' => $id]);
         $acces->name          = $request->name;
+        $acces->region        = $request->region;
         $acces->price         = 0;
         $acces->capital_price = 0;
         $acces->divisi_id     = Auth::user()->divisi_id;
@@ -197,13 +198,25 @@ class AccessoriesController extends Controller
     }
     public function checkCode(Request $request)
     {
-        $code = $request->get('code_access');
-        $accessory = Accessories::where('divisi_id', Auth::user()->divisi_id)->where('code_acces', $code)->first();
+        $keyword = $request->get('code_access');
+
+        $accessory = Accessories::where('divisi_id', Auth::user()->divisi_id)
+            ->where(function ($query) use ($keyword) {
+                $query->where('code_acces', $keyword)
+                    ->orWhere('name', 'like', '%' . $keyword . '%');
+            })
+            ->first();
 
         if ($accessory) {
-            return response()->json(['exists' => true, 'data' => $accessory]);
+            return response()->json([
+                'exists' => true,
+                'data' => $accessory
+            ]);
         } else {
-            return response()->json(['exists' => false, 'message' => 'Code Accessories or No Seri not found!']);
+            return response()->json([
+                'exists' => false,
+                'message' => 'Code Accessories atau Nama tidak ditemukan!'
+            ]);
         }
     }
 
