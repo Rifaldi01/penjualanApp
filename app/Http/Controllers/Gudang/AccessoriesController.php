@@ -240,7 +240,11 @@ class AccessoriesController extends Controller
                         'accessories_id' => $accessory->id,
                         'qty' => $accessoryData['stok'],
                         'kode_msk' => $accessoryData['kode_msk'] ?? null,
-                        'date_in' => now(),
+                        'date_in' => $accessoryData['date_in'] ?? now(),
+                        'created_at' => $accessoryData['date_in'] ?? now(),
+                        'price_bottom' => $accessory->price_bottom,
+                        'price' => $accessory->price,
+                        'capital_price' => $accessory->capital_price,
                     ]);
                 }
 
