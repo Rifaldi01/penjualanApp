@@ -385,6 +385,35 @@ class ItemController extends Controller
 
         return back()->withSuccess('Ukuran diatur');
     }
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:items,id'
+        ]);
 
+        try {
+            // Ambil semua no_seri dari item yang dipilih
+            $noSeriList = Item::whereIn('id', $request->ids)
+                ->pluck('no_seri');
+
+            // Hapus semua data di item_ins yang no_seri sama
+            ItemIn::whereIn('no_seri', $noSeriList)->delete();
+
+            // Hapus item
+            Item::whereIn('id', $request->ids)->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data item berhasil dihapus'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghapus data'
+            ], 500);
+        }
+    }
 
 }

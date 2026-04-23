@@ -66,6 +66,9 @@
                         </div>
                     </div>
                 </div>
+                <button type="button" id="btnDeleteSelected" class="btn btn-danger btn-sm ms-2">
+                    <i class="bx bx-trash"></i> Delete Selected
+                </button>
             </div>
 
             <div class="table-responsive">
@@ -309,5 +312,54 @@
                 }
             });
         }
+        $('#btnDeleteSelected').on('click', function () {
+            let selected = [];
+
+            $('.select_item:checked').each(function () {
+                selected.push($(this).val());
+            });
+
+            if (selected.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih data terlebih dahulu!',
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('gudang.item.bulkDelete') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: selected
+                        },
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message
+                            }).then(() => {
+                                location.reload();
+                            });
+                        },
+                        error: function () {
+                            Swal.fire('Error!', 'Terjadi kesalahan.', 'error');
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endpush
