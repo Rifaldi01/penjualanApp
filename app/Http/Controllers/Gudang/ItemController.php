@@ -44,7 +44,8 @@ class ItemController extends Controller
             $barcodes[$item->id] = $barcode;
         }
         $setting = Setting::where('divisi_id', Auth::user()->divisi_id)->first();
-        return view('gudang.item.index', compact('items', 'barcodes', 'setting'));
+        $cat = ItemCategory::all();
+        return view('gudang.item.index', compact('items', 'barcodes', 'setting', 'cat'));
     }
 
     /**
@@ -145,66 +146,60 @@ class ItemController extends Controller
         return back()->withSuccess('Success', 'Delete Item Success');
     }
 
-    private function save(Request $request, $id = null)
+    private function save(Request $request)
     {
-        $validate = $request->validate([
-            'name' => 'required',
-            'itemcategory_id' => 'required',
-            'no_seri' => $id ? 'required' : 'required|unique:items',
-        ], [
-            'name.required' => 'Nama Tidak Boleh Kosong',
-            'itemcategory_id.required' => 'Pilih Category',
-            'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
-            'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
+        $request->validate([
+            'name.*' => 'required',
+            'itemcategory_id.*' => 'required',
+            'no_seri.*' => 'required',
         ]);
 
-        // Ambil divisi login
         $divisiId = Auth::user()->divisi_id;
 
-        // Simpan atau update data di tabel `items`
-        $item = Item::updateOrCreate(
-            ['id' => $id],
-            [
-                'itemcategory_id' => $request->input('itemcategory_id'),
-                'name' => $request->input('name'),
-                'no_seri' => $request->input('no_seri'),
-                'created_at' => $request->input('created_at'),
-                'divisi_id' => $divisiId,
-            ]
-        );
+        foreach ($request->name as $index => $name) {
 
-        // Update atau buat data di tabel `item_ins`
-        ItemIn::updateOrCreate(
-            ['no_seri' => $item->no_seri],
-            [
-                'itemcategory_id' => $item->itemcategory_id,
-                'divisi_id' => $item->divisi_id,
-                'name' => $item->name,
-                'created_at' => $item->created_at,
-                'kode_msk' => $request->input('kode_msk'),
-            ]
-        );
+            $id = $request->id[$index] ?? null;
 
-        // Cek apakah invoice dengan divisi yang sama sudah ada di tabel `pembelian`
-        $invoice = $request->input('kode_msk');
+            $item = Item::updateOrCreate(
+                ['id' => $id], // 🔥 ini kunci utama
+                [
+                    'itemcategory_id' => $request->itemcategory_id[$index],
+                    'name' => $name,
+                    'no_seri' => $request->no_seri[$index],
+                    'created_at' => $request->created_at[$index],
+                    'divisi_id' => $divisiId,
+                ]
+            );
 
-        $existingPembelian = Pembelian::where('invoice', $invoice)
-            ->where('divisi_id', $divisiId)
-            ->first();
+            ItemIn::updateOrCreate(
+                ['no_seri' => $item->no_seri],
+                [
+                    'itemcategory_id' => $item->itemcategory_id,
+                    'divisi_id' => $item->divisi_id,
+                    'name' => $item->name,
+                    'created_at' => $item->created_at,
+                    'kode_msk' => $request->kode_msk[$index],
+                ]
+            );
 
-        // Jika tidak ada, buat entri baru
-        if (!$existingPembelian && $invoice) {
-            Pembelian::create([
-                'divisi_id' => $divisiId,
-                'invoice' => $invoice,
-                'status' => '1',
-            ]);
+            $invoice = $request->kode_msk[$index];
+
+            if ($invoice) {
+                Pembelian::firstOrCreate(
+                    [
+                        'invoice' => $invoice,
+                        'divisi_id' => $divisiId
+                    ],
+                    [
+                        'status' => '1'
+                    ]
+                );
+            }
         }
 
         Alert::success('Success', 'Data berhasil disimpan');
         return redirect()->route('gudang.item.index');
     }
-
 
     public function download(Item $item)
     {

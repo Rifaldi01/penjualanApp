@@ -6,7 +6,7 @@
                 @if(isset($item))
                     <h3 class="mb-4 ms-3">Edit Item<i class="bx bx-edit"></i></h3>
                 @else
-                    <h3 class="mb-4 ms-3">Add Item<i class="bx bx-user-plus"></i></h3>
+                    <h3 class="mb-4 ms-3">Tambah Item<i class="bx bx-user-plus"></i></h3>
                 @endif
                 <hr>
             </div>
@@ -29,66 +29,71 @@
                 </div>
             @endforeach
         @endif
-        <form class="card-body p-4" action="{{$url}}" method="POST" enctype="multipart/form-data" id="myFormItem">
-            @csrf
-            @isset($item)
-                @method('PUT')
-            @endisset
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="mb-2">
-                        <label class="col-form-label">Name Item</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
-                               value="{{isset($item) ? $item->name : null}}">
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="mb-2">
-                        <label class="col-form-label">Tanggal Masuk</label>
-                        <input type="text" name="created_at" class="form-control datepicker" placeholder="Enter Date"
-                               value="{{isset($item) ? $item->created_at : null}}">
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="mb-2">
-                        <label class="col-form-label">Invoice</label>
-                        <input type="text" name="kode_msk" class="form-control" placeholder="Enter Invoice"
-                               value="{{ isset($item) ? optional($item->itemIn)->kode_msk : null }}">
-                    </div>
-                </div>
+        <form action="{{$url}}" method="POST">
+
+            <div class="card-body">
+                @csrf
+                @isset($item)
+                    @method('PUT')
+                @endisset
+                <button type="button" class="btn btn-success mb-2 float-end me-2" id="addRow">+ Tambah</button>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Tanggal</th>
+                        <th>Invoice</th>
+                        <th>Kategori</th>
+                        <th>No Seri</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-body">
+                    <tr>
+                        <td>
+                            <input type="hidden" name="id[]" value="{{ $item->id ?? '' }}">
+                            <input type="text" name="name[]" class="form-control"
+                                   value="{{ $item->name ?? '' }}">
+                        </td>
+
+                        <td>
+                            <input type="text" name="created_at[]" class="form-control datepicker"
+                                   value="{{ $item->created_at ?? '' }}">
+                        </td>
+
+                        <td>
+                            <input type="text" name="kode_msk[]" class="form-control"
+                                   value="{{ isset($item) ? optional($item->itemIn)->kode_msk : '' }}">
+                        </td>
+
+                        <td>
+                            <select name="itemcategory_id[]" class="form-select">
+                                @foreach($cat as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ isset($item) && $item->itemcategory_id == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+
+                        <td>
+                            <input type="text" name="no_seri[]" class="form-control"
+                                   value="{{ $item->no_seri ?? '' }}">
+                        </td>
+
+                        <td>
+                            <button type="button" class="btn btn-danger" onclick="removeRow(this)">Hapus</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="mt-3 mb-2">
-                <label for="single-select-field" class="form-label">Category</label>
-                <select name="itemcategory_id" class="form-select" id="single-select-clear-field"
-                        data-placeholder="Choose one thing">
-                    @foreach($cat as $category)
-                        @if(isset($item))
-                            <option
-                                value="{{ $category->id }}" {{ $item->itemcategory_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                        @else
-                            <option value=""></option>
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endif
-                    @endforeach
-                </select>
-            </div>
-            <div class="mt-3 mb-2">
-                <label class="col-form-label">No Seri</label>
-                <input type="text" name="no_seri" class="form-control" placeholder="Enter No Seri"
-                       value="{{isset($item) ? $item->no_seri : null}}">
-            </div>
-            <div class="mb-2">
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtnItem">Save<i
-                            class="bx bx-save"></i></button>
-                    @if(isset($item))
-                        <a href="{{route('gudang.item.index')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-undo"></i>Back</a>
-                    @else
-                        <a href="{{route('gudang.item.index')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-list-ul"></i>List Item</a>
-                    @endif
-                </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary float-end mb-2 me-2"><i class="bx bx-save"></i>Simpan
+                </button>
+                <a href="{{route('gudang.item.index')}}" class="btn btn-warning float-end me-2"><i
+                        class="bx bx-list-ul"></i>Kembali</a>
             </div>
         </form>
     </div>
@@ -110,8 +115,38 @@
         });
     </script>
     <script>
-        $(document).ready(function() {
-            $('#submitBtnItem').click(function(event) {
+        $('#addRow').click(function () {
+            let row = `
+                <tr>
+                    <td>
+                        <input type="hidden" name="id[]" value="">
+                        <input type="text" name="name[]" class="form-control">
+                    </td>
+                    <td><input type="text" name="created_at[]" class="form-control datepicker"></td>
+                    <td><input type="text" name="kode_msk[]" class="form-control"></td>
+                    <td>
+                        <select name="itemcategory_id[]" class="form-select">
+                            @foreach($cat as $category)
+            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+            </select>
+        </td>
+        <td><input type="text" name="no_seri[]" class="form-control"></td>
+        <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Hapus</button></td>
+    </tr>
+`;
+            $('#table-body').append(row);
+
+            // re-init datepicker
+            $(".datepicker").flatpickr({dateFormat: "Y-m-d"});
+        });
+
+        function removeRow(btn) {
+            $(btn).closest('tr').remove();
+        }
+
+        $(document).ready(function () {
+            $('#submitBtnItem').click(function (event) {
 
                 // Hapus titik dari input harga
                 let priceInput = $('input[name="price"]');
@@ -124,9 +159,9 @@
         });
 
         function formatRupiahItem(element) {
-            let value  = element.value.replace(/[^,\d]/g, '');
-            let split  = value.split(',');
-            let sisa   = split[0].length % 3;
+            let value = element.value.replace(/[^,\d]/g, '');
+            let split = value.split(',');
+            let sisa = split[0].length % 3;
             let rupiah = split[0].substr(0, sisa);
             let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
