@@ -564,5 +564,31 @@ class AccessoriesController extends Controller
             return view('gudang.accessories.index', compact('acces', 'barcodes'));
         }
     }
+    public function bulkDeleteAcces(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:accessories,id'
+        ]);
+
+        try {
+
+            Accessories::whereIn('id', $request->ids)
+                ->where('stok', 0) // hanya stok habis
+                ->delete();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Accessories berhasil dihapus'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menghapus data'
+            ], 500);
+        }
+    }
 
 }

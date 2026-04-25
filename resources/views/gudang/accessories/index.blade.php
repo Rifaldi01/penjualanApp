@@ -19,6 +19,9 @@
         </div>
         <div class="card-body">
             <div class="box-header with-border">
+                <button type="button" class="btn btn-danger btn-sm ms-2 float-end" id="btnDeleteSelected">
+                    <i class="bx bx-trash"></i> Delete Selected
+                </button>
                 <!-- Form untuk cetak barcode -->
                 <form id="printBarcodeForm" action="{{ route('gudang.acces.print') }}" method="POST" target="_blank">
                     @csrf
@@ -129,6 +132,56 @@
                                 this.data(i++);
                             });
                     }).draw();
+                });
+
+                $('#btnDeleteSelected').click(function () {
+
+                    let ids = [];
+
+                    $('.select_item:checked').each(function () {
+                        ids.push($(this).val());
+                    });
+
+                    if (ids.length === 0) {
+                        Swal.fire('Warning', 'Pilih data terlebih dahulu', 'warning');
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Yakin hapus?',
+                        text: 'Accessories stok 0 akan dihapus',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya Hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+
+                            $.ajax({
+                                url: "{{ route('gudang.acces.bulkDeleteAcces') }}",
+                                type: "POST",
+                                data: {
+                                    _token: "{{ csrf_token() }}",
+                                    ids: ids
+                                },
+                                success: function (res) {
+
+                                    Swal.fire('Success', res.message, 'success');
+
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 800);
+                                },
+                                error: function () {
+                                    Swal.fire('Error', 'Gagal menghapus data', 'error');
+                                }
+                            });
+
+                        }
+
+                    });
+
                 });
             </script>
     @endpush

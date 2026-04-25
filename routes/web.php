@@ -81,6 +81,7 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::get('reject/', [AccessoriesController::class, 'listReject'])->name('gudang.acces.listreject');
     Route::get('reject/{id}', [AccessoriesController::class, 'deleteReject'])->name('gudang.acces.deletReject');
     Route::put('update/accesin/{id}', [AccessoriesController::class, 'updatein'])->name('gudang.acces.updatein');
+    Route::post('/gudang/accessories/bulk-delete', [AccessoriesController::class, 'bulkDeleteAcces'])->name('gudang.acces.bulkDeleteAcces');
     //accessories end
 
     //permintaan accessories
