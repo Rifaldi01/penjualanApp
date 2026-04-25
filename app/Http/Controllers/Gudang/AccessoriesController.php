@@ -141,49 +141,63 @@ class AccessoriesController extends Controller
     private function save(Request $request, $id = null)
     {
         $request->validate([
-            'name' => 'required',
+            'name.*'   => 'required',
         ], [
-            'name.required' => 'Nama Accessories Wajib Diisi',
+            'name.*.required'   => 'Nama Accessories Wajib Diisi',
         ]);
 
-        if ($id === null) {
+        $divisiId = Auth::user()->divisi_id;
 
-            // Prefix: P-YYMM
-            $prefix = 'P-' . date('ym');
+        foreach ($request->name as $index => $name) {
 
-            // Ambil code_acces terakhir BERDASARKAN ANGKA TERBESAR
-            $lastAcces = Accessories::where('code_acces', 'like', $prefix . '%')
-                ->orderByRaw('CAST(SUBSTRING(code_acces, 7) AS UNSIGNED) DESC')
-                ->first();
+            $rowId  = $request->id[$index] ?? null;
+            $region = $request->region[$index];
 
-            if ($lastAcces) {
-                // Ambil nomor urut terakhir
-                $lastNumber = (int) substr($lastAcces->code_acces, 6);
-            } else {
-                $lastNumber = 0;
+            // skip row kosong
+            if (!$name) {
+                continue;
             }
 
-            // Generate code baru & pastikan benar-benar unik
-            do {
-                $lastNumber++;
-                $codeAcces = $prefix . str_pad($lastNumber, 3, '0', STR_PAD_LEFT);
-            } while (
-                Accessories::where('code_acces', $codeAcces)->exists()
-            );
+            // ======================
+            // CREATE
+            // ======================
+            if (!$rowId) {
+
+                $prefix = 'P-' . date('ym');
+
+                $lastAcces = Accessories::where('code_acces', 'like', $prefix . '%')
+                    ->orderByRaw('CAST(SUBSTRING(code_acces,7) AS UNSIGNED) DESC')
+                    ->first();
+
+                $lastNumber = $lastAcces
+                    ? (int) substr($lastAcces->code_acces, 6)
+                    : 0;
+
+                do {
+                    $lastNumber++;
+                    $codeAcces = $prefix . str_pad($lastNumber, 3, '0', STR_PAD_LEFT);
+                } while (
+                    Accessories::where('code_acces', $codeAcces)->exists()
+                );
+
+                $acces = new Accessories();
+                $acces->code_acces = $codeAcces;
+
+            } else {
+
+                // ======================
+                // UPDATE
+                // ======================
+                $acces = Accessories::findOrFail($rowId);
+            }
+
+            $acces->name          = $name;
+            $acces->region        = $region;
+            $acces->price         = 0;
+            $acces->capital_price = 0;
+            $acces->divisi_id     = $divisiId;
+            $acces->save();
         }
-
-        $acces = Accessories::firstOrNew(['id' => $id]);
-        $acces->name          = $request->name;
-        $acces->region        = $request->region;
-        $acces->price         = 0;
-        $acces->capital_price = 0;
-        $acces->divisi_id     = Auth::user()->divisi_id;
-
-        if ($id === null) {
-            $acces->code_acces = $codeAcces;
-        }
-
-        $acces->save();
 
         Alert::success('Success', 'Save Data Success');
         return redirect()->route('gudang.accesKosong');

@@ -1,100 +1,174 @@
 @extends('layouts.master')
+
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(isset($acces))
-                    <h3>Ubah Aksesori<span class="bx bx-barcode"></span></h3>
-                @else
-                    <h3>Tambah Barcode<span class="bx bx-barcode"></span></h3>
-                @endif
+                <h3>Tambah / Edit Accessories Multiple</h3>
                 <hr>
             </div>
         </div>
-        @if ($errors->any())
-            @foreach ($errors->all() as $error)
-                <div class="alert border-0 border-start border-5 border-danger alert-dismissible fade show py-2">
-                    <div class="d-flex align-items-center">
-                        <div class="font-35 text-danger"><i class='bx bxs-message-square-x'></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="mb-0 text-danger">Kesalahan</h6>
-                            <div>
-                                <div>{{ $error }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-                </div>
-            @endforeach
-        @endif
-        <div class="card-body p-4">
-            <form action="{{$url}}" method="POST" enctype="multipart/form-data" id="myFormAcces">
+
+        <div class="card-body">
+
+            <form action="{{ $url }}" method="POST" id="myFormAcces">
                 @csrf
+
                 @isset($acces)
                     @method('PUT')
                 @endisset
-                <div class="mb-2">
-                    <label class="col-form-label">Nama Aksesori</label>
-                    <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
-                </div>
-                <div class="mb-2">
-                    <label class="col-form-label">Asal Pembelian</label>
-                    <select name="region" id="region" class="form-control">
-                        <option></option>
-                        <option value="Dalam Negeri"
-                            {{ isset($acces) && $acces->region == 'Dalam Negeri' ? 'selected' : '' }}>
-                            DN
-                        </option>
-                        <option value="Luar Negeri"
-                            {{ isset($acces) && $acces->region == 'Luar Negeri' ? 'selected' : '' }}>
-                            LN
-                        </option>
-                    </select>
-                </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtnAcces">Simpan<i class="bx bx-save"></i> </button>
-                </div>
+
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th width="45%">Nama Accessories</th>
+                        <th width="35%">Region</th>
+                        <th width="20%">Action</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="table-body">
+
+                    @if(isset($items) && count($items))
+
+                        @foreach($items as $row)
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="id[]" value="{{ $row->id }}">
+                                    <input type="text"
+                                           name="name[]"
+                                           class="form-control"
+                                           value="{{ $row->name }}">
+                                </td>
+
+                                <td>
+                                    <select name="region[]" class="form-control region">
+                                        <option value="">-- Pilih --</option>
+                                        <option value="Dalam Negeri"
+                                            {{ $row->region == 'Dalam Negeri' ? 'selected' : '' }}>
+                                            DN
+                                        </option>
+                                        <option value="Luar Negeri"
+                                            {{ $row->region == 'Luar Negeri' ? 'selected' : '' }}>
+                                            LN
+                                        </option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="removeRow(this)">
+                                        Hapus
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                    @else
+
+                        <tr>
+                            <td>
+                                <input type="hidden" name="id[]" value="">
+                                <input type="text"
+                                       name="name[]"
+                                       class="form-control"
+                                       placeholder="Nama Accessories">
+                            </td>
+
+                            <td>
+                                <select name="region[]" class="form-control region">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="Dalam Negeri">DN</option>
+                                    <option value="Luar Negeri">LN</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm"
+                                        onclick="removeRow(this)">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+
+                    @endif
+
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn btn-success btn-sm" id="addRow">
+                    + Tambah Row
+                </button>
+
+                <button type="submit" class="btn btn-primary btn-sm float-end" id="submitBtnAcces">
+                    Simpan
+                </button>
+
             </form>
+
         </div>
     </div>
 @endsection
 
-@push('head')
-
-@endpush
 @push('js')
     <script>
-        $(document).ready(function() {
-            $('#submitBtnAcces').click(function(event) {
-                // Nonaktifkan tombol dan ubah teksnya
-                $(this).prop('disabled', true).text('Memuat...');
+        $(document).ready(function () {
 
+            initSelect2();
+
+            $('#addRow').click(function () {
+
+                let row = `
+        <tr>
+            <td>
+                <input type="hidden" name="id[]" value="">
+                <input type="text" name="name[]" class="form-control">
+            </td>
+
+            <td>
+                <select name="region[]" class="form-control region">
+                    <option value="">-- Pilih --</option>
+                    <option value="Dalam Negeri">DN</option>
+                    <option value="Luar Negeri">LN</option>
+                </select>
+            </td>
+
+            <td>
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="removeRow(this)">
+                    Hapus
+                </button>
+            </td>
+        </tr>
+        `;
+
+                $('#table-body').append(row);
+
+                initSelect2();
+            });
+
+            $('#submitBtnAcces').click(function () {
+                $(this).prop('disabled', true).text('Loading...');
                 $('#myFormAcces').submit();
             });
+
         });
 
-        function formatRupiahAcces(element) {
-            let value  = element.value.replace(/[^,\d]/g, '');
-            let split  = value.split(',');
-            let sisa   = split[0].length % 3;
-            let rupiah = split[0].substr(0, sisa);
-            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-            if (ribuan) {
-                let separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
-            }
-
-            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-            element.value = rupiah;
+        function removeRow(btn)
+        {
+            $(btn).closest('tr').remove();
         }
-        $(document).ready(function () {
-            $('#region').select2({
+
+        function initSelect2()
+        {
+            $('.region').select2({
                 theme:'bootstrap-5',
-                placeholder: "--Pilih Region--",
-                width: '100%'
+                width:'100%',
+                placeholder:'-- Pilih Region --'
             });
-        });
+        }
     </script>
 @endpush
