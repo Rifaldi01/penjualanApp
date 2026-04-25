@@ -28,6 +28,6 @@ class Pembelian extends Model
     }
     public function accessoriesin()
     {
-        return $this->belongsTo(AccessoriesIn::class);
+        return $this->belongsTo(AccessoriesIn::class)->withTrash();
     }
 }
