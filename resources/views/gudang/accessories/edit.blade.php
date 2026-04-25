@@ -62,8 +62,6 @@
         </div>
     </div>
 @endsection
-
-
 @push('js')
     <script>
         $(document).ready(function () {
@@ -107,14 +105,14 @@
                     {
                         data: null,
                         render: function (data) {
-                            return '<input type="text" class="form-control kode_msk-input" value="'+(data.kode_msk ?? '')+'" placeholder="kode/invoice">';
+                            return '<input type="text" class="form-control kode_msk-input" value="' + (data.kode_msk ?? '') + '" placeholder="kode/invoice">';
                         }
                     },
 
                     {
                         data: null,
                         render: function (data) {
-                            return '<input type="text" class="form-control datepicker date_in-input" value="'+(data.date_in ?? '')+'" placeholder="Tanggal Masuk">';
+                            return '<input type="text" class="form-control datepicker date_in-input" value="' + (data.date_in ?? '') + '" placeholder="Tanggal Masuk">';
                         }
                     },
 
@@ -156,13 +154,13 @@
                     let row = $(this.node());
 
                     semuaData.push({
-                        code_acces : this.data().code_acces,
-                        name       : this.data().name,
-                        region     : this.data().region,
-                        price      : this.data().price,
-                        stok       : row.find('.stok-input').val(),
-                        kode_msk   : row.find('.kode_msk-input').val(),
-                        date_in    : row.find('.date_in-input').val()
+                        code_acces: this.data().code_acces,
+                        name: this.data().name,
+                        region: this.data().region,
+                        price: this.data().price,
+                        stok: row.find('.stok-input').val(),
+                        kode_msk: row.find('.kode_msk-input').val(),
+                        date_in: row.find('.date_in-input').val()
                     });
 
                 });
@@ -171,6 +169,7 @@
             }
 
 
+            // SESUAIKAN URUTAN INPUT USER
             function tambahKeTable(response) {
 
                 let found = false;
@@ -185,7 +184,6 @@
                         let qty = parseInt(row.find('.stok-input').val() || 0);
 
                         row.find('.stok-input').val(qty + 1);
-
                         found = true;
                     }
                 });
@@ -194,14 +192,15 @@
 
                     let semuaData = simpanDataLama();
 
-                    semuaData.unshift({
-                        code_acces : response.data.code_acces,
-                        name       : response.data.name,
-                        region     : response.data.region,
-                        price      : response.data.price,
-                        stok       : 1,
-                        kode_msk   : '',
-                        date_in    : ''
+                    // TAMBAH DI PALING BAWAH = SESUAI INPUT PERTAMA KE TERAKHIR
+                    semuaData.push({
+                        code_acces: response.data.code_acces,
+                        name: response.data.name,
+                        region: response.data.region,
+                        price: response.data.price,
+                        stok: 1,
+                        kode_msk: '',
+                        date_in: ''
                     });
 
                     table.clear().rows.add(semuaData).draw();
@@ -217,6 +216,7 @@
                 $.ajax({
                     url: '{{ route("gudang.acces.checkcode") }}',
                     method: 'POST',
+                    async: false, // agar urut sesuai input
                     data: {
                         _token: '{{ csrf_token() }}',
                         code_access: keyword
@@ -248,9 +248,9 @@
 
                 daftar = daftar.map(item => item.trim()).filter(item => item != '');
 
-                daftar.forEach(function(item){
-                    cariAccessories(item);
-                });
+                for (let i = 0; i < daftar.length; i++) {
+                    cariAccessories(daftar[i]);
+                }
 
                 $('.scan-accessories').val('');
                 $('.scan-accessories').first().focus();
@@ -273,7 +273,6 @@
                 table.row($(this).parents('tr')).remove().draw();
                 refreshNomor();
             });
-
 
         });
     </script>
