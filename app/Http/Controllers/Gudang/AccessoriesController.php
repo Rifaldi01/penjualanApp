@@ -186,7 +186,7 @@ class AccessoriesController extends Controller
         $acces->save();
 
         Alert::success('Success', 'Save Data Success');
-        return redirect()->route('gudang.acces.index');
+        return redirect()->route('gudang.accesKosong');
     }
 
 
