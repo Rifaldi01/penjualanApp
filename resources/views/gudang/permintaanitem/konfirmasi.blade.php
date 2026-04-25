@@ -28,12 +28,12 @@
                            <td>{{ $permintaan->kode }}</td>
                            <td>
                                @foreach($permintaan->detailItem as $item)
-                                   <li>{{ $item->itemIn->name }}</li>
+                                   <li>{{ $item->itemIn->name ?? '-'}}</li>
                                @endforeach
                            </td>
                            <td>
                                @foreach($permintaan->detailItem as $item)
-                                   <li>{{ $item->itemIn->no_seri }}</li>
+                                   <li>{{ $item->itemIn->no_seri ?? '-'}}</li>
                                @endforeach
                            </td>
                            <td>{{ $permintaan->jumlah }}</td>
