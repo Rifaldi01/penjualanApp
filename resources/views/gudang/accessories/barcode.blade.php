@@ -10,7 +10,9 @@
         </div>
 
         <div class="card-body">
-
+            <button type="button" class="btn btn-success btn-sm float-end mb-2" id="addRow">
+                + Tambah Row
+            </button>
             <form action="{{ $url }}" method="POST" id="myFormAcces">
                 @csrf
 
@@ -98,9 +100,7 @@
                     </tbody>
                 </table>
 
-                <button type="button" class="btn btn-success btn-sm" id="addRow">
-                    + Tambah Row
-                </button>
+
 
                 <button type="submit" class="btn btn-primary btn-sm float-end" id="submitBtnAcces">
                     Simpan
