@@ -172,29 +172,42 @@
                                 }
                             });
 
+                            // GANTI seluruh blok if (!found) menjadi ini
+
                             if (!found) {
 
-                                table.row.add({
+                                // simpan semua data lama beserta isi input manual user
+                                let semuaData = [];
+
+                                table.rows().every(function () {
+
+                                    let row = $(this.node());
+
+                                    semuaData.push({
+                                        code_acces: this.data().code_acces,
+                                        name: this.data().name,
+                                        region: this.data().region,
+                                        price: this.data().price,
+
+                                        stok: row.find('.stok-input').val(),
+                                        kode_msk: row.find('.kode_msk-input').val(),
+                                        date_in: row.find('.date_in-input').val()
+                                    });
+                                });
+
+                                // tambahkan data baru ke paling atas
+                                semuaData.unshift({
                                     code_acces: response.data.code_acces,
                                     name: response.data.name,
                                     region: response.data.region,
                                     price: response.data.price,
-                                    stok: 1
+                                    stok: 1,
+                                    kode_msk: '',
+                                    date_in: ''
                                 });
 
-                                // pindahkan row terbaru ke paling atas
-                                let dataBaru = table.row(':last').data();
-                                table.row(':last').remove();
-
-                                table.row.add(dataBaru);
-
-                                let semuaData = table.rows().data().toArray();
-
-                                // urutkan agar data baru di atas
-                                semuaData.unshift(semuaData.pop());
-
-                                table.clear();
-                                table.rows.add(semuaData).draw();
+                                // reload table
+                                table.clear().rows.add(semuaData).draw();
                             }
 
                             $('.scan-accessories').val('');
