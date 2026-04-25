@@ -273,6 +273,43 @@
                 table.row($(this).parents('tr')).remove().draw();
                 refreshNomor();
             });
+            $('.btn-simpan').click(function () {
+
+                let accessoriesData = [];
+
+                table.rows().every(function () {
+
+                    let row = $(this.node());
+
+                    accessoriesData.push({
+                        code_acces : this.data().code_acces,
+                        stok       : row.find('.stok-input').val(),
+                        kode_msk   : row.find('.kode_msk-input').val(),
+                        date_in    : row.find('.date_in-input').val()
+                    });
+
+                });
+
+                $.ajax({
+                    url: '{{ route("gudang.acces.updatemultiple") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        accessories: accessoriesData
+                    },
+
+                    success: function () {
+                        Swal.fire('Success', 'Data berhasil disimpan', 'success');
+                        table.clear().draw();
+                        $('.scan-accessories').val('');
+                    },
+
+                    error: function () {
+                        Swal.fire('Error', 'Gagal menyimpan data', 'error');
+                    }
+                });
+
+            });
 
         });
     </script>
