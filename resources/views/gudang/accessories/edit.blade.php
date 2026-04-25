@@ -27,7 +27,6 @@
             <table class="table mt-2 table-stok">
                 <thead>
                 <tr>
-                    <th width="5%">No</th>
                     <th>Code Acces</th>
                     <th>Name</th>
                     <th>Asal Pembelian</th>
@@ -86,12 +85,6 @@
                 data: [],
 
                 columns: [
-                    {
-                        data: null,
-                        render: function (data, type, row, meta) {
-                            return meta.row + 1;
-                        }
-                    }
                     { data: 'code_acces' },
                     { data: 'name' },
                     { data: 'region' },
