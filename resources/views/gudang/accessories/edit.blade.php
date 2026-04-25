@@ -1,25 +1,29 @@
 @extends('layouts.master')
+
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>Add Accessories<span class="bx bx-barcode"></span></h3>
+                <h3>Add Accessories <span class="bx bx-barcode"></span></h3>
                 <hr>
             </div>
         </div>
-        <div class="card-body">
-            <form class="form-produk">
-                @csrf
-                <div class="form-group row">
-                    <label class="col-lg-2 mt-2">
-                        <strong>Kode/Nama Accessories :</strong>
-                    </label>
-                    <div class="col-lg-5">
-                        <input type="text" class="form-control" id="code_access" placeholder="Enter Code Accessories">
-                    </div>
-                </div>
-            </form>
 
+        <div class="card-body">
+
+            {{-- INPUT ATAS --}}
+            <div class="form-group row mb-3">
+                <label class="col-lg-2 mt-2">
+                    <strong>Kode/Nama Accessories :</strong>
+                </label>
+                <div class="col-lg-5">
+                    <input type="text"
+                           class="form-control scan-accessories"
+                           placeholder="Enter Code Accessories">
+                </div>
+            </div>
+
+            {{-- TABLE --}}
             <table class="table mt-2 table-stok">
                 <thead>
                 <tr>
@@ -36,19 +40,34 @@
                 <tbody></tbody>
             </table>
 
-            <div class="box-footer">
+            {{-- INPUT BAWAH --}}
+            <div class="form-group row mt-3">
+                <label class="col-lg-2 mt-2">
+                    <strong>Kode/Nama Accessories :</strong>
+                </label>
+                <div class="col-lg-5">
+                    <input type="text"
+                           class="form-control scan-accessories"
+                           placeholder="Enter Code Accessories">
+                </div>
+            </div>
+
+            <div class="box-footer mt-3">
                 <button type="button" class="btn btn-primary btn-sm float-end btn-simpan">
                     <i class="bx bx-save"></i> Save
                 </button>
             </div>
+
         </div>
     </div>
 @endsection
+
 
 @push('head')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 @endpush
+
 
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -59,48 +78,53 @@
 
             let table = $('.table-stok').DataTable({
                 autoWidth: false,
-                data: [],
                 paging: false,
                 searching: false,
                 ordering: false,
+                info: false,
+                data: [],
 
                 columns: [
                     { data: 'code_acces' },
                     { data: 'name' },
                     { data: 'region' },
+
                     {
                         data: 'price',
                         render: function (data) {
                             return formatRupiah(data);
                         }
                     },
+
                     {
                         data: 'stok',
                         render: function (data) {
-                            return '<input type="number" class="form-control stok-input" value="'+data+'">';
+                            return '<input type="number" class="form-control stok-input" value="' + data + '">';
                         }
                     },
+
                     {
-                        data: 'kode_msk',
+                        data: null,
                         render: function () {
                             return '<input type="text" class="form-control kode_msk-input" placeholder="kode/invoice">';
                         }
                     },
+
                     {
-                        data: 'date_in',
+                        data: null,
                         render: function () {
                             return '<input type="text" class="form-control datepicker date_in-input" placeholder="Tanggal Masuk">';
                         }
                     },
+
                     {
                         data: null,
                         render: function () {
-                            return '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Hapus</button>';
+                            return '<button type="button" class="btn btn-danger btn-sm btn-hapus">Hapus</button>';
                         }
                     }
                 ],
 
-                // 🔥 INI YANG PALING PENTING
                 createdRow: function (row) {
                     $(row).find('.datepicker').flatpickr({
                         dateFormat: "Y-m-d"
@@ -108,67 +132,108 @@
                 }
             });
 
-            function formatRupiah(amount) {
-                let number_string = amount.toString();
-                return 'Rp ' + number_string.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+            function formatRupiah(angka) {
+                angka = parseInt(angka);
+                return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
-            // SCAN BARCODE / INPUT ENTER
-            $('#code_access').on('keypress', function (e) {
-                if (e.which === 13) {
-                    e.preventDefault();
-                    let codeAccess = $(this).val();
 
-                    if (!codeAccess) return;
+            function cariAccessories(keyword, inputObj) {
 
-                    $.ajax({
-                        url: '{{ route('gudang.acces.checkcode') }}',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            code_access: codeAccess
-                        },
-                        success: function (response) {
+                if (keyword == '') return;
 
-                            if (response.exists) {
-                                let found = false;
+                $.ajax({
+                    url: '{{ route("gudang.acces.checkcode") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        code_access: keyword
+                    },
 
-                                table.rows().every(function () {
-                                    let data = this.data();
+                    success: function (response) {
 
-                                    if (data.code_acces === codeAccess) {
-                                        data.stok = parseInt(data.stok) + 1;
-                                        this.data(data).draw();
-                                        found = true;
-                                    }
+                        if (response.exists) {
+
+                            let found = false;
+
+                            table.rows().every(function () {
+
+                                let data = this.data();
+
+                                if (data.code_acces == response.data.code_acces) {
+
+                                    let row = $(this.node());
+                                    let qty = row.find('.stok-input').val();
+
+                                    row.find('.stok-input').val(parseInt(qty) + 1);
+
+                                    found = true;
+                                }
+                            });
+
+                            if (!found) {
+
+                                table.row.add({
+                                    code_acces: response.data.code_acces,
+                                    name: response.data.name,
+                                    region: response.data.region,
+                                    price: response.data.price,
+                                    stok: 1
                                 });
 
-                                if (!found) {
-                                    table.row.add({
-                                        code_acces: response.data.code_acces,
-                                        name: response.data.name,
-                                        region: response.data.region,
-                                        price: response.data.price,
-                                        stok: 1
-                                    }).draw();
-                                }
+                                // pindahkan row terbaru ke paling atas
+                                let dataBaru = table.row(':last').data();
+                                table.row(':last').remove();
 
-                                $('#code_access').val('');
+                                table.row.add(dataBaru);
 
-                            } else {
-                                Swal.fire('Error', response.message, 'error');
+                                let semuaData = table.rows().data().toArray();
+
+                                // urutkan agar data baru di atas
+                                semuaData.unshift(semuaData.pop());
+
+                                table.clear();
+                                table.rows.add(semuaData).draw();
                             }
+
+                            $('.scan-accessories').val('');
+                            $('.scan-accessories').first().focus();
+
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
                         }
-                    });
+                    }
+                });
+            }
+
+
+            // INPUT ATAS / BAWAH BISA DIGUNAKAN
+            $(document).on('keypress', '.scan-accessories', function (e) {
+
+                if (e.which == 13) {
+                    e.preventDefault();
+
+                    let keyword = $(this).val();
+                    cariAccessories(keyword, $(this));
                 }
+
             });
 
-            // SAVE DATA
+
+            // HAPUS ROW
+            $(document).on('click', '.btn-hapus', function () {
+                table.row($(this).parents('tr')).remove().draw();
+            });
+
+
+            // SAVE
             $('.btn-simpan').click(function () {
 
                 let accessoriesData = [];
 
                 table.rows().every(function () {
+
                     let row = $(this.node());
 
                     accessoriesData.push({
@@ -177,29 +242,30 @@
                         kode_msk: row.find('.kode_msk-input').val(),
                         date_in: row.find('.date_in-input').val()
                     });
+
                 });
 
                 $.ajax({
-                    url: '{{ route('gudang.acces.updatemultiple') }}',
+                    url: '{{ route("gudang.acces.updatemultiple") }}',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
                         accessories: accessoriesData
                     },
+
                     success: function () {
                         Swal.fire('Success', 'Data berhasil disimpan', 'success');
                         table.clear().draw();
+                        $('.scan-accessories').val('');
+                    },
+
+                    error: function () {
+                        Swal.fire('Error', 'Gagal menyimpan data', 'error');
                     }
                 });
 
             });
 
         });
-
-        // HAPUS ROW
-        function removeRow(btn) {
-            let table = $('.table-stok').DataTable();
-            table.row($(btn).parents('tr')).remove().draw();
-        }
     </script>
 @endpush
