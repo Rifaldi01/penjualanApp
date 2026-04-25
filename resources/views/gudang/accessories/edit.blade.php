@@ -12,7 +12,7 @@
                 @csrf
                 <div class="form-group row">
                     <label class="col-lg-2 mt-2">
-                        <strong>Kode Accessories :</strong>
+                        <strong>Kode/Nama Accessories :</strong>
                     </label>
                     <div class="col-lg-5">
                         <input type="text" class="form-control" id="code_access" placeholder="Enter Code Accessories">
@@ -25,6 +25,7 @@
                 <tr>
                     <th>Code Acces</th>
                     <th>Name</th>
+                    <th>Asal Pembelian</th>
                     <th>Price</th>
                     <th>Stok</th>
                     <th>Kode/Invoice</th>
@@ -66,6 +67,7 @@
                 columns: [
                     { data: 'code_acces' },
                     { data: 'name' },
+                    { data: 'region' },
                     {
                         data: 'price',
                         render: function (data) {
@@ -145,6 +147,7 @@
                                     table.row.add({
                                         code_acces: response.data.code_acces,
                                         name: response.data.name,
+                                        region: response.data.region,
                                         price: response.data.price,
                                         stok: 1
                                     }).draw();
