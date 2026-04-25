@@ -529,6 +529,7 @@ class AccessoriesController extends Controller
         $item->update([
             'kode_msk' => $request->kode_msk,
             'date_in' => $request->date_in,
+            'created_at' => $request->date_in,
         ]);
 
         // Cek apakah invoice sudah ada di tabel `pembelian`
