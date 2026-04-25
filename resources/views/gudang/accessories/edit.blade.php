@@ -105,15 +105,15 @@
 
                     {
                         data: null,
-                        render: function () {
-                            return '<input type="text" class="form-control kode_msk-input" placeholder="kode/invoice">';
+                        render: function (data) {
+                            return '<input type="text" class="form-control kode_msk-input" value="'+(data.kode_msk ?? '')+'" placeholder="kode/invoice">';
                         }
                     },
 
                     {
                         data: null,
-                        render: function () {
-                            return '<input type="text" class="form-control datepicker date_in-input" placeholder="Tanggal Masuk">';
+                        render: function (data) {
+                            return '<input type="text" class="form-control datepicker date_in-input" value="'+(data.date_in ?? '')+'" placeholder="Tanggal Masuk">';
                         }
                     },
 
@@ -134,14 +134,76 @@
 
 
             function formatRupiah(angka) {
-                angka = parseInt(angka);
+                angka = parseInt(angka || 0);
                 return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
 
-            function cariAccessories(keyword, inputObj) {
+            function simpanDataLama() {
 
-                if (keyword == '') return;
+                let semuaData = [];
+
+                table.rows().every(function () {
+
+                    let row = $(this.node());
+
+                    semuaData.push({
+                        code_acces : this.data().code_acces,
+                        name       : this.data().name,
+                        region     : this.data().region,
+                        price      : this.data().price,
+                        stok       : row.find('.stok-input').val(),
+                        kode_msk   : row.find('.kode_msk-input').val(),
+                        date_in    : row.find('.date_in-input').val()
+                    });
+
+                });
+
+                return semuaData;
+            }
+
+
+            function tambahKeTable(response) {
+
+                let found = false;
+
+                table.rows().every(function () {
+
+                    let data = this.data();
+
+                    if (data.code_acces == response.data.code_acces) {
+
+                        let row = $(this.node());
+                        let qty = parseInt(row.find('.stok-input').val() || 0);
+
+                        row.find('.stok-input').val(qty + 1);
+
+                        found = true;
+                    }
+                });
+
+                if (!found) {
+
+                    let semuaData = simpanDataLama();
+
+                    semuaData.unshift({
+                        code_acces : response.data.code_acces,
+                        name       : response.data.name,
+                        region     : response.data.region,
+                        price      : response.data.price,
+                        stok       : 1,
+                        kode_msk   : '',
+                        date_in    : ''
+                    });
+
+                    table.clear().rows.add(semuaData).draw();
+                }
+            }
+
+
+            function cariAccessories(keyword) {
+
+                if (keyword.trim() == '') return;
 
                 $.ajax({
                     url: '{{ route("gudang.acces.checkcode") }}',
@@ -154,87 +216,54 @@
                     success: function (response) {
 
                         if (response.exists) {
-
-                            let found = false;
-
-                            table.rows().every(function () {
-
-                                let data = this.data();
-
-                                if (data.code_acces == response.data.code_acces) {
-
-                                    let row = $(this.node());
-                                    let qty = row.find('.stok-input').val();
-
-                                    row.find('.stok-input').val(parseInt(qty) + 1);
-
-                                    found = true;
-                                }
-                            });
-
-                            // GANTI seluruh blok if (!found) menjadi ini
-
-                            if (!found) {
-
-                                // simpan semua data lama beserta isi input manual user
-                                let semuaData = [];
-
-                                table.rows().every(function () {
-
-                                    let row = $(this.node());
-
-                                    semuaData.push({
-                                        code_acces: this.data().code_acces,
-                                        name: this.data().name,
-                                        region: this.data().region,
-                                        price: this.data().price,
-
-                                        stok: row.find('.stok-input').val(),
-                                        kode_msk: row.find('.kode_msk-input').val(),
-                                        date_in: row.find('.date_in-input').val()
-                                    });
-                                });
-
-                                // tambahkan data baru ke paling atas
-                                semuaData.unshift({
-                                    code_acces: response.data.code_acces,
-                                    name: response.data.name,
-                                    region: response.data.region,
-                                    price: response.data.price,
-                                    stok: 1,
-                                    kode_msk: '',
-                                    date_in: ''
-                                });
-
-                                // reload table
-                                table.clear().rows.add(semuaData).draw();
-                            }
-
-                            $('.scan-accessories').val('');
-                            $('.scan-accessories').first().focus();
-
+                            tambahKeTable(response);
                         } else {
-                            Swal.fire('Error', response.message, 'error');
+                            Swal.fire('Error', keyword + ' tidak ditemukan', 'error');
                         }
                     }
                 });
             }
 
 
-            // INPUT ATAS / BAWAH BISA DIGUNAKAN
+            function prosesMultiInput(textInput) {
+
+                if (textInput.trim() == '') return;
+
+                let daftar = [];
+
+                // Jika ada koma = pecah berdasarkan koma (nama barang)
+                if (textInput.includes(',')) {
+                    daftar = textInput.split(',');
+                } else {
+                    // selain itu pecah spasi (kode barcode)
+                    daftar = textInput.split(/\s+/);
+                }
+
+                daftar = daftar.map(item => item.trim()).filter(item => item != '');
+
+                daftar.forEach(function(item){
+                    cariAccessories(item);
+                });
+
+                $('.scan-accessories').val('');
+                $('.scan-accessories').first().focus();
+            }
+
+
+            // ENTER dari input atas / bawah
             $(document).on('keypress', '.scan-accessories', function (e) {
 
                 if (e.which == 13) {
                     e.preventDefault();
 
-                    let keyword = $(this).val();
-                    cariAccessories(keyword, $(this));
+                    let isi = $(this).val();
+                    prosesMultiInput(isi);
                 }
 
             });
 
 
-            // HAPUS ROW
+            // Tombol hapus row
             $(document).on('click', '.btn-hapus', function () {
                 table.row($(this).parents('tr')).remove().draw();
             });
@@ -250,10 +279,10 @@
                     let row = $(this.node());
 
                     accessoriesData.push({
-                        code_acces: this.data().code_acces,
-                        stok: row.find('.stok-input').val(),
-                        kode_msk: row.find('.kode_msk-input').val(),
-                        date_in: row.find('.date_in-input').val()
+                        code_acces : this.data().code_acces,
+                        stok       : row.find('.stok-input').val(),
+                        kode_msk   : row.find('.kode_msk-input').val(),
+                        date_in    : row.find('.date_in-input').val()
                     });
 
                 });
