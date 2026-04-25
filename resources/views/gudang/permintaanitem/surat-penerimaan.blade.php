@@ -97,8 +97,8 @@
                                 <tr>
                                     <td width="1%" class="text-center"
                                         style="border-left-width:1px;">{{ $key + 1 }}</td>
-                                    <td>{{ $item->itemIn->name }}</td>
-                                    <td class="text-right">{{ $item->itemIn->no_seri }}</td>
+                                    <td>{{ $item->itemIn->name ?? '-'}}</td>
+                                    <td class="text-right">{{ $item->itemIn->no_seri ?? '-'}}</td>
                                 </tr>
                             @endforeach
                             <tr>
