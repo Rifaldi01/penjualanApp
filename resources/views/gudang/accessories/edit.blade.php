@@ -27,6 +27,7 @@
             <table class="table mt-2 table-stok">
                 <thead>
                 <tr>
+                    <th width="5%">No</th>
                     <th>Code Acces</th>
                     <th>Name</th>
                     <th>Asal Pembelian</th>
@@ -63,16 +64,7 @@
 @endsection
 
 
-@push('head')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-@endpush
-
-
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
     <script>
         $(document).ready(function () {
 
@@ -85,6 +77,15 @@
                 data: [],
 
                 columns: [
+
+                    // NOMOR
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+
                     { data: 'code_acces' },
                     { data: 'name' },
                     { data: 'region' },
@@ -136,6 +137,13 @@
             function formatRupiah(angka) {
                 angka = parseInt(angka || 0);
                 return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+
+            function refreshNomor() {
+                table.rows().every(function (rowIdx) {
+                    table.cell(rowIdx, 0).data(rowIdx + 1);
+                });
             }
 
 
@@ -197,6 +205,7 @@
                     });
 
                     table.clear().rows.add(semuaData).draw();
+                    refreshNomor();
                 }
             }
 
@@ -231,11 +240,9 @@
 
                 let daftar = [];
 
-                // Jika ada koma = pecah berdasarkan koma (nama barang)
                 if (textInput.includes(',')) {
                     daftar = textInput.split(',');
                 } else {
-                    // selain itu pecah spasi (kode barcode)
                     daftar = textInput.split(/\s+/);
                 }
 
@@ -250,7 +257,6 @@
             }
 
 
-            // ENTER dari input atas / bawah
             $(document).on('keypress', '.scan-accessories', function (e) {
 
                 if (e.which == 13) {
@@ -263,50 +269,11 @@
             });
 
 
-            // Tombol hapus row
             $(document).on('click', '.btn-hapus', function () {
                 table.row($(this).parents('tr')).remove().draw();
+                refreshNomor();
             });
 
-
-            // SAVE
-            $('.btn-simpan').click(function () {
-
-                let accessoriesData = [];
-
-                table.rows().every(function () {
-
-                    let row = $(this.node());
-
-                    accessoriesData.push({
-                        code_acces : this.data().code_acces,
-                        stok       : row.find('.stok-input').val(),
-                        kode_msk   : row.find('.kode_msk-input').val(),
-                        date_in    : row.find('.date_in-input').val()
-                    });
-
-                });
-
-                $.ajax({
-                    url: '{{ route("gudang.acces.updatemultiple") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        accessories: accessoriesData
-                    },
-
-                    success: function () {
-                        Swal.fire('Success', 'Data berhasil disimpan', 'success');
-                        table.clear().draw();
-                        $('.scan-accessories').val('');
-                    },
-
-                    error: function () {
-                        Swal.fire('Error', 'Gagal menyimpan data', 'error');
-                    }
-                });
-
-            });
 
         });
     </script>
