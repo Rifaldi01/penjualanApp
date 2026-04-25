@@ -26,12 +26,14 @@
                            <td>{{$key +1}}</td>
                            <td>{{ tanggal($permintaan->created_at) }}</td>
                            <td>{{ $permintaan->kode }}</td>
-                           @foreach($permintaan->detailItem as $item)
-                               <li>{{ $item->itemIn->name ?? '-' }}</li>
-                           @endforeach
                            <td>
                                @foreach($permintaan->detailItem as $item)
-                                   <li>{{ $item->itemIn->no_seri ?? '-'}}</li>
+                                   <li>{{ $item->itemIn->name }}</li>
+                               @endforeach
+                           </td>
+                           <td>
+                               @foreach($permintaan->detailItem as $item)
+                                   <li>{{ $item->itemIn->no_seri }}</li>
                                @endforeach
                            </td>
                            <td>{{ $permintaan->jumlah }}</td>
