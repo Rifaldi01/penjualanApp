@@ -8,17 +8,31 @@
                         <h4 class="text-uppercase">Accessories Balance</h4>
                     </div>
                 </div>
+                <div class="col-6 mt-3">
+                    <form method="GET">
+                        <select name="year" onchange="this.form.submit()">
+
+                            @for($y = now()->year; $y >= 2020; $y--)
+
+                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected':'' }}>
+                                    {{ $y }}
+                                </option>
+
+                            @endfor
+
+                        </select>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="balance" class="table table-striped table-bordered" style="width:100%">
+                <table id="example" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
-                        <th width="4%">No</th>
-                        <th>Tahun</th>
-                        <th>Divisi</th>
-                        <th>Stok Awal</th>
+                        <th>No</th>
+                        <th>Code</th>
+                        <th>Accessories</th>
                         <th>Barang Masuk</th>
                         <th>Barang Terjual</th>
                         <th>Barang Dikembalikan</th>
@@ -26,10 +40,37 @@
                         <th>Barang Diminta</th>
                         <th>Minta Barang</th>
                         <th>Sisa</th>
-                        <th width="12%" class="text-center">Action</th>
                     </tr>
                     </thead>
-                    <tbody class="dataBalace">
+
+                    <tbody>
+
+                    @foreach($data as $key => $row)
+
+                        @php
+                            $sisa = $row->barang_masuk
+                            - $row->barang_terjual
+                            + $row->barang_dikembalikan
+                            - $row->barang_rusak
+                            - $row->barang_diminta
+                            + $row->minta_barang;
+                        @endphp
+
+                        <tr>
+                            <td>{{ $key+1 }}</td>
+                            <td>{{ $row->code_acces }}</td>
+                            <td>{{ $row->name }}</td>
+                            <td>{{ $row->barang_masuk }}</td>
+                            <td>{{ $row->barang_terjual }}</td>
+                            <td>{{ $row->barang_dikembalikan }}</td>
+                            <td>{{ $row->barang_rusak }}</td>
+                            <td>{{ $row->barang_diminta }}</td>
+                            <td>{{ $row->minta_barang}}</td>
+                            <td>{{ $sisa }}</td>
+                        </tr>
+
+                    @endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -41,61 +82,6 @@
 
 @endpush
 @push('js')
-    <script>
-        $(document).ready(function () {
 
-            let table = $('#balance').DataTable({
-                processing: true,
-                serverSide: false,
-                    ajax: {
-                        url: "{{ route('gudang.accessories.balance.data') }}",
-                    },
-                columns: [
-                    {
-                        data: null,
-                        render: (data, type, row, meta) => meta.row + 1
-                    },
-                    { data: 'year', render: data => 'Tahun ' + data },
-                    { data: 'divisi',
-                        render: function(data){
-                            return data ? data.name : '-';
-                        }
-                    },
-                    { data: 'capital_stock' },
-                    { data: 'accessories_in' },
-                    { data: 'sale' },
-                    { data: 'retur' },
-                    { data: 'reject' },
-                    { data: 'request' },
-                    { data: 'request_in' },
-                    { data: 'remainder' },
-                    {
-                        data: 'id',
-                        className: 'text-center',
-                        render: function (data, type, row) {
-
-                            let detailUrl = "{{ route('gudang.balance.show', ':id') }}";
-                            detailUrl = detailUrl.replace(':id', row.id);
-
-
-
-                            return `
-                            <a href="${detailUrl}"
-                               class="btn btn-info lni lni-eye"
-                               title="Detail"></a>
-
-                            <a href="/"
-                               class="btn btn-warning lni lni-pencil"
-                               title="Edit"></a>
-                        `;
-                        }
-
-                    }
-                ]
-            });
-
-            $('.select2').select2();
-        });
-    </script>
 @endpush
 
