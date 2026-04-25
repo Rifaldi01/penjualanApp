@@ -12,7 +12,7 @@ class Permintaan extends Model
 
     public function detailAccessories()
     {
-        return $this->hasMany(DetailAccessories::class, 'permintaan_id')->withTrashed();
+        return $this->hasMany(DetailAccessories::class, 'permintaan_id');
     }
     public function divisiAsal()
     {
