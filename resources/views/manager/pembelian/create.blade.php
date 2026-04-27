@@ -52,6 +52,7 @@
                         <th>Kode</th>
                         <th>Harga Beli</th>
                         <th>Harga Jual</th>
+                        <th>Harga Bottom</th>
                         <th>PPN</th>
                         <th>Qty</th>
                     </tr>
@@ -69,6 +70,7 @@
                         <th>Kode</th>
                         <th>Harga Beli</th>
                         <th>Harga Jual</th>
+                        <th>Harga Bottom</th>
                         <th>PPN</th>
                         <th>Qty</th>
                     </tr>
@@ -121,7 +123,11 @@
                         <input type="number" name="items[${itemIndex}][price]" class="form-control"
                             value="${item.price ?? ''}" required>
                     </td>
-                     <td><input type="number" name="items[${itemIndex}][ppn]" class="form-control" value="${item.ppn ?? ''}"></td>
+                    <td>
+                        <input type="number" name="items[${itemIndex}][price_bottom]" class="form-control"
+                            value="${item.price_bottom ?? '0'}" required>
+                    </td>
+                     <td><input type="number" name="items[${itemIndex}][ppn]" class="form-control" value="${item.ppn ?? '0'}"></td>
                     <td>
                         <input type="number" name="items[${itemIndex}][qty]" class="form-control"
                             value="${item.qty ?? '1'}" required readonly>
@@ -155,6 +161,10 @@
                     <td>
                         <input type="number" name="acces[${accesIndex}][price]" class="form-control"
                             value="${acces.price ?? ''}" required>
+                    </td>
+                    <td>
+                        <input type="number" name="acces[${accesIndex}][price_bottom]" class="form-control"
+                            value="${acces.price_bottom ?? '0'}" required>
                     </td>
                     <td><input type="number" name="acces[${accesIndex}][ppn]" class="form-control" value="${acces.ppn ?? ''}"></td>
                     <td>
