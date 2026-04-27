@@ -112,7 +112,7 @@
                 <tr>
                     <td>
                         <input type="text" name="items[${itemIndex}][name]" class="form-control"
-                            value="${item.name ?? ''}" required readonly>
+                            value="${item.name ?? ''}" required>
                     </td>
                     <td>
                         <input type="text" name="items[${itemIndex}][no_seri]" class="form-control"
@@ -151,7 +151,7 @@
                 <tr>
                     <td>
                         <input type="text" name="acces[${accesIndex}][name]" class="form-control"
-                            value="${acces.accessories?.name ?? ''}" required readonly>
+                            value="${acces.accessories?.name ?? ''}" required>
                     </td>
                     <td>
                         <input type="text" name="acces[${accesIndex}][code_acces]" class="form-control"

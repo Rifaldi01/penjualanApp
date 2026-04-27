@@ -155,6 +155,7 @@ class PembelianController extends Controller
                 ItemIn::where('kode_msk', $pembelian->invoice)
                     ->where('no_seri', $item['no_seri'])
                     ->update([
+                        'name' => $item['name'],
                         'capital_price' => $item['capital_price'],
                         'price' => $item['price'],
                         'price_bottom' => $item['price_bottom'],
@@ -163,6 +164,7 @@ class PembelianController extends Controller
 
                 // Update tabel items (hanya capital_price dan price)
                 Item::where('no_seri', $item['no_seri'])->update([
+                    'name' => $item['name'],
                     'capital_price' => $item['capital_price'],
                     'price' => $item['price'],
                     'price_bottom' => $item['price_bottom'],
@@ -190,6 +192,7 @@ class PembelianController extends Controller
 
                     // Update tabel accessories (hanya capital_price dan price)
                     Accessories::where('id', $accessoryId)->update([
+                        'name' => $accessory['name'],
                         'capital_price' => $accessory['capital_price'],
                         'price' => $accessory['price'],
                         'price_bottom' => $accessory['price_bottom'],
