@@ -29,7 +29,7 @@ class AccesoriesController extends Controller
         confirmDelete($title, $text);
         $generator = new BarcodeGeneratorPNG(); // Inisialisasi generator barcode
         $acces = Accessories::where('stok', '>', 0)
-            ->where('divisi_id', '!=', '6')
+            ->whereNotIn('divisi_id', [6, 3, 4])
             ->get();
         $barcodes = []; // Array untuk menyimpan barcode
 
