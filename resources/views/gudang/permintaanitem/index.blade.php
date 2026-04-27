@@ -92,6 +92,20 @@
 
                                     </form>
                                 @endif
+                                    @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'diterima')
+
+                                        <form action="{{ route('gudang.permintaanitem.retur.request',$permintaan->id) }}"
+                                              method="POST" class="form-retur"  data-divisi="{{ $permintaan->divisiAsal->name }}">
+                                            @csrf
+                                            @method('PUT')
+
+                                            <button class="btn btn-secondary  btnRetur btn-sm" data-bs-tool="tooltip"
+                                                    data-bs-placement="top" title="Retur Barang">
+                                                <i class="bx bx-repost"></i>
+                                            </button>
+                                        </form>
+
+                                    @endif
                             </td>
                         </tr>
                     @endforeach
@@ -169,6 +183,45 @@
                 btn.innerHTML = '';
                 btn.classList.remove('bx-check');
                 btn.innerText = '...';
+
+            });
+
+        });
+    </script>
+    <script>
+        document.querySelectorAll('.form-retur').forEach(form => {
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                let btn = form.querySelector('.btnRetur');
+                let divisi = form.getAttribute('data-divisi');
+
+                if (btn.disabled) {
+                    return false;
+                }
+
+                Swal.fire({
+                    title: 'Retur barang?',
+                    text: 'Barang akan dikembalikan lagi ke divisi ' + divisi + '.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Retur!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+
+                        btn.disabled = true;
+                        btn.classList.remove('bx-undo');
+                        btn.innerHTML = '...';
+
+                        form.submit();
+                    }
+
+                });
 
             });
 

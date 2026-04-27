@@ -28,6 +28,28 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         View::composer('*', function ($view) {
+            $notifretur = 0;
+
+            if (Auth::check()) { // Pastikan pengguna sudah login
+                $notifretur = Permintaan::where('status', 'retur pending')
+                    ->where('divisi_id_asal', Auth::user()->divisi_id)
+                    ->count();
+            }
+
+            $view->with('notifretur', $notifretur);
+        });
+        View::composer('*', function ($view) {
+            $notifreturitem = 0;
+
+            if (Auth::check()) { // Pastikan pengguna sudah login
+                $notifreturitem = PermintaanItem::where('status', 'retur pending')
+                    ->where('divisi_id_asal', Auth::user()->divisi_id)
+                    ->count();
+            }
+
+            $view->with('notifreturitem', $notifreturitem);
+        });
+        View::composer('*', function ($view) {
             $notif = 0;
 
             if (Auth::check()) { // Pastikan pengguna sudah login
@@ -53,8 +75,7 @@ class AppServiceProvider extends ServiceProvider
             $notiff = 0;
 
             if (Auth::check()) { // Pastikan pengguna sudah login
-                $notiff = Permintaan::where('status', 'pending')
-                    ->orWhere('status', 'disetujui')
+                $notiff = Permintaan::where('status', 'disetujui')
                     ->where('divisi_id_tujuan', Auth::user()->divisi_id)
                     ->count();
             }

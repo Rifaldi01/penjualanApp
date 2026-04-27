@@ -24,6 +24,7 @@ class PermintaanItemController extends Controller
             ->whereDate('created_at', '<', now()->subDays(7))
             ->delete();
         $permintaans = PermintaanItem::with(['detailItem', 'divisiAsal', 'divisiTujuan'])
+            ->whereNotIn('status', ['retur pending', 'retur'])
             ->where('divisi_id_tujuan', $request->user()->divisi_id)
             ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
             ->get();
@@ -156,6 +157,7 @@ class PermintaanItemController extends Controller
     public function konfirmasi(Request $request)
     {
         PermintaanItem::where('status', 'pending')
+            ->whereNotIn('status', ['retur pending', 'retur'])
             ->whereDate('created_at', '<', now()->subDays(7))
             ->delete();
         $permintaans = PermintaanItem::with(['detailItem.itemIn', 'divisiAsal', 'divisiTujuan'])
@@ -204,9 +206,6 @@ class PermintaanItemController extends Controller
         // Redirect ke halaman permintaan dengan pesan sukses
         return redirect()->route('gudang.permintaanitem.index')->with('success', 'Permintaan berhasil diterima.');
     }
-
-
-
     public function receive($id)
     {
         $permintaan = PermintaanItem::findOrFail($id);
@@ -219,5 +218,77 @@ class PermintaanItemController extends Controller
         $permintaan->update(['status' => 'disetujui']);
 
         return redirect()->route('gudang.permintaanitem.konfirmasi')->with('success', 'Permintaan disetujui.');
+    }
+    public function retur(Request $request)
+    {
+        $returs = PermintaanItem::with(['detailItem.itemIn', 'divisiAsal', 'divisiTujuan'])
+            ->whereIn('status', ['retur pending', 'retur'])
+            ->where('divisi_id_asal', $request->user()->divisi_id)
+            ->orderBy('status', 'asc')
+            ->get();
+        $returminta = PermintaanItem::with(['detailItem', 'divisiAsal', 'divisiTujuan'])
+            ->whereIn('status', ['retur pending', 'retur'])
+            ->where('divisi_id_tujuan', $request->user()->divisi_id)
+            ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
+            ->get();
+        return view('gudang.permintaanitem.retur', compact('returs', 'returminta' ));
+    }
+    public function returRequest($id)
+    {
+        $permintaan = PermintaanItem::findOrFail($id);
+
+        if (Auth::user()->divisi_id != $permintaan->divisi_id_tujuan) {
+            return back()->withErrors('Tidak berhak retur.');
+        }
+
+        if ($permintaan->status != 'diterima') {
+            return back()->withErrors('Status belum diterima.');
+        }
+
+        $permintaan->update([
+            'status' => 'retur pending'
+        ]);
+
+        return back()->with('success','Permintaan retur dikirim.');
+    }
+    public function returApprove($id)
+    {
+        // Ambil permintaan item beserta relasi terkait
+        $permintaan = PermintaanItem::with(['detailItem', 'divisiAsal', 'divisiTujuan'])->findOrFail($id);
+
+        // Validasi: Pastikan hanya divisi tujuan yang dapat menyetujui
+        if (Auth::user()->divisi_id != $permintaan->divisi_id_asal) {
+            return redirect()->back()->withErrors('Anda tidak berhak menyetujui permintaan ini.');
+        }
+
+        // Proses setiap detail item
+        foreach ($permintaan->detailItem as $detail) {
+            // Ambil item dari divisi asal
+            $itemAsal = ItemIn::where('id', $detail->item_in_id)
+                ->where('divisi_id', $permintaan->divisi_id_tujuan)
+                ->first();
+
+            // Pastikan item ditemukan sebelum melakukan update
+            if ($itemAsal) {
+                // Update divisi_id pada tabel item_in ke divisi tujuan (yang sedang login)
+                $itemInUpdate = ItemIn::where('id', $detail->item_in_id)
+                    ->update(['divisi_id' => Auth::user()->divisi_id]);
+
+                // Ambil data item berdasarkan no_seri dari tabel items
+                $item = Item::where('no_seri', $itemAsal->no_seri)->first();
+
+                // Pastikan item ditemukan dan update divisi_id pada tabel items
+                if ($item) {
+                    $item->divisi_id = Auth::user()->divisi_id; // Update divisi_id ke divisi tujuan
+                    $item->save(); // Simpan perubahan
+                }
+            }
+        }
+
+        // Update status permintaan menjadi 'diterima'
+        $permintaan->update(['status' => 'retur']);
+
+        // Redirect ke halaman permintaan dengan pesan sukses
+        return back()->with('success', 'Retur diterima.');
     }
 }

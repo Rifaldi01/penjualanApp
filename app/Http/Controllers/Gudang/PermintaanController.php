@@ -29,6 +29,7 @@ class PermintaanController extends Controller
             ->delete();
         // Jika user adalah pemohon (yang meminta barang)
         $permintaans = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])
+            ->whereNotIn('status', ['retur pending', 'retur'])
             ->where('divisi_id_tujuan', $request->user()->divisi_id)
             ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
             ->get();
@@ -292,6 +293,7 @@ class PermintaanController extends Controller
 
         // Ambil daftar permintaan setelah penghapusan
         $permintaans = Permintaan::with(['detailAccessories.accessories', 'divisiAsal', 'divisiTujuan'])
+            ->whereNotIn('status', ['retur pending', 'retur'])
             ->where('divisi_id_asal', $request->user()->divisi_id)
             ->orderBy('status', 'asc')
             ->get();
@@ -307,5 +309,111 @@ class PermintaanController extends Controller
 
         return response()->json($accessories);
     }
+    public function retur(Request $request)
+    {
+       // Ambil daftar permintaan setelah penghapusan
+        $returs = Permintaan::with(['detailAccessories.accessories', 'divisiAsal', 'divisiTujuan'])
+            ->whereIn('status', ['retur pending', 'retur'])
+            ->where('divisi_id_asal', $request->user()->divisi_id)
+            ->orderBy('status', 'asc')
+            ->get();
+        $returminta = Permintaan::with(['detailAccessories.accessories', 'divisiAsal', 'divisiTujuan'])
+            ->whereIn('status', ['retur pending', 'retur'])
+            ->where('divisi_id_tujuan', $request->user()->divisi_id)
+            ->orderBy('status', 'asc')
+            ->get();
 
+        return view('gudang.permintaan.retur', compact('returs','returminta'));
+    }
+    public function returRequest($id)
+    {
+        $permintaan = Permintaan::findOrFail($id);
+
+        if (Auth::user()->divisi_id != $permintaan->divisi_id_tujuan) {
+            return back()->withErrors('Tidak berhak retur.');
+        }
+
+        if ($permintaan->status != 'diterima') {
+            return back()->withErrors('Status belum diterima.');
+        }
+
+        $permintaan->update([
+            'status' => 'retur pending'
+        ]);
+
+        return back()->with('success','Permintaan retur dikirim.');
+    }
+    public function returApprove($id)
+    {
+        $permintaan = Permintaan::with('detailAccessories.accessories')->findOrFail($id);
+
+        if (Auth::user()->divisi_id != $permintaan->divisi_id_asal) {
+            return back()->withErrors('Tidak berhak menerima retur.');
+        }
+
+        if ($permintaan->status != 'retur pending') {
+            return back()->withErrors('Status tidak valid.');
+        }
+
+        DB::transaction(function () use ($permintaan) {
+
+            $kode_msk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
+
+            foreach ($permintaan->detailAccessories as $detail) {
+
+                if (!$detail->accessories) {
+                    throw new \Exception('Accessories tidak ditemukan.');
+                }
+
+                // Barang di divisi tujuan
+                $barangTujuan = Accessories::where('code_acces', $detail->accessories->code_acces)
+                    ->where('divisi_id', $permintaan->divisi_id_tujuan)
+                    ->first();
+
+                if (!$barangTujuan) {
+                    throw new \Exception('Barang tujuan tidak ditemukan.');
+                }
+
+                if ($barangTujuan->stok < $detail->qty) {
+                    throw new \Exception('Stok retur tidak cukup.');
+                }
+
+                // Kurangi stok tujuan
+                $barangTujuan->decrement('stok', $detail->qty);
+
+                // Tambah stok asal
+                $barangAsal = Accessories::where('code_acces', $detail->accessories->code_acces)
+                    ->where('divisi_id', $permintaan->divisi_id_asal)
+                    ->first();
+
+                if ($barangAsal) {
+                    $barangAsal->increment('stok', $detail->qty);
+                } else {
+                    Accessories::create([
+                        'divisi_id'     => $permintaan->divisi_id_asal,
+                        'name'          => $detail->accessories->name,
+                        'price'         => $detail->accessories->price,
+                        'capital_price' => $detail->accessories->capital_price,
+                        'code_acces'    => $detail->accessories->code_acces,
+                        'stok'          => $detail->qty,
+                    ]);
+                }
+
+                /*
+                HAPUS DATA ACCESSORIES_IN
+                yang dibuat saat approve
+                */
+                AccessoriesIn::where('accessories_id', $barangTujuan->id)
+                    ->where('kode_msk', $kode_msk)
+                    ->where('qty', $detail->qty)
+                    ->delete();
+            }
+
+            $permintaan->update([
+                'status' => 'retur'
+            ]);
+        });
+
+        return back()->with('success', 'Retur diterima.');
+    }
 }

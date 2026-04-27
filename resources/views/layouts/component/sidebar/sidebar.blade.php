@@ -268,6 +268,16 @@
                             @endif
                         </a>
                     </li>
+                    <li>
+                        <a href="{{route('gudang.permintaan.retur')}}">
+                            <i class='bx bx-repost'></i>
+                            Retur Accessories
+                            @if($notifretur > 0)
+                                <span class="badge bg-danger">{{$notifretur}}</span>
+                            @else
+                            @endif
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>
@@ -297,6 +307,16 @@
                             Permintaan Item
                             @if($notifitem > 0)
                                 <span class="badge bg-danger">{{$notifitem}}</span>
+                            @else
+                            @endif
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{route('gudang.permintaanitem.retur')}}">
+                            <i class='bx bx-repost'></i>
+                            Retur Item
+                            @if($notifreturitem > 0)
+                                <span class="badge bg-danger">{{$notifreturitem}}</span>
                             @else
                             @endif
                         </a>

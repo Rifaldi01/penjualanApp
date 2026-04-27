@@ -9,7 +9,8 @@
                     </div>
                     <div class="col-sm">
                         <div class="float-end">
-                            <a href="{{route('gudang.permintaan.create')}}" class="btn btn-dnd bx bx-file" data-bs-toggle="tooltip" data-bs-placement="top" title="Meminta Accessories"></a>
+                            <a href="{{route('gudang.permintaan.create')}}" class="btn btn-dnd bx bx-file"
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="Meminta Accessories"></a>
                         </div>
                     </div>
                 </div>
@@ -66,7 +67,7 @@
                                     <span class="badge bg-warning text-dark">Pending</span>
                                 @elseif($permintaan->status == 'disetujui')
                                     <span class="badge bg-success ">Disetujui</span>
-                                @else
+                                @elseif($permintaan->status == 'diterima')
                                     <span class="badge bg-primary ">Diterima</span>
                                 @endif
                             </td>
@@ -90,21 +91,35 @@
                                 @endif
                                 @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'disetujui')
                                     <!-- Tombol Setujui -->
-                                        <form action="{{ route('gudang.permintaan.approve', $permintaan->id) }}"
-                                              method="POST"
-                                              class="approve-form">
+                                    <form action="{{ route('gudang.permintaan.approve', $permintaan->id) }}"
+                                          method="POST"
+                                          class="approve-form">
 
-                                            @csrf
-                                            @method('PUT')
+                                        @csrf
+                                        @method('PUT')
 
-                                            <button type="submit"
-                                                    class="btn btn-success btn-sm bx bx-check btnApprove"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-placement="top"
-                                                    title="Diterima">
-                                            </button>
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm bx bx-check btnApprove"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="Diterima">
+                                        </button>
 
-                                        </form>
+                                    </form>
+                                @endif
+                                @if(Auth::user()->divisi_id == $permintaan->divisi_id_tujuan && $permintaan->status == 'diterima')
+
+                                    <form action="{{ route('gudang.permintaan.retur.request',$permintaan->id) }}"
+                                          method="POST" class="form-retur"  data-divisi="{{ $permintaan->divisiAsal->name }}">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <button class="btn btn-secondary  btnRetur btn-sm" data-bs-tool="tooltip"
+                                                data-bs-placement="top" title="Retur Barang">
+                                            <i class="bx bx-repost"></i>
+                                        </button>
+                                    </form>
+
                                 @endif
                             </td>
                         </tr>
@@ -159,9 +174,9 @@
 
             function formatDatePdf() {
                 const date = new Date();
-                const day   = String(date.getDate()).padStart(2, '0');
-                const month = date.toLocaleString('en-US', { month: 'short' });
-                const year  = String(date.getFullYear()).slice(-2);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = date.toLocaleString('en-US', {month: 'short'});
+                const year = String(date.getFullYear()).slice(-2);
                 return `${day} ${month} ${year}`;
             }
 
@@ -174,7 +189,7 @@
                         filename: function () {
                             return 'Report Accessories ' + formatDatePdf();
                         },
-                        exportOptions: { columns: [0,1,2,3,4,5,6] },
+                        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]},
                         customize: function (doc) {
 
                             doc.defaultStyle.fontSize = 8;
@@ -200,7 +215,7 @@
                     {
                         extend: 'print',
                         footer: true,
-                        exportOptions: { columns: [0,1,2,3,4,5,6] }
+                        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]}
                     }
                 ],
 
@@ -216,7 +231,7 @@
                     };
 
                     var totalQty = api
-                        .column(7, { search: 'applied' })
+                        .column(7, {search: 'applied'})
                         .data()
                         .reduce(function (a, b) {
                             return a + intVal(b);
@@ -231,7 +246,7 @@
 
             table2.on('order.dt search.dt', function () {
                 let i = 1;
-                table2.cells(null, 0, { search: 'applied', order: 'applied' })
+                table2.cells(null, 0, {search: 'applied', order: 'applied'})
                     .every(function () {
                         this.data(i++);
                     });
@@ -263,7 +278,7 @@
     <script>
         document.querySelectorAll('.approve-form').forEach(form => {
 
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
 
                 let btn = form.querySelector('.btnApprove');
 
@@ -276,6 +291,45 @@
                 btn.innerHTML = '';
                 btn.classList.remove('bx-check');
                 btn.innerText = '...';
+
+            });
+
+        });
+    </script>
+    <script>
+        document.querySelectorAll('.form-retur').forEach(form => {
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                let btn = form.querySelector('.btnRetur');
+                let divisi = form.getAttribute('data-divisi');
+
+                if (btn.disabled) {
+                    return false;
+                }
+
+                Swal.fire({
+                    title: 'Retur barang?',
+                    text: 'Barang akan dikembalikan lagi ke divisi ' + divisi + '.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Retur!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+
+                        btn.disabled = true;
+                        btn.classList.remove('bx-undo');
+                        btn.innerHTML = '...';
+
+                        form.submit();
+                    }
+
+                });
 
             });
 
