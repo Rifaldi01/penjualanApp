@@ -111,7 +111,7 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) { // Pastikan pengguna sudah login
                 $notiffitem = PermintaanItem::where('status', 'pending')
                     ->orWhere('status', 'disetujui')
-                    ->where('divisi_id_tujuan', Auth::user()->divisi_id)
+                    ->where('divisi_id_asal', Auth::user()->divisi_id)
                     ->count();
             }
 
