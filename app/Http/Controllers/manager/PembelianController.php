@@ -157,6 +157,7 @@ class PembelianController extends Controller
                     ->update([
                         'capital_price' => $item['capital_price'],
                         'price' => $item['price'],
+                        'price_bottom' => $item['price_bottom'],
                         'ppn' => $item['ppn'] ?? 0,
                     ]);
 
@@ -164,6 +165,7 @@ class PembelianController extends Controller
                 Item::where('no_seri', $item['no_seri'])->update([
                     'capital_price' => $item['capital_price'],
                     'price' => $item['price'],
+                    'price_bottom' => $item['price_bottom'],
                 ]);
             }
         }
@@ -182,6 +184,7 @@ class PembelianController extends Controller
                         ->update([
                             'capital_price' => $accessory['capital_price'],
                             'price' => $accessory['price'],
+                            'price_bottom' => $accessory['price_bottom'],
                             'ppn' => $accessory['ppn'] ?? 0,
                         ]);
 
@@ -189,6 +192,7 @@ class PembelianController extends Controller
                     Accessories::where('id', $accessoryId)->update([
                         'capital_price' => $accessory['capital_price'],
                         'price' => $accessory['price'],
+                        'price_bottom' => $accessory['price_bottom'],
                     ]);
                 }
             }
