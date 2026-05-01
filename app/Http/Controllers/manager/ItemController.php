@@ -139,13 +139,6 @@ class ItemController extends Controller
                 : 'required|unique:items,no_seri',
             'price' => 'nullable|numeric|min:0',
             'capital_price' => 'nullable|numeric|min:0',
-        ], [
-            'name.required' => 'Nama Tidak Boleh Kosong',
-            'itemcategory_id.required' => 'Pilih Category',
-            'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
-            'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
-            'price.numeric' => 'Harga harus berupa angka',
-            'capital_price.numeric' => 'Harga Modal harus berupa angka',
         ]);
 
         DB::beginTransaction();
@@ -153,16 +146,7 @@ class ItemController extends Controller
         try {
 
             // ======================
-            // AMBIL DATA LAMA (UNTUK EDIT)
-            // ======================
-            $oldNoSeri = null;
-            if ($id) {
-                $oldItem = Item::find($id);
-                $oldNoSeri = $oldItem ? $oldItem->no_seri : null;
-            }
-
-            // ======================
-            // SIMPAN / UPDATE ITEMS
+            // ITEMS
             // ======================
             $item = Item::updateOrCreate(
                 ['id' => $id],
@@ -179,15 +163,11 @@ class ItemController extends Controller
             );
 
             // ======================
-            // HANDLE ITEM_INS
+            // ITEM_INS (AUTO CREATE / UPDATE)
             // ======================
-            // Cari berdasarkan no_seri baru
-            $itemIn = ItemIn::where('no_seri', $item->no_seri)->first();
-
-            if ($itemIn) {
-
-                // UPDATE jika ditemukan
-                $itemIn->update([
+            ItemIn::updateOrCreate(
+                ['no_seri' => $item->no_seri], // 🔥 kunci utama
+                [
                     'itemcategory_id' => $item->itemcategory_id,
                     'divisi_id'       => $item->divisi_id,
                     'name'            => $item->name,
@@ -196,36 +176,20 @@ class ItemController extends Controller
                     'price_bottom'    => $item->price_bottom,
                     'created_at'      => $item->created_at,
                     'kode_msk'        => $request->kode_msk,
-                ]);
-
-            } else {
-
-                // TIDAK ADA → CREATE BARU
-                ItemIn::create([
-                    'no_seri'         => $item->no_seri,
-                    'itemcategory_id' => $item->itemcategory_id,
-                    'divisi_id'       => $item->divisi_id,
-                    'name'            => $item->name,
-                    'price'           => $item->price,
-                    'capital_price'   => $item->capital_price,
-                    'price_bottom'    => $item->price_bottom,
-                    'created_at'      => $item->created_at,
-                    'kode_msk'        => $request->kode_msk,
-                ]);
-            }
+                ]
+            );
 
             // ======================
-            // HANDLE PEMBELIAN
+            // PEMBELIAN
             // ======================
-            $invoice = $request->kode_msk;
+            if ($request->kode_msk) {
 
-            if ($invoice) {
-                $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+                $exists = Pembelian::where('invoice', $request->kode_msk)->exists();
 
-                if (!$existingPembelian) {
+                if (!$exists) {
                     Pembelian::create([
                         'divisi_id' => $item->divisi_id,
-                        'invoice'   => $invoice,
+                        'invoice'   => $request->kode_msk,
                         'status'    => '1',
                     ]);
                 }
