@@ -153,6 +153,15 @@ class ItemController extends Controller
         try {
 
             // ======================
+            // AMBIL DATA LAMA (UNTUK EDIT)
+            // ======================
+            $oldNoSeri = null;
+            if ($id) {
+                $oldItem = Item::find($id);
+                $oldNoSeri = $oldItem ? $oldItem->no_seri : null;
+            }
+
+            // ======================
             // SIMPAN / UPDATE ITEMS
             // ======================
             $item = Item::updateOrCreate(
@@ -172,10 +181,12 @@ class ItemController extends Controller
             // ======================
             // HANDLE ITEM_INS
             // ======================
+            // Cari berdasarkan no_seri baru
             $itemIn = ItemIn::where('no_seri', $item->no_seri)->first();
 
             if ($itemIn) {
-                // UPDATE jika ada
+
+                // UPDATE jika ditemukan
                 $itemIn->update([
                     'itemcategory_id' => $item->itemcategory_id,
                     'divisi_id'       => $item->divisi_id,
@@ -186,8 +197,10 @@ class ItemController extends Controller
                     'created_at'      => $item->created_at,
                     'kode_msk'        => $request->kode_msk,
                 ]);
+
             } else {
-                // CREATE jika tidak ada
+
+                // TIDAK ADA → CREATE BARU
                 ItemIn::create([
                     'no_seri'         => $item->no_seri,
                     'itemcategory_id' => $item->itemcategory_id,
