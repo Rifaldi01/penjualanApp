@@ -134,7 +134,9 @@ class ItemController extends Controller
         $validate = $request->validate([
             'name' => 'required',
             'itemcategory_id' => 'required',
-            'no_seri' => $id ? 'required' : 'required|unique:items',
+            'no_seri' => $id
+                ? 'required|unique:items,no_seri,' . $id
+                : 'required|unique:items,no_seri',
             'price' => 'nullable|numeric|min:0',
             'capital_price' => 'nullable|numeric|min:0',
         ], [
@@ -142,55 +144,94 @@ class ItemController extends Controller
             'itemcategory_id.required' => 'Pilih Category',
             'no_seri.required' => 'Nomor Seri Tidak Boleh Kosong',
             'no_seri.unique' => 'Nomor Seri Sudah Terdaftar',
-
-            // Pesan error baru
             'price.numeric' => 'Harga harus berupa angka',
             'capital_price.numeric' => 'Harga Modal harus berupa angka',
         ]);
 
-        // Simpan atau update data di tabel `items`
-        $item = Item::updateOrCreate(
-            ['id' => $id],
-            [
-                'itemcategory_id' => $request->input('itemcategory_id'),
-                'name' => $request->input('name'),
-                'no_seri' => $request->input('no_seri'),
-                'created_at' => $request->input('created_at'),
-                'price' => $request->input('price') ?? 0,
-                'capital_price' => $request->input('capital_price') ?? 0,
-                'price_bottom' => $request->input('price_bottom') ?? 0,
-                'divisi_id' => $request->input('divisi_id'),
-            ]
-        );
+        DB::beginTransaction();
 
-        // Update tabel `item_ins`
-        ItemIn::updateOrCreate(
-            ['no_seri' => $item->no_seri],
-            [
-                'itemcategory_id' => $item->itemcategory_id,
-                'divisi_id' => $request->input('divisi_id'),
-                'name' => $item->name,
-                'price' => $item->price,
-                'capital_price' => $item->capital_price,
-                'price_bottom' => $item->price_bottom,
-                'created_at' => $item->created_at,
-                'kode_msk' => $request->input('kode_msk'),
-            ]
-        );
+        try {
 
-        // Cek invoice di tabel pembelian
-        $invoice = $request->input('kode_msk');
-        $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+            // ======================
+            // SIMPAN / UPDATE ITEMS
+            // ======================
+            $item = Item::updateOrCreate(
+                ['id' => $id],
+                [
+                    'itemcategory_id' => $request->itemcategory_id,
+                    'name'            => $request->name,
+                    'no_seri'         => $request->no_seri,
+                    'created_at'      => $request->created_at,
+                    'price'           => $request->price ?? 0,
+                    'capital_price'   => $request->capital_price ?? 0,
+                    'price_bottom'    => $request->price_bottom ?? 0,
+                    'divisi_id'       => $request->divisi_id,
+                ]
+            );
 
-        if (!$existingPembelian && $invoice) {
-            Pembelian::create([
-                'divisi_id' => $item->divisi_id,
-                'invoice' => $invoice,
-                'status' => '1',
-            ]);
+            // ======================
+            // HANDLE ITEM_INS
+            // ======================
+            $itemIn = ItemIn::where('item_id', $item->id)->first();
+
+            if ($itemIn) {
+                // UPDATE
+                $itemIn->update([
+                    'no_seri'         => $item->no_seri,
+                    'itemcategory_id' => $item->itemcategory_id,
+                    'divisi_id'       => $item->divisi_id,
+                    'name'            => $item->name,
+                    'price'           => $item->price,
+                    'capital_price'   => $item->capital_price,
+                    'price_bottom'    => $item->price_bottom,
+                    'created_at'      => $item->created_at,
+                    'kode_msk'        => $request->kode_msk,
+                ]);
+            } else {
+                // CREATE
+                ItemIn::create([
+                    'item_id'         => $item->id,
+                    'no_seri'         => $item->no_seri,
+                    'itemcategory_id' => $item->itemcategory_id,
+                    'divisi_id'       => $item->divisi_id,
+                    'name'            => $item->name,
+                    'price'           => $item->price,
+                    'capital_price'   => $item->capital_price,
+                    'price_bottom'    => $item->price_bottom,
+                    'created_at'      => $item->created_at,
+                    'kode_msk'        => $request->kode_msk,
+                ]);
+            }
+
+            // ======================
+            // HANDLE PEMBELIAN
+            // ======================
+            $invoice = $request->kode_msk;
+
+            if ($invoice) {
+                $existingPembelian = Pembelian::where('invoice', $invoice)->first();
+
+                if (!$existingPembelian) {
+                    Pembelian::create([
+                        'divisi_id' => $item->divisi_id,
+                        'invoice'   => $invoice,
+                        'status'    => '1',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('manager.item.index')
+                ->withSuccess('Data berhasil disimpan');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->withErrors($e->getMessage());
         }
-
-        return redirect()->route('manager.item.index')->withSuccess('Data berhasil disimpan');
     }
 
 
