@@ -168,7 +168,7 @@ class ItemController extends Controller
             ['no_seri' => $item->no_seri],
             [
                 'itemcategory_id' => $item->itemcategory_id,
-                'divisi_id' => $item->divisi_id,
+                'divisi_id' => $request->input('divisi_id'),
                 'name' => $item->name,
                 'price' => $item->price,
                 'capital_price' => $item->capital_price,
