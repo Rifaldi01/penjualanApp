@@ -63,15 +63,16 @@
                         <label for="single-select-field" class="form-label">Divisi</label>
                         <select name="divisi_id" class="form-select" id="single-select-clear-field"
                                 data-placeholder="Pilih Divisi">
+
+                            <option value="">-- Pilih Divisi --</option>
+
                             @foreach($divisi as $div)
-                                @if(isset($item))
-                                    <option
-                                        value="{{ $div->id }}" {{ $div->divisi_id == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
-                                @else
-                                    <option value=""></option>
-                                    <option value="{{ $div->id }}">{{ $div->name }}</option>
-                                @endif
+                                <option value="{{ $div->id }}"
+                                    {{ (isset($item) && $item->divisi_id == $div->id) ? 'selected' : '' }}>
+                                    {{ $div->name }}
+                                </option>
                             @endforeach
+
                         </select>
                     </div>
                 </div>
