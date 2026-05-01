@@ -169,7 +169,7 @@
                     <td><input type="number" name="acces[${accesIndex}][ppn]" class="form-control" value="${acces.ppn ?? ''}"></td>
                     <td>
                         <input type="number" name="acces[${accesIndex}][qty]" class="form-control"
-                            value="${acces.qty ?? '1'}" required readonly>
+                            value="${acces.qty ?? '1'}" required>
                     </td>
                 </tr>
                 `;

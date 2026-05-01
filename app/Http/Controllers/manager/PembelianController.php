@@ -188,6 +188,7 @@ class PembelianController extends Controller
                             'price' => $accessory['price'],
                             'price_bottom' => $accessory['price_bottom'],
                             'ppn' => $accessory['ppn'] ?? 0,
+                            'qty' => $accessory['qty'],
                         ]);
 
                     // Update tabel accessories (hanya capital_price dan price)
@@ -196,6 +197,7 @@ class PembelianController extends Controller
                         'capital_price' => $accessory['capital_price'],
                         'price' => $accessory['price'],
                         'price_bottom' => $accessory['price_bottom'],
+                        'stok' => $accessory['qty'],
                     ]);
                 }
             }
