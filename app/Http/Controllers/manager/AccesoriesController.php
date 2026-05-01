@@ -179,6 +179,7 @@ class AccesoriesController extends Controller
             AccessoriesIn::where('accessories_id', $id)
                 ->update([
                     'price' => $request->input('price'),
+                    'qty' => $request->input('stok'),
                     'capital_price' => $request->input('capital_price'),
                     'price_bottom' => $request->input('price_bottom')
                 ]);
