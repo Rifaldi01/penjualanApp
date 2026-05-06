@@ -4,15 +4,23 @@
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>Tambah / Edit Accessories Multiple</h3>
+                @if(isset($acces))
+                    <h3>Edit Accessories Multiple</h3>
+                @else
+                    <h3>Tambah Accessories Multiple</h3>
+                @endif
                 <hr>
             </div>
         </div>
 
         <div class="card-body">
-            <button type="button" class="btn btn-success btn-sm float-end mb-2" id="addRow">
-                + Tambah Row
-            </button>
+            @if(isset($acces))
+            @else
+                <button type="button" class="btn btn-success btn-sm float-end mb-2" id="addRow">
+                    + Tambah Row
+                </button>
+            @endif
+
             <form action="{{ $url }}" method="POST" id="myFormAcces">
                 @csrf
 
@@ -31,9 +39,9 @@
 
                     <tbody id="table-body">
 
-                    @if(isset($items) && count($items))
+                    @if(isset($acces) && count($acces))
 
-                        @foreach($items as $row)
+                        @foreach($acces as $row)
                             <tr>
                                 <td>
                                     <input type="hidden" name="id[]" value="{{ $row->id }}">

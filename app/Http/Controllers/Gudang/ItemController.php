@@ -166,6 +166,7 @@ class ItemController extends Controller
                     'itemcategory_id' => $request->itemcategory_id[$index],
                     'name' => $name,
                     'no_seri' => $request->no_seri[$index],
+                    'region' => $request->region[$index],
                     'created_at' => $request->created_at[$index],
                     'divisi_id' => $divisiId,
                 ]
@@ -177,6 +178,7 @@ class ItemController extends Controller
                     'itemcategory_id' => $item->itemcategory_id,
                     'divisi_id' => $item->divisi_id,
                     'name' => $item->name,
+                    'region' => $item->region,
                     'created_at' => $item->created_at,
                     'kode_msk' => $request->kode_msk[$index],
                 ]

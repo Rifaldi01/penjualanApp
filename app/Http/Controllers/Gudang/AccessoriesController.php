@@ -58,16 +58,19 @@ class AccessoriesController extends Controller
     {
         $inject = [
             'url' => route('gudang.acces.store'),
-            'divisi' => Divisi::pluck('name', 'id')->toArray(),
         ];
-        if ($id){
-            $acces = Accessories::whereId($id)->first();
+
+        if ($id) {
+
+            // 🔥 ambil sebagai COLLECTION (bukan single)
+            $acces = Accessories::where('id', $id)->get();
+
             $inject = [
                 'url' => route('gudang.acces.update', $id),
-                'divisi' => Divisi::pluck('name', 'id')->toArray(),
                 'acces' => $acces
             ];
         }
+
         return view('gudang.accessories.barcode', $inject);
     }
 

@@ -153,6 +153,7 @@ class ItemController extends Controller
                 [
                     'itemcategory_id' => $request->itemcategory_id,
                     'name'            => $request->name,
+                    'region'          => $request->region,
                     'no_seri'         => $request->no_seri,
                     'created_at'      => $request->created_at,
                     'price'           => $request->price ?? 0,
@@ -171,6 +172,7 @@ class ItemController extends Controller
                     'itemcategory_id' => $item->itemcategory_id,
                     'divisi_id'       => $item->divisi_id,
                     'name'            => $item->name,
+                    'region'          => $item->region,
                     'price'           => $item->price,
                     'capital_price'   => $item->capital_price,
                     'price_bottom'    => $item->price_bottom,

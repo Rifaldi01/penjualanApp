@@ -58,7 +58,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                     <div class="mt-3 mb-2">
                         <label for="single-select-field" class="form-label">Divisi</label>
                         <select name="divisi_id" class="form-select" id="single-select-clear-field"
@@ -76,7 +76,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                     <div class="mt-3 mb-2">
                         <label for="single-select-field" class="form-label">Category</label>
                         <select name="itemcategory_id" class="form-control" id="category"
@@ -90,6 +90,22 @@
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endif
                             @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mt-3 mb-2">
+                        <label for="single-select-field" class="form-label">Region</label>
+                        <select name="region[]" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            <option value="Dalam Negeri"
+                                {{ isset($item) && $item->region == 'Dalam Negeri' ? 'selected' : '' }}>
+                                DN
+                            </option>
+                            <option value="Luar Negeri"
+                                {{ isset($item) && $item->region == 'Luar Negeri' ? 'selected' : '' }}>
+                                LN
+                            </option>
                         </select>
                     </div>
                 </div>

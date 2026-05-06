@@ -230,6 +230,7 @@ class SaleController extends Controller
                         ItemSale::create([
                             'sale_id' => $sale->id,
                             'itemcategory_id' => $item['itemcategory_id'],
+                            'region' => $item['region'],
                             'name' => $item['name'],
                             'no_seri' => $item['no_seri'],
                             'price' => $item['price'],

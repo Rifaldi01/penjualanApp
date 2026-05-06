@@ -36,7 +36,10 @@
                 @isset($item)
                     @method('PUT')
                 @endisset
-                <button type="button" class="btn btn-success mb-2 float-end me-2" id="addRow">+ Tambah</button>
+                @if(isset($item))
+                @else
+                    <button type="button" class="btn btn-success mb-2 float-end me-2" id="addRow">+ Tambah</button>
+                @endif
                 <table class="table">
                     <thead>
                     <tr>
@@ -45,6 +48,7 @@
                         <th>Invoice</th>
                         <th>Kategori</th>
                         <th>No Seri</th>
+                        <th>Region</th>
                         <th>Aksi</th>
                     </tr>
                     </thead>
@@ -81,7 +85,19 @@
                             <input type="text" name="no_seri[]" class="form-control"
                                    value="{{ $item->no_seri ?? '' }}">
                         </td>
-
+                        <td>
+                            <select name="region[]" class="form-control">
+                                <option value="">-- Pilih --</option>
+                                <option value="Dalam Negeri"
+                                    {{ isset($item) && $item->region == 'Dalam Negeri' ? 'selected' : '' }}>
+                                    DN
+                                </option>
+                                <option value="Luar Negeri"
+                                    {{ isset($item) && $item->region == 'Luar Negeri' ? 'selected' : '' }}>
+                                    LN
+                                </option>
+                            </select>
+                        </td>
                         <td>
                             <button type="button" class="btn btn-danger" onclick="removeRow(this)">Hapus</button>
                         </td>
@@ -132,6 +148,19 @@
             </select>
         </td>
         <td><input type="text" name="no_seri[]" class="form-control"></td>
+        <td>
+    <select name="region[]" class="form-control">
+        <option value="">-- Pilih --</option>
+        <option value="Dalam Negeri"
+            {{ isset($item) && $item->region == 'Dalam Negeri' ? 'selected' : '' }}>
+            DN
+        </option>
+        <option value="Luar Negeri"
+            {{ isset($item) && $item->region == 'Luar Negeri' ? 'selected' : '' }}>
+            LN
+        </option>
+    </select>
+</td>
         <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Hapus</button></td>
     </tr>
 `;
