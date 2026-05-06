@@ -21,17 +21,17 @@ class Sale extends Model
     }
     public function accessoriesSales()
     {
-        return $this->hasMany(AccessoriesSale::class);
+        return $this->hasMany(AccessoriesSale::class)->withTrashed();
     }
     public function accessories()
     {
         return $this->belongsToMany(Accessories::class, 'accessories_sales', 'sale_id', 'accessories_id')
-            ->withPivot('qty');
+            ->withPivot('qty')->withTrashed();
     }
 
     public function itemSales()
     {
-        return $this->hasMany(ItemSale::class, 'sale_id', );
+        return $this->hasMany(ItemSale::class, 'sale_id', )->withTrashed();
     }
 
     public function debt()
