@@ -96,7 +96,7 @@
                 <div class="col-sm-4">
                     <div class="mt-3 mb-2">
                         <label for="single-select-field" class="form-label">Region</label>
-                        <select name="region[]" class="form-control">
+                        <select name="region" class="form-control">
                             <option value="">-- Pilih --</option>
                             <option value="Dalam Negeri"
                                 {{ isset($item) && $item->region == 'Dalam Negeri' ? 'selected' : '' }}>
