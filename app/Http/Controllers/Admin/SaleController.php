@@ -26,16 +26,54 @@ class SaleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil data penjualan
-        $sales = Sale::where('divisi_id', Auth::user()->divisi_id)->with(['customer.divisi', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+        $year = $request->year ?? date('Y');
 
-        // Format nomor invoice untuk setiap transaksi
+        // Semua transaksi aktif (semua tahun)
+        $salesActive = Sale::where('divisi_id', Auth::user()->divisi_id)
+            ->whereColumn('nominal_in', '<', 'pay')
+            ->with([
+                'customer.divisi',
+                'user',
+                'itemSales.itemCategory',
+                'accessoriesSales.accessories'
+            ])
+            ->latest()
+            ->get();
 
-       $bank = Bank::all();
-        // Pass data ke view
-        return view('admin.sale.index', compact('sales', 'bank'));
+        // Query transaksi lunas
+        $salesQuery = Sale::where('divisi_id', Auth::user()->divisi_id)
+            ->whereColumn('nominal_in', '>=', 'pay')
+            ->with([
+                'customer.divisi',
+                'user',
+                'itemSales.itemCategory',
+                'accessoriesSales.accessories'
+            ]);
+
+        // Jika bukan ALL maka filter tahun
+        if ($year != 'all') {
+            $salesQuery->whereYear('created_at', $year);
+        }
+
+        $sales = $salesQuery->latest()->get();
+
+        // Ambil daftar tahun
+        $years = Sale::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $bank = Bank::all();
+
+        return view('admin.sale.index', compact(
+            'sales',
+            'salesActive',
+            'bank',
+            'years',
+            'year'
+        ));
     }
 
     private function convertToRoman($monthNumber)
@@ -230,7 +268,7 @@ class SaleController extends Controller
                         ItemSale::create([
                             'sale_id' => $sale->id,
                             'itemcategory_id' => $item['itemcategory_id'],
-                            'region' => $item['region'],
+                            'region' => $itemRecord->region,
                             'name' => $item['name'],
                             'no_seri' => $item['no_seri'],
                             'price' => $item['price'],
@@ -292,39 +330,85 @@ class SaleController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'nominal_in'         => 'required',
-            'pay_debts'        => 'required|',
-            'date_pay'       => 'required',
+            'nominal_in' => 'required',
+            'pay_debts'  => 'required',
+            'date_pay'   => 'required',
         ]);
 
-        if (empty($request->input('bank_id')) && empty($request->input('description'))) {
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Validasi bank / lainya
+        if (empty($request->bank_id) && empty($request->description)) {
             return back()->withErrors([
                 'bank_id' => 'Kolom Bank atau Lainya harus diisi.',
             ])->withInput();
         }
 
-        if (!empty($request->input('bank_id')) && empty($request->input('penerima'))) {
+        // Validasi penerima
+        if (!empty($request->bank_id) && empty($request->penerima)) {
             return back()->withErrors([
                 'penerima' => 'Masukan Nama Penerima.',
             ])->withInput();
         }
-        // Format ulang input nominal_in dan pay_debts untuk menghapus simbol dan titik
-        $nominal_in = str_replace(['Rp.', '.', ' '], '', $request->input('nominal_in'));
-        $pay_debts = str_replace(['Rp.', '.', ' '], '', $request->input('pay_debts'));
 
-        // Update nominal_in di tabel sales
+        // Bersihkan format rupiah
+        $nominal_in = (int) str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
+        $pay_debts = (int) str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts);
+        $admin_fee_baru = (int) str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee);
+
+        // Ambil data sale
         $sale = Sale::findOrFail($id);
+
+        // Biaya admin lama
+        $admin_fee_lama = (int) $sale->admin_fee;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika biaya admin berubah
+        |--------------------------------------------------------------------------
+        */
+
+        if ($admin_fee_baru != $admin_fee_lama) {
+
+            // Hitung selisih
+            $selisih_admin = $admin_fee_baru - $admin_fee_lama;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Contoh:
+            | lama = 2000
+            | baru = 3000
+            | selisih = 1000
+            | pay dikurangi 1000
+            |--------------------------------------------------------------------------
+            |
+            | lama = 2000
+            | baru = 1000
+            | selisih = -1000
+            | pay otomatis bertambah 1000
+            */
+
+            $sale->pay = $sale->pay - $selisih_admin;
+        }
+
+        // Update data sale
         $sale->nominal_in = $nominal_in;
+        $sale->admin_fee = $admin_fee_baru;
+
         $sale->save();
 
-        // Simpan data ke tabel debts
-        $debts = Debt::create([
-            'sale_id' => $id,
-            'bank_id' => $request->input('bank_id'),
-            'pay_debts' => $pay_debts,
-            'date_pay' => $request->input('date_pay'),
-            'penerima' => $request->input('penerima'),
-            'description' => $request->input('description'),
+        // Simpan pembayaran
+        Debt::create([
+            'sale_id'     => $id,
+            'bank_id'     => $request->bank_id,
+            'pay_debts'   => $pay_debts,
+            'date_pay'    => $request->date_pay,
+            'penerima'    => $request->penerima,
+            'description' => $request->description,
         ]);
 
         return back()->withSuccess('Pembayaran Berhasil');

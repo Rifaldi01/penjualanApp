@@ -37,7 +37,8 @@
                             <div class="form-group row">
                                 <div class="">
                                     <div class="input-group">
-                                        <input type="text" class="form-control datepicker" name="created_at" id="created_at"
+                                        <input type="text" class="form-control datepicker" name="created_at"
+                                               id="created_at"
                                                placeholder="Tanggal Invoice">
                                     </div>
                                 </div>
@@ -76,60 +77,63 @@
             </table>
             <form action="" class="form-pembelian" method="post">
                 @csrf
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="bg-primary">
-                        <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
-                    </div>
-                    <div class=" col-lg-4 float-end ms-2">
-                        <div class="mt-2">
-                            <label for="">PPN</label>
-                            <input type="text" name="ppn" class="form-control" id="ppn" onkeyup="formatRupiah(this)" value="0">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="bg-primary">
+                            <h1 class="text-center" id="totalAmount">Bayar Rp. 0</h1>
                         </div>
-                        <div class="mt-2">
-                            <label for="">PPH</label>
-                            <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)" value="0">
-                        </div>
-                        <div class="mt-4">
-                            <label for="">Penerima</label>
-                            <input type="text" class="form-control" name="penerima" id="penerima" >
-                        </div>
-                        @if(auth()->check() && auth()->user()->divisi_id == 3)
-                            <div class="mt-4">
-                                <label>Invoice Manual</label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="inv_manual"
-                                       id="inv_manual">
+                        <div class=" col-lg-4 float-end ms-2">
+                            <div class="mt-2">
+                                <label for="">PPN</label>
+                                <input type="text" name="ppn" class="form-control" id="ppn" onkeyup="formatRupiah(this)"
+                                       value="0">
                             </div>
-                        @endif
+                            <div class="mt-2">
+                                <label for="">PPH</label>
+                                <input type="text" class="form-control" name="pph" id="pph" onkeyup="formatRupiah(this)"
+                                       value="0">
+                            </div>
+                            <div class="mt-4">
+                                <label for="">Penerima</label>
+                                <input type="text" class="form-control" name="penerima" id="penerima">
+                            </div>
+                            @if(auth()->check() && auth()->user()->divisi_id == 3)
+                                <div class="mt-4">
+                                    <label>Invoice Manual</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           name="inv_manual"
+                                           id="inv_manual">
+                                </div>
+                            @endif
+                        </div>
+                        <div class=" col-lg-4 float-end">
+                            <div class="mt-2">
+                                <label for="">Nominal In</label>
+                                <input type="text" name="nominal_in" class="form-control" id="nominal_in"
+                                       onkeyup="formatRupiah(this)">
+                            </div>
+                            <div class="mt-2">
+                                <label for="">Pay Plan</label>
+                                <input type="text" class="form-control datepicker" name="deadlines" id="deadlines">
+                            </div>
+                            <div class="mt-4">
+                                <label for="">Nama Bank</label>
+                                <select name="bank_id" id="bank"
+                                        data-placeholder="--Pilih Bank--" class="form-control accessory-select">
+                                    <option value=""></option>
+                                    @foreach($bank as $data)
+                                        <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mt-2">
+                                <label for="">Lainya</label>
+                                <textarea name="description" id="desciption" class="form-control"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class=" col-lg-4 float-end">
-                        <div class="mt-2">
-                            <label for="">Nominal In</label>
-                            <input type="text" name="nominal_in" class="form-control" id="nominal_in" onkeyup="formatRupiah(this)">
-                        </div>
-                        <div class="mt-2">
-                            <label for="">Pay Plan</label>
-                            <input type="text" class="form-control datepicker" name="deadlines" id="deadlines">
-                        </div>
-                        <div class="mt-4">
-                            <label for="">Nama Bank</label>
-                            <select name="bank_id" id="bank"
-                                    data-placeholder="--Pilih Bank--" class="form-control accessory-select">
-                                <option value=""></option>
-                                @foreach($bank as $data)
-                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mt-2">
-                            <label for="">Lainya</label>
-                            <textarea name="description" id="desciption" class="form-control"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
+                    <div class="col-lg-4">
                         <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
                             <label for="customer" class="col-lg-4 control-label">Customer</label>
@@ -146,49 +150,60 @@
                         <div class="form-group row mb-2">
                             <label for="totalrp" class="col-lg-4 control-label">Total Price</label>
                             <div class="col-lg-8">
-                                <input type="text" id="totalrp" class="form-control" readonly>
+                                <input type="text" id="totalrp" class="form-control" value="0" readonly>
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="diskon" class="col-lg-4 control-label">Diskon</label>
                             <div class="col-lg-8">
-                                <input type="text" name="diskon" id="diskon" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                                <input type="text" name="diskon" id="diskon" class="form-control" value="0"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="fee" class="col-lg-4 control-label">Fee</label>
                             <div class="col-lg-8">
-                                <input type="text" name="fee" id="fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                                <input type="text" name="fee" id="fee" class="form-control" value="0"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
                             <label for="ongkir" class="col-lg-4 control-label">Ongkir Konsumen</label>
                             <div class="col-lg-8">
-                                <input type="text" name="ongkir" id="ongkir" class="form-control" value="0" onkeyup="formatRupiah(this)">
-                            </div>
-                        </div>
-                    <div class="form-group row mb-2">
-                            <label for="ongkir" class="col-lg-4 control-label">Biaya Admin</label>
-                            <div class="col-lg-8">
-                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0" onkeyup="formatRupiah(this)">
+                                <input type="text" name="ongkir" id="ongkir" class="form-control" value="0"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
                         <div class="form-group row mb-2">
-                            <label for="bayar" class="col-lg-4 control-label">Bayar</label>
+                            <label for="ongkir" class="col-lg-4 control-label">Biaya Admin</label>
                             <div class="col-lg-8">
-                                <input type="text" id="bayarrp" name="bayar" class="form-control" readonly>
+                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
-            <hr>
-            <div class="box-footer">
-                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
-                    Save
-                </button>
-            </div>
+{{--                        <div class="form-group row mb-2">--}}
+{{--                            <label for="ongkir" class="col-lg-4 control-label">Admin E-Commerce</label>--}}
+{{--                            <div class="col-lg-8">--}}
+{{--                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0"--}}
+{{--                                       onkeyup="formatRupiah(this)">--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+                        <div class="form-group row mb-2">
+                            <label for="bayar" class="col-lg-4 control-label">Bayar</label>
+                            <div class="col-lg-8">
+                                <input type="text" id="bayarrp" name="bayar" class="form-control" value="0" readonly>
+                            </div>
+                        </div>
+            </form>
         </div>
+    </div>
+    <hr>
+    <div class="box-footer">
+        <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
+            Save
+        </button>
+    </div>
+    </div>
     </div>
 @endsection
 
@@ -202,7 +217,7 @@
     <script>
         $(document).ready(function () {
             $('#bank').select2({
-                theme:'bootstrap-5',
+                theme: 'bootstrap-5',
                 placeholder: "--Pilih Invoice--",
                 width: '100%'
             });
@@ -259,7 +274,7 @@
                 let total = 0;
                 let bayar = 0;
                 let totalQty = 0;
-                let adminFee =0;
+                let adminFee = 0;
 
                 table.rows().every(function () {
                     let data = this.data();
@@ -453,8 +468,8 @@
                         total_price: Math.floor(parseFloat($('#totalrp').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ongkir: Math.floor(parseFloat($('#ongkir').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         diskon: Math.floor(parseFloat($('#diskon').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
-                        fee:Math.floor(parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
-                        admin_fee:Math.floor(parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        fee: Math.floor(parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
+                        admin_fee: Math.floor(parseFloat($('#admin_fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         nominal_in: Math.floor(parseFloat($('#nominal_in').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         ppn: Math.floor(parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
                         pph: Math.floor(parseFloat($('#pph').val().replace(/[^0-9,-]/g, "").replace(',', '.'))),
