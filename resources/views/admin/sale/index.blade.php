@@ -80,6 +80,8 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
+                                            <h5 class="modal-title ms-2 mt-2">Total Bayar : {{formatRupiah($data->pay)}}</h5>
+                                            <h5 class="modal-title ms-2 mt-2">Sisa Bayar : {{formatRupiah($data->pay - $data->nominal_in)}}</h5>
                                             <form action="{{route('admin.sale.update', $data->id)}}" method="POST">
                                                 @csrf
                                                 @method('PUT')
