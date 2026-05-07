@@ -183,6 +183,23 @@
                 lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
                 pageLength: 10, // Default halaman pertama
                 responsive: true, // Untuk tampilan responsif
+                dom: 'lBfrtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="bx bx-file"></i> Download Excel',
+                        className: 'btn btn-success btn-sm shadow',
+                        exportOptions: {
+                            // export hanya kolom yang terlihat (hide/visible ikut terfilter juga)
+                            columns: ':visible:not(:first-child):not(:last-child)',
+                            modifier: {
+                                search: 'applied',   // ikut filter pencarian
+                                order: 'applied',    // ikut urutan sort
+                                page: 'current'         // ambil semua hasil filter (bukan hanya halaman aktif)
+                            }
+                        }
+                    }
+                ],
                 footerCallback: function (row, data, start, end, display) {
                     var api = this.api();
 
