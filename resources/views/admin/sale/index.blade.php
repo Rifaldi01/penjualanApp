@@ -125,7 +125,7 @@
                                                             <div class="position-relative input-icon">
                                                                 <input type="text" class="form-control"
                                                                        name="admin_fee" id="admin_fee{{$data->id}}"
-                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->nominal_in) }}">
+                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->admin_fee) }}">
                                                                 <span
                                                                     class="position-absolute top-50 translate-middle-y"><i
                                                                         class='bx bx-money'></i></span>
