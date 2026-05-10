@@ -51,17 +51,20 @@ class AccesoriesController extends Controller
         $inject = [
             'url' => route('manager.acces.store')
         ];
+
         if ($id){
-            $acces = Accessories::whereId($id)->first();
+            $acces = Accessories::withTrashed()->whereId($id)->first();
+
             $inject = [
                 'url' => route('manager.acces.update', $id),
                 'acces' => $acces
             ];
         }
+
         $divisi = Divisi::all();
+
         return view('manager.accessories.barcode', $inject, compact('divisi'));
     }
-
     /**
      * Store a newly created resource in storage.
      *
