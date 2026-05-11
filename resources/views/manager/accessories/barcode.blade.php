@@ -34,6 +34,7 @@
                 @isset($acces)
                     @method('PUT')
                 @endisset
+                <input type="hidden" name="redirect_url" value="{{ url()->previous() }}">
                 <div class="mb-2">
                     <label class="col-form-label">Nama Aksesori</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}"

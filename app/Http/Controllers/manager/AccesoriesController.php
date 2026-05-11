@@ -145,53 +145,56 @@ class AccesoriesController extends Controller
         ]);
 
         if ($id === null) {
-            // Dapatkan dua digit terakhir tahun, bulan, dan hari
-            $currentDate = date('md'); // contoh: 240822 untuk 22 Agustus 2024
 
-            // Dapatkan jumlah accessories yang diinput pada hari ini
-            $countToday = Accessories::whereDate('created_at', date('Y-m-d'))->count();
+            // Generate kode baru
+            $currentDate = date('md');
 
-            // Nomor urut dengan padding tiga digit
+            $countToday = Accessories::withTrashed()
+                ->whereDate('created_at', date('Y-m-d'))
+                ->count();
+
             $newCode = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
 
-            // Format kode akses baru
-            $codeAcces = 'P-' . $currentDate . $newCode; // contoh output: P-240822001
-        }
+            $codeAcces = 'P-' . $currentDate . $newCode;
 
-        // Cek apakah accessories sudah ada
-        $acces = Accessories::firstOrNew(['id' => $id]);
-        $oldPrice = $acces->price; // Simpan harga lama
-        $oldCapitalPrice = $acces->capital_price; // Simpan harga modal lama
+            $acces = new Accessories();
 
-        // Update data accessories
-        $acces->name = $request->input('name');
-        $acces->price = $request->input('price');
-        $acces->stok = $request->input('stok');
-        $acces->capital_price = $request->input('capital_price');
-        $acces->price_bottom = $request->input('price_bottom');
-        $acces->divisi_id = $request->input('divisi_id');
-
-        if ($id === null) {
             $acces->code_acces = $codeAcces;
+
+        } else {
+
+            // AMBIL DATA TERMASUK SOFT DELETE
+            $acces = Accessories::withTrashed()->findOrFail($id);
         }
+
+        // Simpan harga lama
+        $oldPrice = $acces->price;
+        $oldCapitalPrice = $acces->capital_price;
+
+        // Update data
+        $acces->name = $request->input('name');
+        $acces->price = str_replace('.', '', $request->input('price'));
+        $acces->stok = $request->input('stok');
+        $acces->capital_price = str_replace('.', '', $request->input('capital_price'));
+        $acces->price_bottom = str_replace('.', '', $request->input('price_bottom'));
+        $acces->divisi_id = $request->input('divisi_id');
 
         $acces->save();
 
-        // Jika data accessories berhasil diupdate, update juga accessories_ins
+        // Update accessories_ins
         if ($id !== null) {
+
             AccessoriesIn::where('accessories_id', $id)
                 ->update([
-                    'price' => $request->input('price'),
+                    'price' => str_replace('.', '', $request->input('price')),
                     'qty' => $request->input('stok'),
-                    'capital_price' => $request->input('capital_price'),
-                    'price_bottom' => $request->input('price_bottom')
+                    'capital_price' => str_replace('.', '', $request->input('capital_price')),
+                    'price_bottom' => str_replace('.', '', $request->input('price_bottom'))
                 ]);
         }
 
-        Alert::success('Success', 'Save Data Success');
-        return redirect()->route('manager.acces.index');
+        return redirect($request->redirect_url)->withSuccess('Berhasil Disimpan');
     }
-
 
     public function editmultiple()
     {
