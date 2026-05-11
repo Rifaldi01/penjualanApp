@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Gudang;
 
 use App\Http\Controllers\Controller;
+use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\Sale;
 use Carbon\Carbon;
@@ -11,59 +12,57 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $today = now()->toDateString();
+        $year = $request->year ?? now()->year;
+        $divisi = $request->divisi_id;
 
-        // Jika divisi_id = 1, tampilkan semua data hari ini
-        if (Auth::user()->divisi_id == 1) {
+        // FILTER ITEM
+        $itemQuery = Item::query();
 
-            $itemsByCategory = Item::with('cat')
-                ->select(
-                    'itemcategory_id',
-                    \DB::raw('count(*) as total'),
-                    \DB::raw('SUM(case when status = 0 then 1 else 0 end) as available')
-                )
-                ->groupBy('itemcategory_id')
-                ->get();
-
-            $item = Item::count();
-
-            $sales = Sale::whereDate('created_at', $today)
-                ->with([
-                    'customer',
-                    'user',
-                    'itemSales.itemCategory',
-                    'accessoriesSales.accessories'
-                ])
-                ->get();
-
-        } else {
-
-            $itemsByCategory = Item::where('divisi_id', Auth::user()->divisi_id)
-                ->with('cat')
-                ->select(
-                    'itemcategory_id',
-                    \DB::raw('count(*) as total'),
-                    \DB::raw('SUM(case when status = 0 then 1 else 0 end) as available')
-                )
-                ->groupBy('itemcategory_id')
-                ->get();
-
-            $item = Item::where('divisi_id', Auth::user()->divisi_id)->count();
-
-            $sales = Sale::where('divisi_id', Auth::user()->divisi_id)
-                ->whereDate('created_at', $today)
-                ->with([
-                    'customer',
-                    'user',
-                    'itemSales.itemCategory',
-                    'accessoriesSales.accessories'
-                ])
-                ->get();
+        if ($divisi) {
+            $itemQuery->where('divisi_id', $divisi);
         }
 
-        return view('gudang.index', compact('itemsByCategory', 'item', 'sales'));
+        $itemsByCategory = $itemQuery
+            ->with('cat')
+            ->select(
+                'itemcategory_id',
+                \DB::raw('count(*) as total'),
+                \DB::raw('SUM(case when status = 0 then 1 else 0 end) as available')
+            )
+            ->groupBy('itemcategory_id')
+            ->get();
+
+        $item = (clone $itemQuery)->count();
+
+        // FILTER SALES
+        $salesQuery = Sale::query();
+
+        if ($divisi) {
+            $salesQuery->where('divisi_id', $divisi);
+        }
+
+        $sales = $salesQuery
+            ->whereYear('created_at', $year)
+            ->with([
+                'customer',
+                'user',
+                'itemSales.itemCategory',
+                'accessoriesSales.accessories'
+            ])
+            ->latest()
+            ->get();
+
+        $divisis = Divisi::where('id', '!=', 6)->get();
+        return view('gudang.index', compact(
+            'itemsByCategory',
+            'item',
+            'sales',
+            'divisis',
+            'year',
+            'divisi'
+        ));
     }
     public function error(){
         return view('errors.500');
