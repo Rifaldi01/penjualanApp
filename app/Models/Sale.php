@@ -21,7 +21,7 @@ class Sale extends Model
     }
     public function accessoriesSales()
     {
-        return $this->hasMany(AccessoriesSale::class)->withTrashed();
+        return $this->hasMany(AccessoriesSale::class);
     }
     public function accessories()
     {
