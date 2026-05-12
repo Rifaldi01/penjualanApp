@@ -53,7 +53,9 @@
                             <td>{{ $data->name }}</td>
                             <td>{{ $data->divisi->name }}</td>
                             <td>{{ is_numeric($data->price_bottom) ? formatRupiah($data->price_bottom, 0, '.', '.') : '0' }},-</td>
-                            <td>{{ formatRupiah($data->price) }}</td>
+                            <td>{{ is_numeric(str_replace('.', '', $data->price))
+                                            ? formatRupiah(str_replace('.', '', $data->price))
+                                            : '0' }},-</td>
                             <td>{{ $data->code_acces }}</td>
                             <td>{{ $data->stok }}</td>
                         </tr>
@@ -93,8 +95,12 @@
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $data->name }}</td>
                             <td>{{ $data->divisi->name }}</td>
-                            <td>{{ formatRupiah($data->price_bottom) }}</td>
-                            <td>{{ formatRupiah($data->price) }}</td>
+                            <td>{{ is_numeric(str_replace('.', '', $data->price_bottom))
+                                            ? formatRupiah(str_replace('.', '', $data->price_bottom))
+                                            : '0' }},-</td>
+                            <td>{{ is_numeric(str_replace('.', '', $data->price))
+                                            ? formatRupiah(str_replace('.', '', $data->price))
+                                            : '0' }},-</td>
                             <td>{{ $data->code_acces }}</td>
                             <td>{{ $data->stok }}</td>
                         </tr>
