@@ -55,8 +55,17 @@
                                     <td>{{ $data->name }}</td>
                                     <td>{{ $data->divisi->name }}</td>
                                     <td>{{ is_numeric($data->capital_price) ? formatRupiah($data->capital_price, 0, '.', '.') : '0' }},-</td>
-                                    <td>{{ formatRupiah($data->price_bottom) }},-</td>
-                                    <td>{{ formatRupiah($data->price) }},-</td>
+                                    <td>
+                                        {{ is_numeric(str_replace('.', '', $data->price_bottom))
+                                            ? formatRupiah(str_replace('.', '', $data->price_bottom))
+                                            : '0' }},-
+                                    </td>
+
+                                    <td>
+                                        {{ is_numeric(str_replace('.', '', $data->price))
+                                            ? formatRupiah(str_replace('.', '', $data->price))
+                                            : '0' }},-
+                                    </td>
                                     <td class="text-center">
                                         <input type="number" name="barcode_quantity[{{ $data->id }}]" placeholder="Jumlah Barcode" class="form-control" min="1">                                    </td>
                                     <td class="text-center">{{ $data->stok }}</td>
