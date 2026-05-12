@@ -267,7 +267,11 @@
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
                                 formatRupiah(totalCapital?.[data.id] ?? 0),
-                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id] ?? 0), 0)),
+                                formatRupiah(
+                                    (parseFloat(data.pay ?? 0))
+                                    - (parseFloat(data.fee ?? 0))
+                                    - (parseFloat(totalCapital?.[data.id] ?? 0))
+                                ),
                                 debtList
                             ]).draw(false);
 
