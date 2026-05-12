@@ -269,7 +269,6 @@
                                 formatRupiah(totalCapital?.[data.id] ?? 0),
                                 formatRupiah(
                                     (parseFloat(data.pay ?? 0))
-                                    - (parseFloat(data.fee ?? 0))
                                     - (parseFloat(totalCapital?.[data.id] ?? 0))
                                 ),
                                 debtList
