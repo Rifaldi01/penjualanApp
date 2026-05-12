@@ -337,10 +337,12 @@
 
                                 // Hapus tag HTML <ul> dan <li>
                                 text = text
-                                    .replace(/<\/?ul>/g, '')     // hapus <ul> dan </ul>
-                                    .replace(/<\/?li>/g, '')     // hapus <li> dan </li>
-                                    .replace(/\n/g, '')          // hapus newline jika ada
-                                    .trim();                     // hapus spasi di awal/akhir
+                                    .replace(/<a[^>]*>/g, '')     // hapus tag pembuka <a>
+                                    .replace(/<\/a>/g, '')        // hapus tag penutup </a>
+                                    .replace(/<\/?ul>/g, '')      // hapus <ul>
+                                    .replace(/<\/?li>/g, '')      // hapus <li>
+                                    .replace(/\n/g, '')           // hapus enter
+                                    .trim();
 
                                 cell.text(text);
                             });
