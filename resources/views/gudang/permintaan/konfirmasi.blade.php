@@ -4,6 +4,96 @@
         <div class="container">
             <div class="card-header mb-3 mt-3">
                 <h4>DAFTAR PERMINTAAN</h4>
+                <form method="GET" class="mb-3">
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <label>Bulan</label>
+
+                            <select name="bulan" class="form-control bulan">
+
+                                <option value="">-- Semua Bulan --</option>
+
+                                @foreach([
+                                    1 => 'Januari',
+                                    2 => 'Februari',
+                                    3 => 'Maret',
+                                    4 => 'April',
+                                    5 => 'Mei',
+                                    6 => 'Juni',
+                                    7 => 'Juli',
+                                    8 => 'Agustus',
+                                    9 => 'September',
+                                    10 => 'Oktober',
+                                    11 => 'November',
+                                    12 => 'Desember'
+                                ] as $key => $value)
+
+                                    <option value="{{ $key }}"
+                                        {{ request('bulan') == $key ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Tahun</label>
+
+                            <select name="tahun" class="form-control tahun">
+
+                                <option value="">-- Semua Tahun --</option>
+
+                                @for($i = now()->year; $i >= 2023; $i--)
+
+                                    <option value="{{ $i }}"
+                                        {{ request('tahun') == $i ? 'selected' : '' }}>
+                                        {{ $i }}
+                                    </option>
+
+                                @endfor
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Divisi Tujuan</label>
+
+                            <select name="divisi_tujuan" class="form-control divisi">
+
+                                <option value="">-- Semua Divisi --</option>
+
+                                @foreach($divisis as $divisi)
+
+                                    <option value="{{ $divisi->id }}"
+                                        {{ request('divisi_tujuan') == $divisi->id ? 'selected' : '' }}>
+                                        {{ $divisi->name }}
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+
+                            <button class="btn btn-primary btn-sm me-2">
+                                <i class="bx bx-filter"></i> Filter
+                            </button>
+
+                            <a href="{{ route('gudang.permintaan.konfirmasi') }}"
+                               class="btn btn-danger btn-sm">
+                                Reset
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </form>
             </div>
             <div class="card-body">
                 <table class="table table-bordered table-striped" id="konfir">
@@ -170,17 +260,24 @@
                         extend: 'pdfHtml5',
                         footer: true,
                         filename: function () {
-                            return 'Report Accessories ' + formatDatePdf();
+                            return 'Report Permintaan Accessories ' + formatDatePdf();
                         },
-                        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]},
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                        },
                         customize: function (doc) {
 
                             doc.defaultStyle.fontSize = 8;
                             doc.styles.tableHeader.fontSize = 9;
                             doc.pageMargins = [20, 20, 20, 20];
 
-                            // Cari table node secara aman
+                            // Style header
+                            doc.styles.tableHeader.alignment = 'center';
+                            doc.styles.tableHeader.valignment = 'middle';
+
+                            // Cari table node
                             var tableNode;
+
                             doc.content.forEach(function (item) {
                                 if (item.table) {
                                     tableNode = item;
@@ -188,17 +285,91 @@
                             });
 
                             if (tableNode) {
+
                                 tableNode.table.widths = [
-                                    '5%', '20%', '30%', '20%', '5%', '15%', '5%'
+                                    '3%', '12%', '16%', '28%', '10%', '7%', '10%', '8%', '8%'
                                 ];
+
+                                // CENTER semua isi body tabel
+                                tableNode.table.body.forEach(function (row, rowIndex) {
+
+                                    row.forEach(function (cell) {
+
+                                        cell.alignment = 'center';
+                                        cell.valignment = 'middle';
+
+                                    });
+
+                                });
+
                             }
                         }
-
                     },
                     {
                         extend: 'print',
                         footer: true,
-                        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]}
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                            stripHtml: false
+                        },
+
+                        customize: function (win) {
+
+                            // Tambahkan style print
+                            $(win.document.head).append(`
+            <style>
+                @page {
+                    size: landscape;
+                    margin: 10mm;
+                }
+
+                body {
+                    font-size: 10px;
+                }
+
+                table {
+                    width: 100% !important;
+                    border-collapse: collapse !important;
+                }
+
+                table th,
+                table td {
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    padding: 5px !important;
+                    border: 1px solid #000 !important;
+                }
+
+                table thead th {
+                    font-weight: bold;
+                }
+            </style>
+        `);
+
+                            // Center semua isi tabel
+                            $(win.document.body).find('table tbody td').css({
+                                'text-align': 'center',
+                                'vertical-align': 'middle'
+                            });
+
+                            $(win.document.body).find('table thead th').css({
+                                'text-align': 'center',
+                                'vertical-align': 'middle'
+                            });
+
+                            $(win.document.body).find('table tfoot th').css({
+                                'text-align': 'center',
+                                'vertical-align': 'middle'
+                            });
+
+                        }
+                    },{
+                        extend: 'excel',
+                        footer: true,
+                        filename: function () {
+                            return 'Report Permintaan Accessories ' + formatDatePdf();
+                        },
+                        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]}
                     }
                 ],
 
@@ -235,5 +406,20 @@
                     });
             }).draw();
         }
+        $('.divisi').select2({
+            theme: 'bootstrap-5', // Sesuaikan dengan tema CSS Anda
+            placeholder: 'Pilih Divisi',
+            allowClear: true,
+        });
+        $('.tahun').select2({
+            theme: 'bootstrap-5', // Sesuaikan dengan tema CSS Anda
+            placeholder: 'Pilih Tahun',
+            allowClear: true,
+        });
+        $('.bulan').select2({
+            theme: 'bootstrap-5', // Sesuaikan dengan tema CSS Anda
+            placeholder: 'Pilih Bulan',
+            allowClear: true,
+        });
     </script>
 @endpush

@@ -27,14 +27,49 @@ class PermintaanController extends Controller
         Permintaan::where('status', 'pending')
             ->whereDate('created_at', '<', now()->subDays(7))
             ->delete();
-        // Jika user adalah pemohon (yang meminta barang)
-        $permintaans = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])
+
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+        $divisiAsal = $request->divisi_asal;
+
+        $query = Permintaan::with([
+            'detailAccessories.accessories',
+            'divisiAsal',
+            'divisiTujuan'
+        ])
             ->whereNotIn('status', ['retur pending', 'retur'])
-            ->where('divisi_id_tujuan', $request->user()->divisi_id)
-            ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
+            ->where('divisi_id_tujuan', $request->user()->divisi_id);
+
+        // FILTER BULAN
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        // FILTER TAHUN
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        // FILTER DIVISI ASAL
+        if ($divisiAsal) {
+            $query->where('divisi_id_asal', $divisiAsal);
+        }
+
+        $permintaans = $query
+            ->orderBy('status', 'asc')
+            ->latest()
             ->get();
 
-        return view('gudang.permintaan.index', compact('permintaans'));
+        $divisis = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->get();
+
+        return view('gudang.permintaan.index', compact(
+            'permintaans',
+            'divisis',
+            'bulan',
+            'tahun',
+            'divisiAsal'
+        ));
     }
 
     /**
@@ -286,19 +321,46 @@ class PermintaanController extends Controller
     }
     public function konfirmasi(Request $request)
     {
-        // Hapus permintaan dengan status "pending" jika sudah lebih dari 7 hari sejak dibuat
-        Permintaan::where('status', 'pending')
-            ->whereDate('created_at', '<', now()->subDays(7))
-            ->delete();
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+        $divisiTujuan = $request->divisi_tujuan;
 
-        // Ambil daftar permintaan setelah penghapusan
-        $permintaans = Permintaan::with(['detailAccessories.accessories', 'divisiAsal', 'divisiTujuan'])
-            ->whereNotIn('status', ['retur pending', 'retur'])
-            ->where('divisi_id_asal', $request->user()->divisi_id)
-            ->orderBy('status', 'asc')
+        $query = Permintaan::with([
+            'detailAccessories.accessories',
+            'divisiAsal',
+            'divisiTujuan'
+        ])
+            ->where('divisi_id_asal', Auth::user()->divisi_id);
+
+        // FILTER BULAN
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        // FILTER TAHUN
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        // FILTER DIVISI TUJUAN
+        if ($divisiTujuan) {
+            $query->where('divisi_id_tujuan', $divisiTujuan);
+        }
+
+        $permintaans = $query
+            ->latest()
             ->get();
 
-        return view('gudang.permintaan.konfirmasi', compact('permintaans'));
+        $divisis = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->get();
+
+        return view('gudang.permintaan.konfirmasi', compact(
+            'permintaans',
+            'divisis',
+            'bulan',
+            'tahun',
+            'divisiTujuan'
+        ));
     }
 
     public function fetchAccessories($divisi_id)

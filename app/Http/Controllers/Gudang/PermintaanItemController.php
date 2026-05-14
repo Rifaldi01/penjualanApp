@@ -23,15 +23,50 @@ class PermintaanItemController extends Controller
         PermintaanItem::where('status', 'pending')
             ->whereDate('created_at', '<', now()->subDays(7))
             ->delete();
-        $permintaans = PermintaanItem::with(['detailItem', 'divisiAsal', 'divisiTujuan'])
+
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+        $divisiAsal = $request->divisi_asal;
+
+        $query = PermintaanItem::with([
+            'detailItem.itemIn',
+            'divisiAsal',
+            'divisiTujuan'
+        ])
             ->whereNotIn('status', ['retur pending', 'retur'])
-            ->where('divisi_id_tujuan', $request->user()->divisi_id)
-            ->orderBy('status', 'asc') // Mengurutkan dari data yang baru ditambahkan
+            ->where('divisi_id_tujuan', $request->user()->divisi_id);
+
+        // FILTER BULAN
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        // FILTER TAHUN
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        // FILTER DIVISI ASAL
+        if ($divisiAsal) {
+            $query->where('divisi_id_asal', $divisiAsal);
+        }
+
+        $permintaans = $query
+            ->orderBy('status', 'asc')
+            ->latest()
             ->get();
 
-        return view('gudang.permintaanitem.index', compact('permintaans'));
-    }
+        $divisis = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->get();
 
+        return view('gudang.permintaanitem.index', compact(
+            'permintaans',
+            'divisis',
+            'bulan',
+            'tahun',
+            'divisiAsal'
+        ));
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -160,11 +195,48 @@ class PermintaanItemController extends Controller
             ->whereNotIn('status', ['retur pending', 'retur'])
             ->whereDate('created_at', '<', now()->subDays(7))
             ->delete();
-        $permintaans = PermintaanItem::with(['detailItem.itemIn', 'divisiAsal', 'divisiTujuan'])
-            ->where('divisi_id_asal', $request->user()->divisi_id)
+
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+        $divisiTujuan = $request->divisi_tujuan;
+
+        $query = PermintaanItem::with([
+            'detailItem.itemIn',
+            'divisiAsal',
+            'divisiTujuan'
+        ])
+            ->where('divisi_id_asal', $request->user()->divisi_id);
+
+        // FILTER BULAN
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        // FILTER TAHUN
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        // FILTER DIVISI TUJUAN
+        if ($divisiTujuan) {
+            $query->where('divisi_id_tujuan', $divisiTujuan);
+        }
+
+        $permintaans = $query
             ->orderBy('status', 'asc')
+            ->latest()
             ->get();
-        return view('gudang.permintaanitem.konfirmasi', compact('permintaans', ));
+
+        $divisis = Divisi::where('id', '!=', Auth::user()->divisi_id)
+            ->get();
+
+        return view('gudang.permintaanitem.konfirmasi', compact(
+            'permintaans',
+            'divisis',
+            'bulan',
+            'tahun',
+            'divisiTujuan'
+        ));
     }
     public function approve($id)
     {

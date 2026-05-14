@@ -66,42 +66,44 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="mt-2">
-                        <form method="GET" action="{{ url()->current() }}">
-                            <div class="row">
+                        @if(auth()->user()->divisi_id == 1)
+                            <form method="GET" action="{{ url()->current() }}">
+                                <div class="row">
 
-                                <div class="col-md-4">
-                                    <label>Tahun</label>
-                                    <select name="year" class="form-select">
-                                        @for($i = now()->year; $i >= 2020; $i--)
-                                            <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>
-                                                {{ $i }}
-                                            </option>
-                                        @endfor
-                                    </select>
+                                    <div class="col-md-4">
+                                        <label>Tahun</label>
+                                        <select name="year" class="form-select">
+                                            @for($i = now()->year; $i >= 2020; $i--)
+                                                <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>
+                                                    {{ $i }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label>Divisi</label>
+                                        <select name="divisi_id" class="form-select">
+                                            <option value="">Semua Divisi</option>
+
+                                            @foreach($divisis as $d)
+                                                <option value="{{ $d->id }}"
+                                                    {{ $divisi == $d->id ? 'selected' : '' }}>
+                                                    {{ $d->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button class="btn btn-primary">
+                                            Filter
+                                        </button>
+                                    </div>
+
                                 </div>
-
-                                <div class="col-md-4">
-                                    <label>Divisi</label>
-                                    <select name="divisi_id" class="form-select">
-                                        <option value="">Semua Divisi</option>
-
-                                        @foreach($divisis as $d)
-                                            <option value="{{ $d->id }}"
-                                                {{ $divisi == $d->id ? 'selected' : '' }}>
-                                                {{ $d->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button class="btn btn-primary">
-                                        Filter
-                                    </button>
-                                </div>
-
-                            </div>
-                        </form>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -166,7 +168,7 @@
 
 @push('js')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             $('#example').DataTable();
 
