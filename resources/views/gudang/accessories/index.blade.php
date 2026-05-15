@@ -99,7 +99,25 @@
                     $('#exampleA').DataTable({
                         lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
                         pageLength: 10, // Default halaman pertama
-                        responsive: true, // Untuk tampilan responsif
+                        responsive: true,
+                        dom: 'lBfrtip',
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                text: '<i class="bx bx-file"></i> Download Excel',
+                                className: 'btn btn-success btn-sm shadow',
+                                exportOptions: {
+                                    // export hanya kolom yang terlihat (hide/visible ikut terfilter juga)
+                                    columns: ':visible:not(:first-child):not(:last-child)',
+                                    modifier: {
+                                        search: 'applied',   // ikut filter pencarian
+                                        order: 'applied',    // ikut urutan sort
+                                        page: 'current'         // ambil semua hasil filter (bukan hanya halaman aktif)
+                                    }
+                                }
+                            }
+                        ],
+                        // Untuk tampilan responsif
                         footerCallback: function (row, data, start, end, display) {
                             var api = this.api();
 
@@ -122,12 +140,12 @@
                         }
                     });
 
-                    exampleI.buttons().container()
-                        .appendTo('#konfir_wrapper .col-md-6:eq(0)');
+                    exampleA.buttons().container()
+                        .appendTo('#exampleA_wrapper .col-md-6:eq(0)');
 
-                    exampleI.on('order.dt search.dt', function () {
+                    exampleA.on('order.dt search.dt', function () {
                         let i = 1;
-                        exampleI.cells(null, 0, { search: 'applied', order: 'applied' })
+                        exampleA.cells(null, 0, { search: 'applied', order: 'applied' })
                             .every(function () {
                                 this.data(i++);
                             });

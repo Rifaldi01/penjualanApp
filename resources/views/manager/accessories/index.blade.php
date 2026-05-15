@@ -153,7 +153,7 @@
                     });
 
                     exampleI.buttons().container()
-                        .appendTo('#konfir_wrapper .col-md-6:eq(0)');
+                        .appendTo('#exampleI_wrapper .col-md-6:eq(0)');
 
                     exampleI.on('order.dt search.dt', function () {
                         let i = 1;
