@@ -31,7 +31,7 @@ class Sale extends Model
 
     public function itemSales()
     {
-        return $this->hasMany(ItemSale::class, 'sale_id', )->withTrashed();
+        return $this->hasMany(ItemSale::class, 'sale_id', );
     }
 
     public function debt()
@@ -45,5 +45,9 @@ class Sale extends Model
     public function divisi()
     {
         return $this->belongsTo(Divisi::class);
+    }
+    public function returns()
+    {
+        return $this->hasMany(SalesReturn::class);
     }
 }

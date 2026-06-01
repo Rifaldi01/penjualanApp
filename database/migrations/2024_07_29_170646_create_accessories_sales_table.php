@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('qty');
             $table->string('subtotal');
             $table->date('acces_out');
+            $table->integer('return_qty')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

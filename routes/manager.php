@@ -89,12 +89,21 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('/konfirmasi', [PermintaanController::class, 'konfirmasi'])->name('manager.permintaan.konfirmasi');
     Route::get('/minta/accessories/{divisi_id}', [PermintaanController::class, 'fetchAccessories'])->name('manager.permintaan.fetchAccessories');
 
-    // Route untuk hapus item dari transaksi
-    Route::delete('/sale/item-sale/{id}', [SaleController::class, 'deleteItemSale'])->name('sale.item-sale.delete');
+    Route::post(
+        '/sale/accessory-return/{id}',
+        [SaleController::class, 'returnAccessory']
+    )->name('sale.accessory.return');
 
-    // Route untuk hapus accessories dari transaksi
-    Route::delete('/sale/accessory-sale/{id}', [SaleController::class, 'deleteAccessorySale'])->name('sale.accessory-sale.delete');
+    Route::post(
+        '/sale/item-return/{id}',
+        [SaleController::class, 'returnItem']
+    )->name('sale.item.return');
 
+    Route::post('/sale/return-full/{id}', [SaleController::class, 'returnFull'])
+        ->name('manager.sale.return.full');
+
+    Route::get('/sales-return', [SaleController::class, 'salesReturn'])
+        ->name('manager.sale.return.index');
     //Retur Sale
     Route::get('/retur-sales', [ReturController::class, 'index'])->name('manager.retur-sales.index');
     Route::get('/retur-sales/{id}', [ReturController::class, 'show'])->name('retur-sales.show');

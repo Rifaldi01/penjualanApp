@@ -23,4 +23,11 @@ class AccessoriesSale extends Model
     {
         return $this->hasMany(AccessoriesIn::class, 'accessories_id');
     }
+    public function returnAccessories()
+    {
+        return $this->hasMany(
+            SalesReturnAccessories::class,
+            'accessories_sale_id'
+        );
+    }
 }

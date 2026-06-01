@@ -9,64 +9,84 @@
                     </div>
                 </div>
                 <div class="col-6 mt-3">
-                    <form method="GET">
-                        <select name="year" onchange="this.form.submit()">
-
-                            @for($y = now()->year; $y >= 2020; $y--)
-
-                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected':'' }}>
-                                    {{ $y }}
-                                </option>
-
-                            @endfor
-
-                        </select>
-                    </form>
                 </div>
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <form method="GET">
+                    <div class="row mb-3">
+
+                        <div class="col-md-3">
+                            <select name="year" class="form-control">
+
+                                @for($y = 2026; $y <= date('Y') + 2; $y++)
+                                    <option value="{{ $y }}"
+                                        {{ $year == $y ? 'selected' : '' }}>
+                                        {{ $y }}
+                                    </option>
+                                @endfor
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <select name="month" class="form-control">
+
+                                @for($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}"
+                                        {{ $month == $m ? 'selected' : '' }}>
+                                        {{ date('F', mktime(0,0,0,$m,1)) }}
+                                    </option>
+                                @endfor
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <button class="btn btn-primary">
+                                Filter
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+                <table id="tabelBalance" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Code</th>
+                        <th>Kode</th>
                         <th>Accessories</th>
-                        <th>Barang Masuk</th>
-                        <th>Barang Terjual</th>
-                        <th>Barang Dikembalikan</th>
-                        <th>Barang Rusak</th>
-                        <th>Barang Diminta</th>
-                        <th>Minta Barang</th>
-                        <th>Sisa</th>
+                        <th>Saldo Awal</th>
+                        <th>Masuk</th>
+                        <th>Retur</th>
+                        <th>Req {{Auth::user()->divisi->name}}</th>
+                        <th>Terjual</th>
+                        <th>Rusak</th>
+                        <th>Req Non {{Auth::user()->divisi->name}}</th>
+                        <th>Saldo Akhir</th>
                     </tr>
                     </thead>
 
                     <tbody>
 
-                    @foreach($data as $key => $row)
-
-                        @php
-                            $sisa = $row->barang_masuk
-                            - $row->barang_terjual
-                            + $row->barang_dikembalikan
-                            - $row->barang_rusak
-                            - $row->barang_diminta
-                            + $row->minta_barang;
-                        @endphp
+                    @foreach($data as $row)
 
                         <tr>
-                            <td>{{ $key+1 }}</td>
-                            <td>{{ $row->code_acces }}</td>
+
+                            <td>{{ $row->code }}</td>
                             <td>{{ $row->name }}</td>
+                            <td>{{ $row->saldo_awal }}</td>
                             <td>{{ $row->barang_masuk }}</td>
+                            <td>{{ $row->barang_retur }}</td>
+                            <td>{{ $row->permintaan_masuk }}</td>
                             <td>{{ $row->barang_terjual }}</td>
-                            <td>{{ $row->barang_dikembalikan }}</td>
                             <td>{{ $row->barang_rusak }}</td>
-                            <td>{{ $row->barang_diminta }}</td>
-                            <td>{{ $row->minta_barang}}</td>
-                            <td>{{ $sisa }}</td>
+                            <td>{{ $row->permintaan_keluar }}</td>
+
+                            <td>
+                                <strong>{{ $row->saldo_akhir }}</strong>
+                            </td>
+
                         </tr>
 
                     @endforeach
@@ -82,6 +102,17 @@
 
 @endpush
 @push('js')
+    <script>
+        $(document).ready(function() {
+            var table = $('#tabelBalance').DataTable( {
+                order: [[1, 'asc']],
+                lengthChange: false,
+                buttons: ['excel', 'pdf', 'print']
+            } );
 
+            table.buttons().container()
+                .appendTo( '#tabelBalance_wrapper .col-md-6:eq(0)' );
+        } );
+    </script>
 @endpush
 

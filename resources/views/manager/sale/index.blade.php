@@ -29,7 +29,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($sales as $key => $data)
+                    @foreach($salesactive as $key => $data)
                         @if($data->nominal_in >= $data->pay)
                         @else
                             <tr>
@@ -179,11 +179,12 @@
                                     <a href="{{route('manager.sale.edit', $data->id)}}"
                                        class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
                                        data-bs-placement="top" title="Edit Transaksi"></a>
-                                    <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm lni lni-close return-sale"
                                             data-id="{{ $data->id }}"
                                             data-bs-tool="tooltip"
                                             data-bs-placement="top"
-                                            title="Batalkan">
+                                            title="Retur Full Transaksi">
                                     </button>
                                 </td>
                             </tr>
@@ -200,6 +201,106 @@
                 <div class="col-6 mt-3">
                     <div class="container">
                         <h4 class="text-uppercase">List Trasaction</h4>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="container">
+                        <form method="GET" action="{{ route('manager.sale.index') }}">
+
+                            <div class="row mb-3">
+
+                                {{-- TAHUN --}}
+                                <div class="col-md-3">
+
+                                    <select name="year" class="form-control">
+
+                                        <option value="all">
+                                            Semua Tahun
+                                        </option>
+
+                                        @foreach($years as $year)
+
+                                            <option value="{{ $year }}"
+                                                {{ request('year', date('Y')) == $year ? 'selected' : '' }}>
+
+                                                {{ $year }}
+
+                                            </option>
+
+                                        @endforeach
+
+                                    </select>
+
+                                </div>
+
+                                {{-- BULAN --}}
+                                <div class="col-md-3">
+
+                                    <select name="month" class="form-control">
+
+                                        <option value="all">
+                                            Semua Bulan
+                                        </option>
+
+                                        @for($m = 1; $m <= 12; $m++)
+
+                                            <option value="{{ $m }}"
+                                                {{ request('month', date('n')) == $m ? 'selected' : '' }}>
+
+                                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+
+                                            </option>
+
+                                        @endfor
+
+                                    </select>
+
+                                </div>
+
+                                {{-- DIVISI --}}
+                                <div class="col-md-3">
+
+                                    <select name="divisi_id" class="form-control">
+
+                                        <option value="all">
+                                            Semua Divisi
+                                        </option>
+
+                                        @foreach($divisi as $div)
+
+                                            <option value="{{ $div->id }}"
+                                                {{ request('divisi_id') == $div->id ? 'selected' : '' }}>
+
+                                                {{ $div->name }}
+
+                                            </option>
+
+                                        @endforeach
+
+                                    </select>
+
+                                </div>
+
+                                <div class="col-md-3">
+
+                                    <button type="submit" class="btn btn-primary">
+
+                                        Filter
+
+                                    </button>
+
+                                    <a href="{{ route('manager.sale.index') }}"
+                                       class="btn btn-secondary">
+
+                                        Reset
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </form>
                     </div>
                 </div>
             </div>
@@ -249,11 +350,12 @@
                                     <a href="{{route('manager.sale.edit', $data->id)}}"
                                        class="btn btn-warning btn-sm lni lni-pencil" data-bs-tool="tooltip"
                                        data-bs-placement="top" title="Edit Transaksi"></a>
-                                    <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm lni lni-close return-sale"
                                             data-id="{{ $data->id }}"
                                             data-bs-tool="tooltip"
                                             data-bs-placement="top"
-                                            title="Batalkan">
+                                            title="Retur Full Transaksi">
                                     </button>
                                 </td>
 
@@ -401,42 +503,92 @@
     </script>
     <script>
         $(document).ready(function () {
-            $(document).on('click', '.delete-sale', function () {
-                const saleId = $(this).data('id'); // ID dari data yang akan dihapus
+
+            $(document).on('click', '.return-sale', function () {
+
+                const saleId = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Hapus Transaksi?',
-                    text: "Transaksi Yang Dihapus Tidak Dapat Dikembalikan!",
+
+                    title: 'Retur Full Transaksi?',
+                    text: "Semua barang akan dikembalikan ke stok!",
                     icon: 'warning',
+
                     showCancelButton: true,
+
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Tidak'
+
+                    confirmButtonText: 'Ya, Retur!',
+                    cancelButtonText: 'Batal'
+
                 }).then((result) => {
+
                     if (result.isConfirmed) {
+
                         $.ajax({
-                            url: '{{ route("manager.sale.destroy", ":id") }}'.replace(':id', saleId), // Gunakan route() dengan mengganti placeholder :id
-                            method: 'DELETE',
+
+                            url: '{{ route("manager.sale.return.full", ":id") }}'
+                                .replace(':id', saleId),
+
+                            method: 'POST',
+
                             data: {
-                                _token: '{{ csrf_token() }}', // Kirim token CSRF
+                                _token: '{{ csrf_token() }}'
                             },
+
                             success: function (response) {
+
                                 if (response.success) {
-                                    // Hapus elemen baris dari DOM
-                                    $(`button[data-id="${saleId}"]`).closest('tr').remove();
-                                    Swal.fire('Berhasil!', 'Transaksi Berhasil Dihapus', 'success');
+
+                                    Swal.fire({
+
+                                        icon: 'success',
+
+                                        title: 'Berhasil',
+
+                                        text: response.message,
+
+                                        timer: 2000,
+
+                                        showConfirmButton: false
+
+                                    });
+
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 2000);
+
                                 } else {
-                                    Swal.fire('Failed!', response.message || 'Failed to delete sale.', 'error');
+
+                                    Swal.fire(
+                                        'Error',
+                                        response.message,
+                                        'error'
+                                    );
+
                                 }
+
                             },
+
                             error: function (xhr) {
-                                Swal.fire('Error!', xhr.responseJSON?.message || 'An error occurred while processing your request.', 'error');
+
+                                Swal.fire(
+                                    'Error',
+                                    xhr.responseJSON?.message ?? 'Terjadi kesalahan',
+                                    'error'
+                                );
+
                             }
+
                         });
+
                     }
+
                 });
+
             });
+
         });
     </script>
 

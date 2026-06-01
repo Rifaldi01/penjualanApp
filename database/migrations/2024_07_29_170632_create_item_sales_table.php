@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('price');
             $table->string('capital_price')->nullable();
             $table->date('date_in');
+            $table->tinyInteger('status_return')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

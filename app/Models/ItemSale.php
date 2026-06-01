@@ -23,4 +23,11 @@ class ItemSale extends Model
     {
         return $this->belongsTo(Divisi::class);
     }
+    public function returnItems()
+    {
+        return $this->hasMany(
+            SalesReturnItem::class,
+            'item_sale_id'
+        );
+    }
 }

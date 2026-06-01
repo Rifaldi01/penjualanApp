@@ -30,6 +30,7 @@ return new class extends Migration
             $table->integer('user_id');
             $table->integer('divisi_id');
             $table->string('admin_fee')->nullable();
+            $table->tinyInteger('status_return')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

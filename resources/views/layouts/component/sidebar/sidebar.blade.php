@@ -213,14 +213,14 @@
                     </li>
                 </ul>
             </li>
-{{--            <li>--}}
-{{--                <a href="{{route('gudang.balance.index')}}">--}}
-{{--                    <div class="parent-icon"><i class='bx bx-data'></i>--}}
-{{--                    </div>--}}
-{{--                    <div class="menu-title">Accessories Balance--}}
-{{--                    </div>--}}
-{{--                </a>--}}
-{{--            </li>--}}
+            <li>
+                <a href="{{route('gudang.balance.index')}}">
+                    <div class="parent-icon"><i class='bx bx-data'></i>
+                    </div>
+                    <div class="menu-title">Accessories Balance
+                    </div>
+                </a>
+            </li>
             <li>
                 <a href="{{route('gudang.item.report')}}">
                     <div class="parent-icon"><i class='bx bx-file'></i>

@@ -13,6 +13,9 @@ use App\Models\Item;
 use App\Models\ItemSale;
 use App\Models\ReturSale;
 use App\Models\Sale;
+use App\Models\SalesReturn;
+use App\Models\SalesReturnAccessories;
+use App\Models\SalesReturnItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,26 +28,124 @@ class SaleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil data penjualan
-        $sales = Sale::with(['divisi','customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER
+        |--------------------------------------------------------------------------
+        */
 
-        // Format nomor invoice untuk setiap transaksi
+        $year = $request->year ?? date('Y');
+
+        $month = $request->month ?? date('n');
+
+        $divisi_id = $request->divisi_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUERY
+        |--------------------------------------------------------------------------
+        */
+
+        $sales = Sale::with([
+            'divisi',
+            'customer',
+            'user',
+            'itemSales.itemCategory',
+            'accessoriesSales.accessories'
+        ])
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER TAHUN
+            |--------------------------------------------------------------------------
+            */
+
+            ->when($year != 'all', function ($query) use ($year) {
+
+                $query->whereYear('created_at', $year);
+
+            })
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER BULAN
+            |--------------------------------------------------------------------------
+            */
+
+            ->when($month != 'all', function ($query) use ($month) {
+
+                $query->whereMonth('created_at', $month);
+
+            })
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER DIVISI
+            |--------------------------------------------------------------------------
+            */
+
+            ->when($divisi_id && $divisi_id != 'all', function ($query) use ($divisi_id) {
+
+                $query->where('divisi_id', $divisi_id);
+
+            })
+
+            ->latest()
+
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | FORMAT INVOICE
+        |--------------------------------------------------------------------------
+        */
+
         foreach ($sales as $data) {
+
             $transactionCount = Sale::where('id', '<=', $data->id)->count();
+
             $nextNumber = str_pad($transactionCount, 4, '0', STR_PAD_LEFT);
-            $currentYear = date('Y');
-            $currentMonthNumber = date('n');
+
+            $currentYear = date('Y', strtotime($data->created_at));
+
+            $currentMonthNumber = date('n', strtotime($data->created_at));
+
             $currentMonthRoman = $this->convertToRoman($currentMonthNumber);
 
-            // Format nomor invoice
             $data->invoiceNumber = "INV/DND/{$nextNumber}/{$currentMonthRoman}/{$currentYear}";
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA FILTER
+        |--------------------------------------------------------------------------
+        */
+
         $bank = Bank::all();
+
         $divisi = Divisi::all();
-        // Pass data ke view
-        return view('manager.sale.index', compact('sales', 'bank', 'divisi'));
+
+        $years = Sale::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN
+        |--------------------------------------------------------------------------
+        */
+        $salesactive = Sale::with(['divisi','customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+
+        return view('manager.sale.index', compact(
+            'sales',
+            'bank',
+            'divisi',
+            'years',
+            'salesactive'
+        ));
     }
     private function convertToRoman($monthNumber)
     {
@@ -294,135 +395,697 @@ class SaleController extends Controller
         DB::beginTransaction();
 
         try {
-            $sale = Sale::findOrFail($id);
-            $sale->customer_id = $request->customer_id;
-            $sale->total_price = str_replace('.', '', $request->total_price); // Total harga tanpa titik
-            $sale->diskon = $request->diskon;
-            $sale->ongkir = $request->ongkir;
-            $sale->nominal_in = str_replace('.', '', $request->nominal_in);;
-            $sale->deadlines = $request->deadlines;
-            $sale->total_item = $request->total_item;
-            $sale->created_at = $request->created_at;
-            $sale->no_po = $request->no_po;
-            $sale->divisi_id = $request->divisi_id;
-            $sale->fee = str_replace('.', '', $request->fee); // Bayar tanpa titik
-            $sale->admin_fee = str_replace('.', '', $request->admin_fee); // Bayar tanpa titik
-            $sale->pay = str_replace('.', '', $request->bayar); // Bayar tanpa titik
-            $sale->ppn = str_replace('.', '', $request->ppn); // Bayar tanpa titik
-            $sale->pph = str_replace('.', '', $request->pph); // Bayar tanpa titik
-            $sale->save();
-            ItemSale::where('sale_id', $id);
-            AccessoriesSale::where('sale_id', $id);
-            Debt::where('sale_id', $id);
 
-            if ($request->nominal_in == 0) {
-                // Hapus semua hutang terkait jika nominal_in = 0
-                Debt::where('sale_id', $sale->id)->delete();
-            } else {
-                // Periksa apakah ada hutang pada tanggal yang sama
-                $debt = Debt::where('sale_id', $sale->id)
-                    ->whereDate('created_at', now()->toDateString())
-                    ->first();
+            $sale = Sale::with('divisi')->findOrFail($id);
 
-                if ($debt) {
-                    // Jika ada, perbarui hutang
-                    $debt->pay_debts = $request->nominal_in;
-                    $debt->bank_id = $request->bank_id;
-                    $debt->penerima = $request->penerima;
-                    $debt->description = $request->description;
-                    $debt->date_pay = now();
-                    $debt->save();
-                } else {
-                    // Jika tidak ada, buat data hutang baru
-                    Debt::create([
-                        'sale_id' => $sale->id,
-                        'pay_debts' => $request->nominal_in,
-                        'bank_id' => $request->bank_id,
-                        'penerima' => $request->penerima,
-                        'description' => $request->description,
-                        'date_pay' => now(),
-                    ]);
-                }
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE SALE
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->update([
+
+                'customer_id' => $request->customer_id,
+                'divisi_id'   => $request->divisi_id,
+
+                'total_item'  => $request->total_item,
+                'total_price' => $request->total_price,
+
+                'diskon'      => $request->diskon ?? 0,
+                'ongkir'      => $request->ongkir ?? 0,
+
+                'ppn'         => $request->ppn ?? 0,
+                'pph'         => $request->pph ?? 0,
+
+                'admin_fee'   => $request->admin_fee ?? 0,
+
+                'pay'         => $request->bayar,
+                'nominal_in'  => $request->nominal_in,
+
+                'deadlines'   => $request->deadlines,
+                'no_po'       => $request->no_po,
+
+                'fee'         => $request->fee ?? 0,
+
+                'created_at'  => $request->created_at,
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE DEBT
+            |--------------------------------------------------------------------------
+            */
+
+            if ($sale->debt()->exists()) {
+
+                $sale->debt()->update([
+
+                    'bank_id'     => $request->bank_id,
+                    'penerima'    => $request->penerima,
+                    'description' => $request->description,
+
+                ]);
             }
 
-            if ($request->has('items')) {
-                foreach ($request->items as $item) {
-                    // Temukan item di tabel items berdasarkan no_seri
-                    $existingItem = Item::where('no_seri', $item['no_seri'])->first();
-                    if ($existingItem) {
-                        // Pindahkan data ke tabel item_sales
-                        $itemSale = new ItemSale();
-                        $itemSale->sale_id = $sale->id;
-                        $itemSale->name = $existingItem->name;
-                        $itemSale->no_seri = $existingItem->no_seri;
-                        $itemSale->price = $existingItem->price;
-                        $itemSale->capital_price = $existingItem->capital_price;
-                        $itemSale->itemcategory_id = $existingItem->itemcategory_id;
-                        $itemSale->date_in = now();
-                        $itemSale->save();
+            /*
+            |--------------------------------------------------------------------------
+            | GENERATE RETURN INVOICE
+            |--------------------------------------------------------------------------
+            */
 
-                        // Hapus item dari tabel items
-                        $existingItem->delete();
-                    }
-                }
-            }
+            $divisiName = strtoupper(
+                preg_replace('/\s+/', '', $sale->divisi->name)
+            );
 
+            $lastReturn = SalesReturn::latest()->first();
 
+            $nextNumber = $lastReturn
+                ? $lastReturn->id + 1
+                : 1;
 
-            if ($request->has('accessories')) {
-                foreach ($request->accessories as $accessory) {
-                    $id = $accessory['id'] ?? null;
-                    $accessoriesSale = AccessoriesSale::firstOrNew(['id' => $id]);
+            $returnInvoice = 'RTR-' .
+                $divisiName . '-' .
+                date('Ymd') . '-' .
+                str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
-                    // Dapatkan aksesori terkait berdasarkan accessories_id
-                    $accessoryModel = Accessories::find($accessory['accessories_id']);
-                    if ($accessoryModel) {
-                        // Dapatkan qty lama jika aksesori sudah ada, jika tidak, set 0 (untuk aksesori baru)
-                        $previousQty = $accessoriesSale->exists ? $accessoriesSale->qty : 0;
-                        $newQty = $accessory['qty'];
+            /*
+            |--------------------------------------------------------------------------
+            | ACCESSORIES
+            |--------------------------------------------------------------------------
+            */
 
-                        // Jika aksesori baru, kurangi stok berdasarkan qty baru
-                        if (!$accessoriesSale->exists) {
-                            $accessoryModel->stok -= $newQty;
-                        } else {
-                            // Jika aksesori lama, hitung perbedaan stok berdasarkan perubahan qty
-                            $stockDifference = $previousQty - $newQty;
-                            $accessoryModel->stok += $stockDifference;
+            if ($request->accessories) {
+
+                foreach ($request->accessories as $row) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES LAMA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($row['status'] == 'old') {
+
+                        $detail = AccessoriesSale::with('accessories')
+                            ->find($row['sale_detail_id']);
+
+                        if (!$detail) {
+                            continue;
                         }
 
-                        // Simpan perubahan stok
-                        $accessoryModel->save();
+                        $oldQty = (int) $detail->qty;
 
-                        // Simpan atau perbarui AccessoriesSale
-                        $accessoriesSale->sale_id = $sale->id;
-                        $accessoriesSale->accessories_id = $accessory['accessories_id'];
-                        $accessoriesSale->qty = $newQty;
-                        $accessoriesSale->subtotal = str_replace('.', '', $accessory['subtotal']);
-                        $accessoriesSale->acces_out = now();
-                        $accessoriesSale->save();
+                        $newQty = (int) $row['qty'];
+
+                        $selisih = $oldQty - $newQty;
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | QTY DIKURANGI / RETUR
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if ($selisih > 0) {
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | RETURN STOCK
+                            |--------------------------------------------------------------------------
+                            */
+
+                            Accessories::where(
+                                'id',
+                                $detail->accessories_id
+                            )->increment('stok', $selisih);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | CREATE SALES RETURN
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $salesReturn = SalesReturn::create([
+
+                                'sale_id'        => $sale->id,
+
+                                'return_invoice' => $returnInvoice,
+
+                                'description'    => 'Retur dari edit transaksi',
+
+                                'user_id'        => Auth::id(),
+
+                                'created_at'     => now(),
+
+                            ]);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | CREATE RETURN ACCESSORIES
+                            |--------------------------------------------------------------------------
+                            */
+
+                            SalesReturnAccessories::create([
+
+                                'sale_return_id'      => $salesReturn->id,
+
+                                'accessories_sale_id' => $detail->id,
+
+                                'accessories_id'      => $detail->accessories_id,
+
+                                'qty'                 => $selisih,
+
+                                'subtotal'            =>
+                                    $detail->accessories->price * $selisih,
+
+                            ]);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | UPDATE RETURN QTY
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $detail->return_qty =
+                                ($detail->return_qty ?? 0) + $selisih;
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | QTY DITAMBAH
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if ($selisih < 0) {
+
+                            $kurangStok = abs($selisih);
+
+                            $accessory = Accessories::find(
+                                $detail->accessories_id
+                            );
+
+                            if ($accessory->stok < $kurangStok) {
+
+                                DB::rollBack();
+
+                                return response()->json([
+                                    'status'  => 'error',
+                                    'message' => 'Stok accessories tidak cukup'
+                                ]);
+                            }
+
+                            $accessory->decrement(
+                                'stok',
+                                $kurangStok
+                            );
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE ACCESSORIES SALE
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $detail->update([
+
+                            'qty' => $newQty,
+
+                            'subtotal' =>
+                                $detail->accessories->price * $newQty,
+
+                            'return_qty' =>
+                                $detail->return_qty ?? 0,
+
+                        ]);
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES BARU
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($row['status'] == 'new') {
+
+                        $accessory = Accessories::find(
+                            $row['accessories_id']
+                        );
+
+                        if (!$accessory) {
+                            continue;
+                        }
+
+                        if ($accessory->stok < $row['qty']) {
+
+                            DB::rollBack();
+
+                            return response()->json([
+                                'status'  => 'error',
+                                'message' => 'Stok accessories tidak cukup'
+                            ]);
+                        }
+
+                        AccessoriesSale::create([
+
+                            'sale_id'        => $sale->id,
+
+                            'accessories_id' => $row['accessories_id'],
+
+                            'qty'            => $row['qty'],
+
+                            'subtotal'       =>
+                                $accessory->price * $row['qty'],
+
+                            'return_qty'     => 0,
+
+                        ]);
+
+                        $accessory->decrement(
+                            'stok',
+                            $row['qty']
+                        );
                     }
                 }
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | ITEMS
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->items) {
+
+                foreach ($request->items as $row) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ITEM BARU
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($row['status'] == 'new') {
+
+                        $item = Item::where(
+                            'no_seri',
+                            $row['no_seri']
+                        )->first();
+
+                        if (!$item) {
+                            continue;
+                        }
+
+                        if ($item->status == 2) {
+
+                            DB::rollBack();
+
+                            return response()->json([
+                                'status'  => 'error',
+                                'message' => 'Item sudah terjual'
+                            ]);
+                        }
+
+                        ItemSale::create([
+
+                            'sale_id'         => $sale->id,
+
+                            'itemcategory_id' => $row['itemcategory_id'],
+
+                            'name'            => $row['name'],
+
+                            'price'           => $row['price'],
+
+                            'no_seri'         => $row['no_seri'],
+
+                            'status_returnn'   => 0
+
+                        ]);
+
+                        $item->update([
+                            'status' => 2
+                        ]);
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ITEM LAMA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($row['status'] == 'old') {
+
+                        $detail = ItemSale::find(
+                            $row['sale_detail_id']
+                        );
+
+                        if (!$detail) {
+                            continue;
+                        }
+
+                        $detail->update([
+
+                            'price' => $row['price']
+
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+
+                'status'  => 'success',
+
+                'message' => 'Transaction berhasil diupdate'
+
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'status'  => 'error',
+
+                'message' => $e->getMessage()
+
+            ]);
+        }
+    }
+    public function returnAccessory(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $accessorySale = AccessoriesSale::with([
+                'accessories',
+                'sale'
+            ])->find($id);
+
+            if (!$accessorySale) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data accessories sale tidak ditemukan'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI RETURN QTY
+            |--------------------------------------------------------------------------
+            */
+
+            $returnQty = (int) ($request->return_qty ?? $accessorySale->qty);
+
+            if ($returnQty < 1) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Qty retur tidak valid'
+                ]);
+            }
+
+            $sisaQty = $accessorySale->qty - ($accessorySale->return_qty ?? 0);
+
+            if ($returnQty > $sisaQty) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Qty retur melebihi qty tersisa'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK / BUAT SALES RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            $sale = $accessorySale->sale;
+
+            $returnInvoice = str_replace(
+                'INV',
+                'RTR',
+                $sale->invoice
+            );
+
+            $salesReturn = SalesReturn::where(
+                'return_invoice',
+                $returnInvoice
+            )->first();
+
+            if (!$salesReturn) {
+
+                $salesReturn = SalesReturn::create([
+
+                    'sale_id'        => $sale->id,
+
+                    'return_invoice' => $returnInvoice,
+
+                    'description'    => 'Retur accessories',
+
+                    'user_id'        => Auth::id(),
+
+                    'created_at'     => now(),
+
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE DETAIL RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            SalesReturnAccessories::create([
+
+                'sale_return_id'      => $salesReturn->id,
+
+                'accessories_sale_id' => $accessorySale->id,
+
+                'accessories_id'      => $accessorySale->accessories_id,
+
+                'qty'                 => $returnQty,
+
+                'subtotal'            =>
+                    $accessorySale->accessories->price * $returnQty,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE STOCK
+            |--------------------------------------------------------------------------
+            */
+
+            $accessory = Accessories::find(
+                $accessorySale->accessories_id
+            );
+
+            $accessory->stok += $returnQty;
+
+            $accessory->save();
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE RETURN QTY
+            |--------------------------------------------------------------------------
+            */
+
+            $accessorySale->return_qty =
+                ($accessorySale->return_qty ?? 0) + $returnQty;
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE STATUS RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            if ($accessorySale->return_qty >= $accessorySale->qty) {
+
+                $accessorySale->status_returnn = 1;
+            }
+
+            $accessorySale->save();
+
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Transaction updated successfully!',
-                'reqest' => $request->all()
+                'message' => 'Retur accessories berhasil'
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
+
+            DB::rollback();
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to update transaction! ' . $e->getMessage(),
-                'request' => $request->all() //save
-            ], 500);
+                'message' => $e->getMessage()
+            ]);
         }
     }
+    /*
+    |--------------------------------------------------------------------------
+    | RETUR ITEM SERIAL
+    |--------------------------------------------------------------------------
+    */
 
-    /**
+    public function returnItem(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $itemSale = ItemSale::find($id);
+
+            if (!$itemSale) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data item sale tidak ditemukan'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK SUDAH DIRETUR
+            |--------------------------------------------------------------------------
+            */
+
+            if ($itemSale->status_returnn == 1) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Item sudah diretur'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL DATA SALE
+            |--------------------------------------------------------------------------
+            */
+
+            $sale = Sale::find($itemSale->sale_id);
+
+            if (!$sale) {
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data sale tidak ditemukan'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK / BUAT SALES RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            $returnInvoice = str_replace(
+                'INV',
+                'RTR',
+                $sale->invoice
+            );
+
+            $salesReturn = SalesReturn::where(
+                'return_invoice',
+                $returnInvoice
+            )->first();
+
+            if (!$salesReturn) {
+
+                $salesReturn = SalesReturn::create([
+
+                    'sale_id'        => $sale->id,
+
+                    'return_invoice' => $returnInvoice,
+
+                    'user_id'        => Auth::id(),
+
+                    'created_at'     => now(),
+
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | KEMBALIKAN ITEM KE TABLE ITEMS
+            |--------------------------------------------------------------------------
+            */
+
+            Item::create([
+
+                'divisi_id'       => $itemSale->divisi_id,
+
+                'itemcategory_id' => $itemSale->itemcategory_id,
+
+                'name'            => $itemSale->name,
+
+                'price'           => $itemSale->price,
+
+                'capital_price'   => $itemSale->capital_price,
+
+                'no_seri'         => $itemSale->no_seri,
+
+                'status'          => 1,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | DETAIL RETURN ITEM
+            |--------------------------------------------------------------------------
+            */
+
+            SalesReturnItem::create([
+
+                'sale_return_id' => $salesReturn->id,
+
+                'item_sale_id'   => $itemSale->id,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE STATUS RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            $itemSale->update([
+
+                'status_returnn' => 1
+
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+
+                'status' => 'success',
+
+                'message' => 'Item berhasil diretur'
+
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'status' => 'error',
+
+                'message' => $e->getMessage()
+
+            ]);
+        }
+    }   /**
      * Remove the specified resource from storage.
      *
      * @param int $id
@@ -440,7 +1103,7 @@ class SaleController extends Controller
             // ===============================
             $invoiceRetur = str_replace('INV', 'INR', $sale->invoice);
 
-            ReturSale::create([
+            SalesReturn::create([
                 'invoice_retur' => $invoiceRetur,
                 'sales_id'      => $sale->id,
                 'user_id'       => auth()->id(),
@@ -551,47 +1214,304 @@ class SaleController extends Controller
 
         return back()->withSuccess('Pembayaran Berhasil');
     }
-    public function deleteItemSale($id)
+    public function returnFull($id)
     {
+        DB::beginTransaction();
+
         try {
-            $itemSale = ItemSale::findOrFail($id);
 
-            // Buat ulang item jika perlu
-            Item::create([
-                'divisi_id' => $itemSale->divisi_id,
-                'itemcategory_id' => $itemSale->itemcategory_id,
-                'name' => $itemSale->name,
-                'price' => $itemSale->price,
-                'capital_price' => $itemSale->capital_price,
-                'no_seri' => $itemSale->no_seri,
-                'status' => 1,
-            ]);
+            $sale = Sale::with([
+                'itemSales',
+                'accessoriesSales'
+            ])->findOrFail($id);
 
-            $itemSale->delete();
+            /*
+            |--------------------------------------------------------------------------
+            | CEK APAKAH SUDAH DIRETUR
+            |--------------------------------------------------------------------------
+            */
 
-            return response()->json(['status' => 'success', 'message' => 'Item berhasil dihapus.']);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Gagal menghapus item: ' . $e->getMessage()], 500);
-        }
-    }
+            $checkReturn = SalesReturn::where('sale_id', $sale->id)->first();
 
-    public function deleteAccessorySale($id)
-    {
-        try {
-            $accessorySale = AccessoriesSale::findOrFail($id);
+            if ($checkReturn) {
 
-            $accessory = Accessories::find($accessorySale->accessories_id);
-            if ($accessory) {
-                $accessory->stok += $accessorySale->qty;
-                $accessory->save();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi sudah pernah diretur'
+                ]);
+
             }
 
-            $accessorySale->delete();
+            /*
+            |--------------------------------------------------------------------------
+            | HITUNG TOTAL RETUR
+            |--------------------------------------------------------------------------
+            */
 
-            return response()->json(['status' => 'success', 'message' => 'Accessories berhasil dihapus.']);
+            $totalReturn = 0;
+
+            // TOTAL ITEM
+            foreach ($sale->itemSales as $itemSale) {
+
+                $totalReturn += $itemSale->price;
+
+            }
+
+            // TOTAL ACCESSORIES
+            foreach ($sale->accessoriesSales as $accessorySale) {
+
+                $totalReturn += $accessorySale->subtotal;
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | BUAT HEADER RETUR
+            |--------------------------------------------------------------------------
+            */
+
+            $returnInvoice = str_replace('INV', 'RET', $sale->invoice);
+
+            $salesReturn = SalesReturn::create([
+
+                'sale_id'        => $sale->id,
+
+                'user_id'        => auth()->id(),
+
+                'return_invoice' => $returnInvoice,
+
+                'type'           => 'full',
+
+                'total_return'   => $totalReturn,
+
+                'description'    => 'Retur full transaksi',
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | RETUR ITEM SERIAL
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($sale->itemSales as $itemSale) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | KEMBALIKAN KE TABLE ITEMS
+                |--------------------------------------------------------------------------
+                */
+
+                Item::create([
+
+                    'divisi_id'       => $sale->divisi_id,
+
+                    'itemcategory_id' => $itemSale->itemcategory_id,
+
+                    'name'            => $itemSale->name,
+
+                    'price'           => $itemSale->price,
+
+                    'capital_price'   => $itemSale->capital_price,
+
+                    'no_seri'         => $itemSale->no_seri,
+
+                    'status'          => 1,
+
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | SIMPAN DETAIL RETUR ITEM
+                |--------------------------------------------------------------------------
+                */
+
+                SalesReturnItem::create([
+
+                    'sale_return_id' => $salesReturn->id,
+
+                    'item_sale_id'   => $itemSale->id,
+
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | HAPUS ITEM SALE
+                |--------------------------------------------------------------------------
+                */
+
+                $itemSale->delete();
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | RETUR ACCESSORIES
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($sale->accessoriesSales as $accessorySale) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | KEMBALIKAN STOK
+                |--------------------------------------------------------------------------
+                */
+
+                Accessories::where('id', $accessorySale->accessories_id)
+                    ->increment('stok', $accessorySale->qty);
+
+                /*
+                |--------------------------------------------------------------------------
+                | SIMPAN DETAIL RETUR ACCESSORIES
+                |--------------------------------------------------------------------------
+                */
+
+                SalesReturnAccessories::create([
+
+                    'sale_return_id'    => $salesReturn->id,
+
+                    'accessories_sale_id' => $accessorySale->id,
+
+                    'accessories_id'    => $accessorySale->accessories_id,
+
+                    'qty'               => $accessorySale->qty,
+
+                    'subtotal'          => $accessorySale->subtotal,
+
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | HAPUS ACCESSORIES SALE
+                |--------------------------------------------------------------------------
+                */
+
+                $accessorySale->delete();
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS DEBT
+            |--------------------------------------------------------------------------
+            */
+
+            Debt::where('sale_id', $sale->id)->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE STATUS RETUR
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->update([
+
+                'status_return' => 1
+
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' => 'Full transaksi berhasil diretur'
+
+            ]);
+
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Gagal menghapus accessories: ' . $e->getMessage()], 500);
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => $e->getMessage()
+
+            ], 500);
+
         }
     }
+    public function salesReturn(Request $request)
+    {
+        $year = $request->year ?? date('Y');
+        $month = $request->month ?? date('m');
+        $divisiId = $request->divisi_id;
 
+        $query = SalesReturn::with([
+            'sale.customer',
+            'sale.divisi',
+            'user'
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER TAHUN
+        |--------------------------------------------------------------------------
+        */
+
+        if ($year != 'all') {
+
+            $query->whereYear('created_at', $year);
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER BULAN
+        |--------------------------------------------------------------------------
+        */
+
+        if ($month != 'all') {
+
+            $query->whereMonth('created_at', $month);
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER DIVISI
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($divisiId) && $divisiId != 'all') {
+
+            $query->whereHas('sale', function ($q) use ($divisiId) {
+
+                $q->where('divisi_id', $divisiId);
+
+            });
+
+        }
+
+        $salesReturns = $query
+            ->with([
+                'returnItems.itemSale',
+                'returnAccessories.accessories',
+            ])
+            ->latest()
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $years = SalesReturn::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $divisi = Divisi::all();
+
+        return view('manager.sale.return-index', compact(
+            'salesReturns',
+            'years',
+            'divisi'
+        ));
+    }
 }

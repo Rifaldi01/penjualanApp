@@ -4,243 +4,274 @@ namespace App\Http\Controllers\Gudang;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accessories;
-use App\Models\AccessoriesBalance;
-use App\Models\DetailAccessoriesBalance;
-use App\Models\Permintaan;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AccessoriesBalanceController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
-    public function index()
+    public function index(Request $request)
     {
         $divisiId = auth()->user()->divisi_id;
-        $currentYear = now()->year;
 
-        $firstYear = DB::table('accessories')
-            ->where('divisi_id', $divisiId)
-            ->selectRaw('MIN(YEAR(created_at)) as year')
-            ->value('year') ?? $currentYear;
+        $year = $request->year ?? date('Y');
+        $month = $request->month ?? date('n');
 
-        for ($year = $firstYear; $year <= $currentYear; $year++) {
-
-            $exists = AccessoriesBalance::where('divisi_id', $divisiId)
-                ->where('year', $year)
-                ->exists();
-
-            if (!$exists) {
-                $this->generateYearlyBalance($divisiId, $year);
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | START SISTEM APRIL 2026
+        |--------------------------------------------------------------------------
+        */
+        if ($year == 2026 && $month < 4) {
+            $month = 4;
         }
 
-        $balances = AccessoriesBalance::with('divisi')
-            ->where('divisi_id', $divisiId)
-            ->orderByDesc('year')
+        $accessories = Accessories::where('divisi_id', $divisiId)
+            ->orderBy('name')
             ->get();
 
-        return view('gudang.balance.index', compact('balances'));
-    }
-    public function data()
-    {
-        $divisiId = auth()->user()->divisi_id;
+        $data = [];
 
-        $balances = AccessoriesBalance::with('divisi')
-            ->where('divisi_id', $divisiId)
-            ->orderByDesc('year')
-            ->get();
-
-        return response()->json(['data' => $balances]);
-    }
-
-    public function show($id)
-    {
-        $balance = AccessoriesBalance::with([
-            'divisi',
-            'details.accessory'
-        ])->findOrFail($id);
-
-        return view('gudang.balance.show', compact('balance'));
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | GENERATE YEARLY BALANCE
-    |--------------------------------------------------------------------------
-    */
-    private function generateYearlyBalance($divisiId, $year)
-    {
-        DB::transaction(function () use ($divisiId, $year) {
-
-            $currentYear = now()->year;
-
-            $previousYearBalance = AccessoriesBalance::where('divisi_id', $divisiId)
-                ->where('year', $year - 1)
-                ->value('remainder') ?? 0;
-
-            $balance = AccessoriesBalance::create([
-                'divisi_id'      => $divisiId,
-                'year'           => $year,
-                'capital_stock'  => $previousYearBalance,
-                'accessories_in' => 0,
-                'sale'           => 0,
-                'reject'         => 0,
-                'retur'          => 0,
-                'request'        => 0,
-                'request_in'     => 0,
-                'remainder'      => 0,
-            ]);
-            $mintaKeluar = DB::table('permintaans')
-                ->where('permintaans.divisi_id_asal', $divisiId)
-                ->whereRaw('LOWER(permintaans.status) = ?', ['diterima'])
-                ->whereYear('permintaans.created_at', $year)
-                ->sum('permintaans.jumlah');
-            $mintaMasuk = DB::table('permintaans')
-                ->where('permintaans.divisi_id_tujuan', $divisiId)
-                ->whereRaw('LOWER(permintaans.status) = ?', ['diterima'])
-                ->whereYear('permintaans.created_at', $year)
-                ->sum('permintaans.jumlah');
-            $accessories = Accessories::where('divisi_id', $divisiId)->get();
-
-            foreach ($accessories as $accessory) {
-
-                $previousBalance = DetailAccessoriesBalance::whereHas('balance', function ($q) use ($divisiId, $year) {
-                    $q->where('divisi_id', $divisiId)
-                        ->where('year', $year - 1);
-                })
-                    ->where('accessories_id', $accessory->id)
-                    ->value('accessories_balance') ?? 0;
-
-                /*
-                |--------------------------------------------------------------------------
-                | TRANSAKSI MASUK
-                |--------------------------------------------------------------------------
-                */
-                $in = DB::table('accessories_ins')
-                    ->where('accessories_id', $accessory->id)
-                    ->whereYear('created_at', $year)
-                    ->sum('qty');
-
-                /*
-                |--------------------------------------------------------------------------
-                | SALES
-                |--------------------------------------------------------------------------
-                */
-                $sale = DB::table('accessories_sales')
-                    ->where('accessories_id', $accessory->id)
-                    ->whereYear('created_at', $year)
-                    ->sum('qty');
-
-                /*
-                |--------------------------------------------------------------------------
-                | REJECT
-                |--------------------------------------------------------------------------
-                */
-                $reject = DB::table('accessories_rejectes')
-                    ->where('code_acces', $accessory->code_acces)
-                    ->whereYear('created_at', $year)
-                    ->sum('stok');
-
-                /*
-                |--------------------------------------------------------------------------
-                | RETUR
-                |--------------------------------------------------------------------------
-                */
-                $retur = DB::table('accessories_sales')
-                    ->where('accessories_id', $accessory->id)
-                    ->whereNotNull('deleted_at')
-                    ->whereYear('deleted_at', $year)
-                    ->sum('qty');
-
-                /*
-                |--------------------------------------------------------------------------
-                | REQUEST OUT (KELUAR DARI DIVISI INI)
-                |--------------------------------------------------------------------------
-                */
-                $requestOut = DB::table('detail_accessories')
-                    ->join('permintaans', 'permintaans.id', '=', 'detail_accessories.permintaan_id')
-                    ->where('detail_accessories.accessories_id', $accessory->id)
-                    ->where('permintaans.divisi_id_asal', $divisiId) // <-- ini yang benar
-                    ->whereRaw('LOWER(permintaans.status) = ?', ['diterima'])
-                    ->whereYear('permintaans.created_at', $year)
-                    ->sum('detail_accessories.qty');
-
-                /*
-                |--------------------------------------------------------------------------
-                | REQUEST IN (MASUK KE DIVISI INI)
-                |--------------------------------------------------------------------------
-                */
-                $requestIn = DB::table('detail_accessories')
-                    ->join('permintaans', 'permintaans.id', '=', 'detail_accessories.permintaan_id')
-                    ->where('permintaans.divisi_id_tujuan', $divisiId)
-                    ->where('permintaans.status', 'diterima')
-                    ->whereYear('permintaans.created_at', $year)
-                    ->sum('detail_accessories.qty');
-//                dd( DB::table('detail_accessories')
-//                    ->join('permintaans', 'permintaans.id', '=', 'detail_accessories.permintaan_id')
-//                    ->where('permintaans.divisi_id_tujuan', $divisiId)
-//                    ->where('permintaans.status', 'diterima')
-//                    ->whereYear('permintaans.created_at', $year)
-//                    ->get());
-                /*
-                |--------------------------------------------------------------------------
-                | HITUNG SALDO
-                |--------------------------------------------------------------------------
-                */
-                $balanceQty =
-                    $previousBalance
-                    + $in
-                    + $retur
-                    - $sale
-                    - $reject
-                    - $requestOut;
-
-                DetailAccessoriesBalance::create([
-                    'accessories_id'            => $accessory->id,
-                    'balance_accessories_id'    => $balance->id,
-                    'accessories_capital_stock' => $previousBalance,
-                    'accessories_in'            => $in,
-                    'accessories_sale'          => $sale,
-                    'accessories_reject'        => $reject,
-                    'accessories_retur'         => $retur,
-                    'accessories_requested'     => $requestOut,
-                    'accessories_requested_in'  => $requestIn,
-                    'accessories_balance'       => $balanceQty,
-                ]);
-            }
+        foreach ($accessories as $accessory) {
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE MASTER
+            | SALDO AWAL
             |--------------------------------------------------------------------------
             */
+            $saldoAwal = $this->getSaldoAwal(
+                $accessory,
+                $divisiId,
+                $year,
+                $month
+            );
 
-            $updateData = [
-                'capital_stock'  => $balance->details()->sum('accessories_capital_stock'),
-                'accessories_in' => $balance->details()->sum('accessories_in'),
-                'sale'           => $balance->details()->sum('accessories_sale'),
-                'reject'         => $balance->details()->sum('accessories_reject'),
-                'retur'          => $balance->details()->sum('accessories_retur'),
-                'request'        => $mintaKeluar,
-                'request_in'     => $mintaMasuk,
-            ];
+            /*
+            |--------------------------------------------------------------------------
+            | BARANG MASUK
+            |--------------------------------------------------------------------------
+            */
+            $barangMasuk = DB::table('accessories_ins')
+                ->where('accessories_id', $accessory->id)
+                ->whereYear('date_in', $year)
+                ->whereMonth('date_in', $month)
+                ->sum('qty');
 
-            if ($year < $currentYear) {
-                $updateData['remainder'] =
-                    $balance->details()->sum('accessories_capital_stock') +
-                    $balance->details()->sum('accessories_in') +
-                    $balance->details()->sum('accessories_retur') +
-                    $mintaMasuk -
-                    $mintaKeluar -
-                    $balance->details()->sum('accessories_reject') -
-                    $balance->details()->sum('accessories_sale');
+            /*
+            |--------------------------------------------------------------------------
+            | BARANG TERJUAL
+            |--------------------------------------------------------------------------
+            */
+            $barangTerjual = DB::table('accessories_sales')
+                ->where('accessories_id', $accessory->id)
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->sum('qty');
+
+            /*
+            |--------------------------------------------------------------------------
+            | BARANG RETUR
+            |--------------------------------------------------------------------------
+            */
+            $barangRetur = DB::table('sales_return_accessories')
+                ->where('accessories_id', $accessory->id)
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->sum('qty');
+
+            /*
+            |--------------------------------------------------------------------------
+            | BARANG RUSAK
+            |--------------------------------------------------------------------------
+            */
+            $barangRusak = DB::table('accessories_rejectes')
+                ->where('code_acces', $accessory->code_acces)
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->sum('stok');
+
+            /*
+            |--------------------------------------------------------------------------
+            | PERMINTAAN KELUAR
+            |--------------------------------------------------------------------------
+            */
+            $permintaanKeluar = DB::table('detail_accessories as da')
+                ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
+                ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
+                ->where('a.code_acces', $accessory->code_acces)
+                ->where('p.divisi_id_asal', $divisiId)
+                ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
+                ->whereYear('p.created_at', $year)
+                ->whereMonth('p.created_at', $month)
+                ->sum('da.qty');
+
+            /*
+            |--------------------------------------------------------------------------
+            | PERMINTAAN MASUK
+            |--------------------------------------------------------------------------
+            */
+            $permintaanMasuk = DB::table('detail_accessories as da')
+                ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
+                ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
+                ->where('a.code_acces', $accessory->code_acces)
+                ->where('p.divisi_id_tujuan', $divisiId)
+                ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
+                ->whereYear('p.created_at', $year)
+                ->whereMonth('p.created_at', $month)
+                ->sum('da.qty');
+
+            /*
+            |--------------------------------------------------------------------------
+            | SALDO AKHIR
+            |--------------------------------------------------------------------------
+            */
+            $saldoAkhir =
+                $saldoAwal +
+                $barangMasuk +
+                $barangRetur +
+                $permintaanMasuk -
+                $barangTerjual -
+                $barangRusak -
+                $permintaanKeluar;
+
+            /*
+            |--------------------------------------------------------------------------
+            | JANGAN TAMPILKAN JIKA SEMUA 0
+            |--------------------------------------------------------------------------
+            */
+            if (
+                $saldoAwal == 0 &&
+                $barangMasuk == 0 &&
+                $barangRetur == 0 &&
+                $permintaanMasuk == 0 &&
+                $barangTerjual == 0 &&
+                $barangRusak == 0 &&
+                $permintaanKeluar == 0 &&
+                $saldoAkhir == 0
+            ) {
+                continue;
             }
 
-            $balance->update($updateData);
-        });
+            $data[] = (object)[
+                'code'              => $accessory->code_acces,
+                'name'              => $accessory->name,
+                'saldo_awal'        => $saldoAwal,
+                'barang_masuk'      => $barangMasuk,
+                'barang_retur'      => $barangRetur,
+                'permintaan_masuk'  => $permintaanMasuk,
+                'barang_terjual'    => $barangTerjual,
+                'barang_rusak'      => $barangRusak,
+                'permintaan_keluar' => $permintaanKeluar,
+                'saldo_akhir'       => $saldoAkhir,
+            ];
+        }
+
+        return view(
+            'gudang.balance.index',
+            compact(
+                'data',
+                'year',
+                'month'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SALDO AWAL
+    |--------------------------------------------------------------------------
+    */
+    private function getSaldoAwal($accessory, $divisiId, $year, $month)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | APRIL 2026 = SALDO AWAL 0
+        |--------------------------------------------------------------------------
+        */
+        if ($year == 2026 && $month == 4) {
+            return 0;
+        }
+
+        $startDate = '2026-04-01';
+
+        $endDate = date(
+            'Y-m-t',
+            strtotime($year . '-' . $month . '-01 -1 month')
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASUK
+        |--------------------------------------------------------------------------
+        */
+        $masuk = DB::table('accessories_ins')
+            ->where('accessories_id', $accessory->id)
+            ->whereBetween('date_in', [$startDate, $endDate])
+            ->sum('qty');
+
+        /*
+        |--------------------------------------------------------------------------
+        | TERJUAL
+        |--------------------------------------------------------------------------
+        */
+        $terjual = DB::table('accessories_sales')
+            ->where('accessories_id', $accessory->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('qty');
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETUR
+        |--------------------------------------------------------------------------
+        */
+        $retur = DB::table('sales_return_accessories')
+            ->where('accessories_id', $accessory->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('qty');
+
+        /*
+        |--------------------------------------------------------------------------
+        | RUSAK
+        |--------------------------------------------------------------------------
+        */
+        $rusak = DB::table('accessories_rejectes')
+            ->where('code_acces', $accessory->code_acces)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('stok');
+
+        /*
+        |--------------------------------------------------------------------------
+        | PERMINTAAN KELUAR
+        |--------------------------------------------------------------------------
+        */
+        $keluar = DB::table('detail_accessories as da')
+            ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
+            ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
+            ->where('a.code_acces', $accessory->code_acces)
+            ->where('p.divisi_id_asal', $divisiId)
+            ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
+            ->whereBetween('p.created_at', [$startDate, $endDate])
+            ->sum('da.qty');
+
+        /*
+        |--------------------------------------------------------------------------
+        | PERMINTAAN MASUK
+        |--------------------------------------------------------------------------
+        */
+        $masukDivisi = DB::table('detail_accessories as da')
+            ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
+            ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
+            ->where('a.code_acces', $accessory->code_acces)
+            ->where('p.divisi_id_tujuan', $divisiId)
+            ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
+            ->whereBetween('p.created_at', [$startDate, $endDate])
+            ->sum('da.qty');
+
+        return
+            $masuk +
+            $retur +
+            $masukDivisi -
+            $terjual -
+            $rusak -
+            $keluar;
     }
 }

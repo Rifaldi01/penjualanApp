@@ -15,7 +15,17 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $year = $request->year ?? now()->year;
-        $divisi = $request->divisi_id;
+
+        // Logika pembatasan divisi
+        $user = auth()->user();
+
+        if ($user->divisi_id != 1) {
+            // Jika bukan divisi 1, kunci ke divisi milik user
+            $divisi = $user->divisi_id;
+        } else {
+            // Jika divisi 1, ambil dari filter request (bisa null/semua)
+            $divisi = $request->divisi_id;
+        }
 
         // FILTER ITEM
         $itemQuery = Item::query();
@@ -54,7 +64,14 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $divisis = Divisi::where('id', '!=', 6)->get();
+        // Opsional: Jika user bukan divisi 1,
+        // daftar divisi di dropdown mungkin hanya perlu menampilkan divisinya saja
+        $divisis = Divisi::where('id', '!=', 6);
+        if ($user->divisi_id != 1) {
+            $divisis->where('id', $user->divisi_id);
+        }
+        $divisis = $divisis->get();
+
         return view('gudang.index', compact(
             'itemsByCategory',
             'item',
@@ -63,8 +80,5 @@ class DashboardController extends Controller
             'year',
             'divisi'
         ));
-    }
-    public function error(){
-        return view('errors.500');
     }
 }
