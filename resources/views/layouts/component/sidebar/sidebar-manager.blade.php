@@ -121,14 +121,14 @@
                 </li>
             </ul>
         </li>
-{{--        <li>--}}
-{{--            <a href="{{route('manager.balance.index')}}">--}}
-{{--                <div class="parent-icon"><i class='bx bx-data'></i>--}}
-{{--                </div>--}}
-{{--                <div class="menu-title">Accessories Balance--}}
-{{--                </div>--}}
-{{--            </a>--}}
-{{--        </li>--}}
+        <li>
+            <a href="{{route('manager.balance.index')}}">
+                <div class="parent-icon"><i class='bx bx-data'></i>
+                </div>
+                <div class="menu-title">Accessories Balance
+                </div>
+            </a>
+        </li>
         <li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-import'></i>

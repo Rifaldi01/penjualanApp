@@ -1,114 +1,157 @@
 @extends('layouts.master')
+
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">Accessories Balance</h4>
-                    </div>
-                </div>
-                <div class="col-6 mt-3">
-                    <div class="btn-group float-end me-3">
-                        <select id="divisiFilter" class="form-select select2">
-                            <option value="">-- Pilih Divisi --</option>
-                            @foreach($divisi as $data)
-                                <option value="{{ $data->id }}">{{ $data->name }}</option>
-                            @endforeach
-                        </select>
+                        <h4 class="text-uppercase">
+                            Accessories Balance
+                        </h4>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="card-body">
+
+            <form method="GET">
+                <div class="row mb-3">
+
+                    <div class="col-md-3">
+                        <select name="divisi_id" class="form-control">
+                            <option value="">
+                                Semua Divisi
+                            </option>
+
+                            @foreach($divisis as $itemDivisi)
+                                <option value="{{ $itemDivisi->id }}"
+                                    {{ $divisiId == $itemDivisi->id ? 'selected' : '' }}>
+                                    {{ $itemDivisi->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <select name="month" class="form-control">
+                            @for($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}"
+                                    {{ $month == $i ? 'selected' : '' }}>
+                                    {{ date('F', mktime(0,0,0,$i,1)) }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <select name="year" class="form-control">
+                            @for($i = 2026; $i <= date('Y') + 5; $i++)
+                                <option value="{{ $i }}"
+                                    {{ $year == $i ? 'selected' : '' }}>
+                                    {{ $i }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">
+                            Filter
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
             <div class="table-responsive">
-                <table id="balance" class="table table-striped table-bordered" style="width:100%">
+
+                <table id="tabelBalance" class="table table-bordered table-striped w-100">
+
                     <thead>
                     <tr>
-                        <th width="4%">No</th>
-                        <th>Tahun</th>
-                        <th>Divisi</th>
-                        <th>Stok Awal</th>
-                        <th>Barang Masuk</th>
-                        <th>Barang Terjual</th>
-                        <th>Barang Dikembalikan</th>
-                        <th>Barang Rusak</th>
-                        <th>Barang Diminta</th>
-                        <th>Minta Barang</th>
-                        <th>Sisa</th>
-                        <th width="12%" class="text-center">Action</th>
+                        <th>No</th>
+                        <th>Kode</th>
+                        <th>Accessories</th>
+                        <th>Saldo Awal</th>
+                        <th>Masuk</th>
+                        <th>Retur</th>
+                        <th>Req Masuk</th>
+                        <th>Terjual</th>
+                        <th>Rusak</th>
+                        <th>Req Keluar</th>
+                        <th>Saldo Akhir</th>
                     </tr>
                     </thead>
-                    <tbody class="dataBalace">
+
+                    <tbody>
+
+                    @forelse($data as $key => $row)
+
+                        <tr>
+                            <td>{{ $key + 1 }}</td>
+                            <td>{{ $row->code }}</td>
+                            <td>{{ $row->name }}</td>
+                            <td>{{ number_format($row->saldo_awal) }}</td>
+                            <td>{{ number_format($row->barang_masuk) }}</td>
+                            <td>{{ number_format($row->barang_retur) }}</td>
+                            <td>{{ number_format($row->permintaan_masuk) }}</td>
+                            <td>{{ number_format($row->barang_terjual) }}</td>
+                            <td>{{ number_format($row->barang_rusak) }}</td>
+                            <td>{{ number_format($row->permintaan_keluar) }}</td>
+
+                            <td>
+                                <strong>
+                                    {{ number_format($row->saldo_akhir) }}
+                                </strong>
+                            </td>
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="12" class="text-center">
+                                Tidak ada data
+                            </td>
+                        </tr>
+
+                    @endforelse
                     </tbody>
+
                 </table>
+
             </div>
         </div>
     </div>
 @endsection
 
-@push('head')
-
-@endpush
 @push('js')
     <script>
         $(document).ready(function () {
 
-            let table = $('#balance').DataTable({
-                processing: true,
-                serverSide: false,
-                ajax: {
-                    url: "{{ route('accessories.balance.data') }}",
-                    data: function (d) {
-                        d.divisi_id = $('#divisiFilter').val();
-                    }
-                },
-                columns: [
+            $('#tabelBalance').DataTable({
+                responsive: true,
+                order: [[1, 'asc']],
+                pageLength: 25,
+                lengthChange: false,
+                dom: 'Bfrtip',
+                buttons: [
                     {
-                        data: null,
-                        render: (data, type, row, meta) => meta.row + 1
+                        extend: 'excel',
+                        footer: true
                     },
-                    { data: 'year', render: data => 'Tahun ' + data },
-                    { data: 'divisi.name', defaultContent: '-' },
-                    { data: 'capital_stock' },
-                    { data: 'accessories_in' },
-                    { data: 'sale' },
-                    { data: 'retur' },
-                    { data: 'reject' },
-                    { data: 'request' },
-                    { data: 'request_in' },
-                    { data: 'remainder' },
                     {
-                        data: 'id',
-                        className: 'text-center',
-                        render: function (data, type, row) {
-
-                            let detailUrl = "{{ route('manager.balance.show', ':id') }}";
-                            detailUrl = detailUrl.replace(':id', row.id);
-
-
-
-                            return `
-                            <a href="${detailUrl}"
-                               class="btn btn-info lni lni-eye"
-                               title="Detail"></a>
-
-                            <a href="/"
-                               class="btn btn-warning lni lni-pencil"
-                               title="Edit"></a>
-                        `;
-                        }
-
+                        extend: 'pdf',
+                        footer: true
+                    },
+                    {
+                        extend: 'print',
+                        footer: true
                     }
                 ]
             });
 
-            $('#divisiFilter').on('change', function () {
-                table.ajax.reload();
-            });
-
-            $('.select2').select2();
         });
     </script>
 @endpush
-
