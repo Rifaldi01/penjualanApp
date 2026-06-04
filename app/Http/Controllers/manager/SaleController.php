@@ -370,17 +370,47 @@ class SaleController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) //ieu fungsi jang ngambil form edit?enya
+    public function edit($id)
     {
-        if (\request()->ajax()){
-            $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'debt.bank'])->findOrFail($id);
+        if (request()->ajax()) {
+
+            $sale = Sale::with([
+                'itemSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
+                'itemSales.itemCategory',
+                'accessoriesSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
+                'accessoriesSales.accessories',
+                'debt.bank'
+            ])->findOrFail($id);
+
             return response()->json($sale);
         }
+
         $customers = Customer::all();
-        $sale = Sale::with(['itemSales.itemCategory', 'accessoriesSales.accessories', 'divisi', 'debt.bank'])->findOrFail($id);
+
+        $sale = Sale::with([
+            'itemSales' => function ($query) {
+                $query->where('status_return', 0);
+            },
+            'itemSales.itemCategory',
+            'accessoriesSales' => function ($query) {
+                $query->where('status_return', 0);
+            },
+            'accessoriesSales.accessories',
+            'divisi',
+            'debt.bank'
+        ])->findOrFail($id);
+
         $divisi = Divisi::all();
-        $bank = Bank::all();
-        return view('manager.sale.edit', compact('sale', 'customers', 'divisi', 'bank'));
+        $bank   = Bank::all();
+
+        return view(
+            'manager.sale.edit',
+            compact('sale', 'customers', 'divisi', 'bank')
+        );
     }
 
     /**
@@ -717,7 +747,7 @@ class SaleController extends Controller
 
                             'no_seri'         => $row['no_seri'],
 
-                            'status_returnn'   => 0
+                            'status_return'   => 0
 
                         ]);
 
@@ -851,6 +881,7 @@ class SaleController extends Controller
                     'user_id'        => Auth::id(),
 
                     'created_at'     => now(),
+                    'total_return'   => 0,
 
                 ]);
             }
@@ -875,6 +906,10 @@ class SaleController extends Controller
                     $accessorySale->accessories->price * $returnQty,
 
             ]);
+            $salesReturn->increment(
+                'total_return',
+                $accessorySale->accessories->price * $returnQty
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -907,7 +942,7 @@ class SaleController extends Controller
 
             if ($accessorySale->return_qty >= $accessorySale->qty) {
 
-                $accessorySale->status_returnn = 1;
+                $accessorySale->status_return = 1;
             }
 
             $accessorySale->save();
@@ -957,7 +992,7 @@ class SaleController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($itemSale->status_returnn == 1) {
+            if ($itemSale->status_return == 1) {
 
                 return response()->json([
                     'status' => 'error',
@@ -1009,6 +1044,7 @@ class SaleController extends Controller
                     'user_id'        => Auth::id(),
 
                     'created_at'     => now(),
+                    'total_return'   => 0,
 
                 ]);
             }
@@ -1036,7 +1072,10 @@ class SaleController extends Controller
                 'status'          => 1,
 
             ]);
-
+            $salesReturn->increment(
+                'total_return',
+                $itemSale->price
+            );
             /*
             |--------------------------------------------------------------------------
             | DETAIL RETURN ITEM
@@ -1059,7 +1098,7 @@ class SaleController extends Controller
 
             $itemSale->update([
 
-                'status_returnn' => 1
+                'status_return' => 1
 
             ]);
 

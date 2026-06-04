@@ -16,38 +16,76 @@ class ReportController extends Controller
     {
         $currentYear = now()->year;
 
-        // Ambil semua divisi untuk dropdown
         $divisi = Divisi::whereNotIn('name', ['Rental', 'rental'])->get();
 
         $report = Sale::whereYear('created_at', $currentYear)
-            ->with('customer', 'accessories', 'itemSales', 'debt.bank')
+            ->with([
+                'customer',
+                'debt.bank',
+                'itemSales' => function ($q) {
+                    $q->where('status_return', 0);
+                },
+                'accessoriesSales' => function ($q) {
+                    $q->whereRaw('COALESCE(return_qty,0) < qty');
+                },
+                'accessoriesSales.accessories'
+            ])
             ->orderBy('created_at', 'asc')
             ->get();
 
         $report->each(function ($sale) {
-            $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
 
-            $sale->itemSales = $sale->itemSales->map(function ($itemSale) {
-                return $itemSale->name;
-            })->implode(', ');
+            $sale->accessories_list = $sale->accessoriesSales
+                ->pluck('accessories.name')
+                ->filter()
+                ->implode(', ');
 
-            $sale->debt = $sale->debt ? $sale->debt->map(function ($debt) {
-                $bankOrDescription = $debt->bank ? $debt->bank->name : ($debt->description ?: 'Tidak ada informasi');
-                return $debt->date_pay . ' (' . $bankOrDescription . ')';
-            })->implode(', ') : '-';
+            $sale->itemSales = $sale->itemSales
+                ->map(function ($itemSale) {
+                    return $itemSale->name;
+                })
+                ->implode(', ');
+
+            $sale->debt = $sale->debt
+                ? $sale->debt->map(function ($debt) {
+                    $bankOrDescription = $debt->bank
+                        ? $debt->bank->name
+                        : ($debt->description ?: 'Tidak ada informasi');
+
+                    return $debt->date_pay . ' (' . $bankOrDescription . ')';
+                })->implode(', ')
+                : '-';
         });
 
-        // Hitung total income dan lainnya
-        $income = $report->sum('pay');
-        $diskon = $report->sum('diskon');
-        $ongkir = $report->sum('ongkir');
-        $ppn = $report->sum('ppn');
-        $pph = $report->sum('pph');
-        $admin_fee = $report->sum('admin_fee');
-        $fee = $report->sum('fee');
+        $income     = $report->sum('pay');
+        $diskon     = $report->sum('diskon');
+        $ongkir     = $report->sum('ongkir');
+        $ppn        = $report->sum('ppn');
+        $pph        = $report->sum('pph');
+        $admin_fee  = $report->sum('admin_fee');
+        $fee        = $report->sum('fee');
+        $diterima   = $report->sum('nominal_in');
 
-        $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->sum('capital_price');
-        $totalCapitalPriceAcces = Accessories::sum('capital_price');
+        $totalCapitalPriceItem = ItemSale::where('status_return', 0)
+            ->whereYear('created_at', $currentYear)
+            ->sum('capital_price');
+
+        $totalCapitalPriceAcces = 0;
+
+        foreach ($report as $sale) {
+
+            foreach ($sale->accessoriesSales as $detail) {
+
+                if (!$detail->accessories) {
+                    continue;
+                }
+
+                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
+
+                $totalCapitalPriceAcces +=
+                    $qtyTersisa * $detail->accessories->capital_price;
+            }
+        }
 
         $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
 
@@ -62,35 +100,44 @@ class ReportController extends Controller
             'pph',
             'divisi',
             'fee',
+            'diterima'
         ));
     }
 
     public function filter(Request $request)
     {
         $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $divisiId = $request->input('divisi_id');
+        $endDate   = $request->input('end_date');
+        $divisiId  = $request->input('divisi_id');
 
         $query = Sale::query();
 
-        // Filter tahun berjalan jika tidak ada filter tanggal
         if (!$startDate && !$endDate) {
             $query->whereYear('created_at', now()->year);
         }
 
-        // Filter berdasarkan tanggal jika disediakan
         if ($startDate && $endDate) {
             $start = Carbon::parse($startDate)->startOfDay();
-            $end = Carbon::parse($endDate)->endOfDay();
+            $end   = Carbon::parse($endDate)->endOfDay();
+
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        // Filter berdasarkan divisi jika disediakan
         if ($divisiId) {
             $query->where('divisi_id', $divisiId);
         }
 
-        $report = $query->with('customer', 'accessories', 'itemSales', 'debt.bank')
+        $report = $query->with([
+            'customer',
+            'debt.bank',
+            'itemSales' => function ($q) {
+                $q->where('status_return', 0);
+            },
+            'accessoriesSales' => function ($q) {
+                $q->whereRaw('COALESCE(return_qty,0) < qty');
+            },
+            'accessoriesSales.accessories'
+        ])
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -101,9 +148,26 @@ class ReportController extends Controller
         $totalppn = 0;
         $totalpph = 0;
         $totalfee = 0;
+        $totalprice = 0;
+        $admin_fee = 0;
+        $diterima = 0;
+
         $totalCapitalPerSale = [];
 
-        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$admin_fee, &$totalppn, &$totalpph, &$totalCapitalPerSale, &$totalfee, &$totalprice) {
+        $report->each(function ($sale) use (
+            &$totalIncome,
+            &$totalCapital,
+            &$totalDiskon,
+            &$totalOngkir,
+            &$admin_fee,
+            &$totalppn,
+            &$totalpph,
+            &$totalCapitalPerSale,
+            &$totalfee,
+            &$totalprice,
+            &$diterima
+        ) {
+
             $totalIncome += $sale->pay;
             $totalDiskon += $sale->diskon;
             $totalOngkir += $sale->ongkir;
@@ -112,43 +176,67 @@ class ReportController extends Controller
             $admin_fee += $sale->admin_fee;
             $totalfee += $sale->fee;
             $totalprice += $sale->total_price;
+            $diterima += $sale->nominal_in;
 
-            $accessoryCapital = $sale->accessories->sum(function ($accessory) {
-                return $accessory->pivot->qty * $accessory->capital_price;
-            });
+            $accessoryCapital = 0;
 
-            $itemCapital = $sale->itemSales->sum('capital_price');
+            foreach ($sale->accessoriesSales as $detail) {
+
+                if (!$detail->accessories) {
+                    continue;
+                }
+
+                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
+
+                $accessoryCapital +=
+                    $qtyTersisa * $detail->accessories->capital_price;
+            }
+
+            $itemCapital = $sale->itemSales
+                ->where('status_return', 0)
+                ->sum('capital_price');
 
             $capitalPerSale = $accessoryCapital + $itemCapital;
+
             $totalCapital += $capitalPerSale;
 
             $totalCapitalPerSale[$sale->id] = $capitalPerSale;
 
-            $sale->accessories_list = $sale->accessories->pluck('name')->implode(', ');
+            $sale->accessories_list = $sale->accessoriesSales
+                ->pluck('accessories.name')
+                ->filter()
+                ->implode(', ');
+
             $sale->itemSales = $sale->itemSales->map(function ($itemSale) {
                 return $itemSale->name . ' - (' . $itemSale->no_seri . ')';
             });
 
-            $sale->debt = $sale->debt ? $sale->debt->map(function ($debt) {
-                $bankOrDescription = $debt->bank ? $debt->bank->name : ($debt->description ?: 'Tidak ada informasi');
-                return $debt->date_pay . ' (' . $bankOrDescription . ')';
-            })->implode(', ') : '-';
+            $sale->debt = $sale->debt
+                ? $sale->debt->map(function ($debt) {
+                    $bankOrDescription = $debt->bank
+                        ? $debt->bank->name
+                        : ($debt->description ?: 'Tidak ada informasi');
+
+                    return $debt->date_pay . ' (' . $bankOrDescription . ')';
+                })->implode(', ')
+                : '-';
         });
 
         $profit = $totalIncome - $totalCapital;
 
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
-            'report' => $report,
-            'admin_fee' => $admin_fee,
-            'income' => $totalIncome,
-            'profit' => $profit,
-            'diskon' => $totalDiskon,
-            'ongkir' => $totalOngkir,
-            'ppn' => $totalppn,
-            'pph' => $totalpph,
-            'fee' => $totalfee,
-            'totalprice' => $totalprice
+            'report'       => $report,
+            'admin_fee'    => $admin_fee,
+            'income'       => $totalIncome,
+            'profit'       => $profit,
+            'diskon'       => $totalDiskon,
+            'ongkir'       => $totalOngkir,
+            'ppn'          => $totalppn,
+            'pph'          => $totalpph,
+            'fee'          => $totalfee,
+            'totalprice'   => $totalprice,
+            'diterima'     => $diterima,
         ]);
     }
 }

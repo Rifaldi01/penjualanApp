@@ -117,6 +117,14 @@
                         <th colspan="6" class="text-center">Ongkir</th>
                         <th colspan="6" class="text-center" id="ongkir">0</th>
                     </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Diterima</th>
+                        <th colspan="6" class="text-center" id="diterima">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-center">Piutang</th>
+                        <th colspan="6" class="text-center" id="piutang">0</th>
+                    </tr>
                     </tfoot>
                 </table>
             </div>
@@ -161,6 +169,8 @@
                         $('#admin').text(formatRupiah(response.admin_fee));
                         $('#fee').text(formatRupiah(response.fee));
                         $('#total-bersih').text(formatRupiah(response.totalprice));
+                        $('#piutang').text(formatRupiah(response.piutang));
+                        $('#diterima').text(formatRupiah(response.diterima));
 
                         let totalCapital = response.totalCapital;
 
@@ -198,24 +208,34 @@
                             // ================= ACCESSORIES =================
                             var accessoriesList = '<ul>';
 
-                            if (data.accessories && data.accessories.length > 0) {
+                            if (data.accessories_sales && data.accessories_sales.length > 0) {
 
-                                data.accessories.forEach(function (accessory) {
+                                data.accessories_sales.forEach(function (detail) {
 
-                                    let accesLink = accesEditUrl.replace(':id', accessory.id);
+                                    if (!detail.accessories) {
+                                        return;
+                                    }
+
+                                    let accesLink = accesEditUrl.replace(
+                                        ':id',
+                                        detail.accessories.id
+                                    );
+
+                                    let qtyTersisa =
+                                        parseInt(detail.qty) - parseInt(detail.return_qty ?? 0);
 
                                     accessoriesList += `
-                <li>
-                    <a href="${accesLink}" class="text-dark">
-                        ${accessory.name} - (${accessory.pivot.qty})
-                    </a>
-                </li>
-            `;
+            <li>
+                <a href="${accesLink}" class="text-dark">
+                    ${detail.accessories.name} - (${qtyTersisa})
+                </a>
+            </li>
+        `;
                                 });
 
                             } else {
 
-                                accessoriesList += ``;
+                                accessoriesList += '<li>-</li>';
 
                             }
 
