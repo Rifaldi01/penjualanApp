@@ -146,7 +146,8 @@
                         <div class="form-group row mb-2">
                             <label class="col-lg-4 control-label">Customer</label>
                             <div class="col-lg-8">
-                                <select id="customer_id" class="form-control accessory-select">
+                                <select name="customer_id" id="single-select-field"
+                                        data-placeholder="--Pilih Customer--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customers as $customer)
                                         <option value="{{ $customer->id }}"
@@ -170,28 +171,32 @@
                         <div class="form-group row mb-2">
                             <label class="col-lg-4 control-label">Diskon</label>
                             <div class="col-lg-8">
-                                <input type="text" id="diskon" class="form-control" value="{{$sale->diskon}}" onkeyup="formatRupiah(this)">
+                                <input type="text" id="diskon" class="form-control" value="{{$sale->diskon}}"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
 
                         <div class="form-group row mb-2">
                             <label for="ongkir" class="col-lg-4 control-label">Fee</label>
                             <div class="col-lg-8">
-                                <input type="text" name="fee" id="fee" class="form-control" value="{{$sale->fee}}" onkeyup="formatRupiah(this)" >
+                                <input type="text" name="fee" id="fee" class="form-control" value="{{$sale->fee}}"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
 
                         <div class="form-group row mb-2">
                             <label class="col-lg-4 control-label">Ongkir</label>
                             <div class="col-lg-8">
-                                <input type="text" id="ongkir" class="form-control" value="{{$sale->ongkir}}" onkeyup="formatRupiah(this)">
+                                <input type="text" id="ongkir" class="form-control" value="{{$sale->ongkir}}"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
 
                         <div class="form-group row mb-2">
                             <label class="col-lg-4 control-label">Biaya Admin</label>
                             <div class="col-lg-8">
-                                <input type="text" id="admin_fee" class="form-control" value="{{$sale->admin_fee}}" onkeyup="formatRupiah(this)">
+                                <input type="text" id="admin_fee" class="form-control" value="{{$sale->admin_fee}}"
+                                       onkeyup="formatRupiah(this)">
                             </div>
                         </div>
 
@@ -239,6 +244,20 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        $(document).ready(function () {
+            $('#invoice').select2({
+                theme: 'bootstrap-5',
+                placeholder: "--Pilih Invoice--",
+                width: '100%'
+            });
+        });
+        $(document).ready(function () {
+            $('#bank').select2({
+                theme: 'bootstrap-5',
+                placeholder: "--Pilih Bank--",
+                width: '100%'
+            });
+        });
 
         $(document).ready(function () {
 
