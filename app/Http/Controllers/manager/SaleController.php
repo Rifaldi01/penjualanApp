@@ -515,95 +515,49 @@ class SaleController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    if ($row['status'] == 'old') {
+                    if ($row['status'] == 'new') {
 
-                        $detail = AccessoriesSale::with('accessories')
-                            ->find($row['sale_detail_id']);
+                        $accessory = Accessories::find(
+                            $row['accessories_id']
+                        );
 
-                        if (!$detail) {
+                        if (!$accessory) {
                             continue;
                         }
 
-                        $oldQty = (int) $detail->qty;
-                        $newQty = (int) $row['qty'];
+                        if ($accessory->stok < $row['qty']) {
 
-                        $accessory = Accessories::find($detail->accessories_id);
+                            DB::rollBack();
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | QTY BERKURANG (RETUR)
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if ($newQty < $oldQty) {
-
-                            $returnQty = $oldQty - $newQty;
-
-                            // kembalikan stok
-                            $accessory->increment('stok', $returnQty);
-
-                            // update return qty
-                            $detail->return_qty =
-                                ($detail->return_qty ?? 0) + $returnQty;
-
-                            // buat sales return
-                            $salesReturn = SalesReturn::firstOrCreate(
-                                [
-                                    'sale_id' => $sale->id,
-                                    'return_invoice' => $returnInvoice,
-                                ],
-                                [
-                                    'description' => 'Retur dari edit transaksi',
-                                    'user_id' => Auth::id(),
-                                    'total_return' => 0,
-                                ]
-                            );
-
-                            $subtotalReturn =
-                                $detail->accessories->price * $returnQty;
-
-                            SalesReturnAccessories::create([
-                                'sale_return_id'      => $salesReturn->id,
-                                'accessories_sale_id' => $detail->id,
-                                'accessories_id'      => $detail->accessories_id,
-                                'qty'                 => $returnQty,
-                                'subtotal'            => $subtotalReturn,
+                            return response()->json([
+                                'status'  => 'error',
+                                'message' => 'Stok accessories tidak cukup'
                             ]);
-
-                            $salesReturn->increment(
-                                'total_return',
-                                $subtotalReturn
-                            );
                         }
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | QTY BERTAMBAH
-                        |--------------------------------------------------------------------------
-                        */
+                        AccessoriesSale::create([
 
-                        if ($newQty > $oldQty) {
+                            'sale_id'        => $sale->id,
 
-                            $ambilStok = $newQty - $oldQty;
+                            'accessories_id' => $row['accessories_id'],
 
-                            if ($accessory->stok < $ambilStok) {
+                            'qty'            => $row['qty'],
 
-                                DB::rollBack();
+                            'subtotal'       =>
+                                $accessory->price * $row['qty'],
 
-                                return response()->json([
-                                    'status' => 'error',
-                                    'message' => 'Stok accessories tidak cukup'
-                                ]);
-                            }
+                            'return_qty'     => 0,
 
-                            $accessory->decrement('stok', $ambilStok);
-                        }
+                            'status_return'  => 0,
 
-                        $detail->update([
-                            'qty' => $newQty,
-                            'subtotal' =>
-                                $detail->accessories->price * $newQty
+                            'acces_out'      => now(),
+
                         ]);
+
+                        $accessory->decrement(
+                            'stok',
+                            $row['qty']
+                        );
                     }
                     /*
                     |--------------------------------------------------------------------------
