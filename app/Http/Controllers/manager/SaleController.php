@@ -525,130 +525,86 @@ class SaleController extends Controller
                         }
 
                         $oldQty = (int) $detail->qty;
-
                         $newQty = (int) $row['qty'];
 
-                        $selisih = $oldQty - $newQty;
+                        $accessory = Accessories::find($detail->accessories_id);
 
                         /*
                         |--------------------------------------------------------------------------
-                        | QTY DIKURANGI / RETUR
+                        | QTY BERKURANG (RETUR)
                         |--------------------------------------------------------------------------
                         */
 
-                        if ($selisih > 0) {
+                        if ($newQty < $oldQty) {
 
-                            /*
-                            |--------------------------------------------------------------------------
-                            | RETURN STOCK
-                            |--------------------------------------------------------------------------
-                            */
+                            $returnQty = $oldQty - $newQty;
 
-                            Accessories::where(
-                                'id',
-                                $detail->accessories_id
-                            )->increment('stok', $selisih);
+                            // kembalikan stok
+                            $accessory->increment('stok', $returnQty);
 
-                            /*
-                            |--------------------------------------------------------------------------
-                            | CREATE SALES RETURN
-                            |--------------------------------------------------------------------------
-                            */
+                            // update return qty
+                            $detail->return_qty =
+                                ($detail->return_qty ?? 0) + $returnQty;
 
-                            $salesReturn = SalesReturn::create([
+                            // buat sales return
+                            $salesReturn = SalesReturn::firstOrCreate(
+                                [
+                                    'sale_id' => $sale->id,
+                                    'return_invoice' => $returnInvoice,
+                                ],
+                                [
+                                    'description' => 'Retur dari edit transaksi',
+                                    'user_id' => Auth::id(),
+                                    'total_return' => 0,
+                                ]
+                            );
 
-                                'sale_id'        => $sale->id,
-
-                                'return_invoice' => $returnInvoice,
-
-                                'description'    => 'Retur dari edit transaksi',
-
-                                'user_id'        => Auth::id(),
-
-                                'created_at'     => now(),
-
-                            ]);
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | CREATE RETURN ACCESSORIES
-                            |--------------------------------------------------------------------------
-                            */
+                            $subtotalReturn =
+                                $detail->accessories->price * $returnQty;
 
                             SalesReturnAccessories::create([
-
                                 'sale_return_id'      => $salesReturn->id,
-
                                 'accessories_sale_id' => $detail->id,
-
                                 'accessories_id'      => $detail->accessories_id,
-
-                                'qty'                 => $selisih,
-
-                                'subtotal'            =>
-                                    $detail->accessories->price * $selisih,
-
+                                'qty'                 => $returnQty,
+                                'subtotal'            => $subtotalReturn,
                             ]);
 
-                            /*
-                            |--------------------------------------------------------------------------
-                            | UPDATE RETURN QTY
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $detail->return_qty =
-                                ($detail->return_qty ?? 0) + $selisih;
+                            $salesReturn->increment(
+                                'total_return',
+                                $subtotalReturn
+                            );
                         }
 
                         /*
                         |--------------------------------------------------------------------------
-                        | QTY DITAMBAH
+                        | QTY BERTAMBAH
                         |--------------------------------------------------------------------------
                         */
 
-                        if ($selisih < 0) {
+                        if ($newQty > $oldQty) {
 
-                            $kurangStok = abs($selisih);
+                            $ambilStok = $newQty - $oldQty;
 
-                            $accessory = Accessories::find(
-                                $detail->accessories_id
-                            );
-
-                            if ($accessory->stok < $kurangStok) {
+                            if ($accessory->stok < $ambilStok) {
 
                                 DB::rollBack();
 
                                 return response()->json([
-                                    'status'  => 'error',
+                                    'status' => 'error',
                                     'message' => 'Stok accessories tidak cukup'
                                 ]);
                             }
 
-                            $accessory->decrement(
-                                'stok',
-                                $kurangStok
-                            );
+                            $accessory->decrement('stok', $ambilStok);
                         }
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | UPDATE ACCESSORIES SALE
-                        |--------------------------------------------------------------------------
-                        */
-
                         $detail->update([
-
                             'qty' => $newQty,
-
                             'subtotal' =>
-                                $detail->accessories->price * $newQty,
-
-                            'return_qty' =>
-                                $detail->return_qty ?? 0,
-
+                                $detail->accessories->price * $newQty
                         ]);
                     }
-
                     /*
                     |--------------------------------------------------------------------------
                     | ACCESSORIES BARU
