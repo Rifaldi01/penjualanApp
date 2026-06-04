@@ -146,7 +146,7 @@
                         <div class="form-group row mb-2">
                             <label class="col-lg-4 control-label">Customer</label>
                             <div class="col-lg-8">
-                                <select name="customer_id" id="single-select-field"
+                                <select name="customer_id" id="customer_id"
                                         data-placeholder="--Pilih Customer--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customers as $customer)
@@ -244,6 +244,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        $(document).ready(function () {
+            $('#customer_id').select2({
+                theme: 'bootstrap-5',
+                placeholder: "--Pilih Customer--",
+                width: '100%'
+            });
+        });
         $(document).ready(function () {
             $('#invoice').select2({
                 theme: 'bootstrap-5',
