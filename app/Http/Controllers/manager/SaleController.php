@@ -687,6 +687,7 @@ class SaleController extends Controller
                                 $accessory->price * $row['qty'],
 
                             'return_qty'     => 0,
+                            'acces_out' => now(),
 
                         ]);
 
