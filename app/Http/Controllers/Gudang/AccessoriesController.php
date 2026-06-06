@@ -275,6 +275,7 @@ class AccessoriesController extends Controller
                         'price_bottom' => $accessory->price_bottom,
                         'price' => $accessory->price,
                         'capital_price' => $accessory->capital_price,
+                        'status' => 'buy',
                     ]);
                 }
 

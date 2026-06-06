@@ -294,6 +294,7 @@ class PermintaanController extends Controller
                     'qty'            => $detail->qty,
                     'kode_msk'       => $kode_msk,
                     'date_in'        => now(),
+                    'status'         => 'request',
                 ]);
             }
 
