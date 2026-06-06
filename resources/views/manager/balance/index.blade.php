@@ -20,46 +20,46 @@
                 <div class="row mb-3">
 
                     <div class="col-md-3">
+                        <label>Divisi</label>
                         <select name="divisi_id" class="form-control">
-                            <option value="">
-                                Semua Divisi
-                            </option>
+                            <option value="">Semua Divisi</option>
 
-                            @foreach($divisis as $itemDivisi)
-                                <option value="{{ $itemDivisi->id }}"
-                                    {{ $divisiId == $itemDivisi->id ? 'selected' : '' }}>
-                                    {{ $itemDivisi->name }}
+                            @foreach($divisis as $divisi)
+                                <option value="{{ $divisi->id }}"
+                                    {{ $divisiId == $divisi->id ? 'selected' : '' }}>
+                                    {{ $divisi->name }}
                                 </option>
                             @endforeach
+
                         </select>
                     </div>
 
-                    <div class="col-md-2">
-                        <select name="month" class="form-control">
-                            @for($i = 1; $i <= 12; $i++)
-                                <option value="{{ $i }}"
-                                    {{ $month == $i ? 'selected' : '' }}>
-                                    {{ date('F', mktime(0,0,0,$i,1)) }}
-                                </option>
-                            @endfor
-                        </select>
+                    <div class="col-md-3">
+                        <label>Tanggal Awal</label>
+                        <input type="date"
+                               name="start_date"
+                               class="form-control"
+                               min="2026-04-14"
+                               value="{{ $startDate }}">
                     </div>
 
-                    <div class="col-md-2">
-                        <select name="year" class="form-control">
-                            @for($i = 2026; $i <= date('Y') + 5; $i++)
-                                <option value="{{ $i }}"
-                                    {{ $year == $i ? 'selected' : '' }}>
-                                    {{ $i }}
-                                </option>
-                            @endfor
-                        </select>
+                    <div class="col-md-3">
+                        <label>Tanggal Akhir</label>
+                        <input type="date"
+                               name="end_date"
+                               class="form-control"
+                               value="{{ $endDate }}">
                     </div>
 
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary">
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary me-2">
                             Filter
                         </button>
+
+                        <a href="{{ route('manager.balance.index') }}"
+                           class="btn btn-secondary">
+                            Reset
+                        </a>
                     </div>
 
                 </div>

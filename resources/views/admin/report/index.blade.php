@@ -60,6 +60,7 @@
                         <th class="text-center">PPH</th>
                         <th class="text-center">Diskon</th>
                         <th class="text-center">Ongkir</th>
+                        <th class="text-center">Biaya Admin</th>
                         <th class="text-center">Diterima</th>
                         <th class="text-center">Piutang</th>
                         <th class="text-center">Total Bayar</th>
@@ -188,6 +189,7 @@
                                 formatRupiah(data.pph ?? 0),
                                 formatRupiah(data.diskon ?? 0),
                                 formatRupiah(data.ongkir ?? 0),
+                                formatRupiah(data.admin_fee),
                                 formatRupiah(data.nominal_in ?? 0),
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
@@ -203,8 +205,21 @@
                 });
             }
 
-            loadData();
+            let summaryData = {
+                totalprice: 0,
+                ppn: 0,
+                pph: 0,
+                diskon: 0,
+                ongkir: 0,
+                income: 0,
+                admin_fee: 0,
+                nominal_in: 0,
+                pay: 0,
+                fee: 0,
+                profit: 0
+            };
 
+            loadData();
             $('#filter-btn').on('click', function () {
                 var startDate = $('input[name="start_date"]').val();
                 var endDate = $('input[name="end_date"]').val();
@@ -267,7 +282,8 @@
 
                             // Tambahkan footer income manual
                             function getFooterText(id) {
-                                return document.getElementById(id).innerText || '0';
+                                const el = document.getElementById(id);
+                                return el ? el.innerText : '0';
                             }
 
                             function addFooterRow(label, value, rowNumber) {
@@ -283,15 +299,23 @@
                                 $sheet.find('sheetData').append(row);
                             }
 
-                            var rowStart = $sheet.find('sheetData row').length + 1;
-                            addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
-                            addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
-                            addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
-                            addFooterRow('PPN', getFooterText('ppn'), rowStart++);
-                            addFooterRow('PPH', getFooterText('pph'), rowStart++);
-                            addFooterRow('Fee', getFooterText('fee'), rowStart++);
-                            addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
-                            addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
+                            var rowStart = $sheet.find('sheetData row').length + 2;
+
+                            addFooterRow('Total Invoice', formatRupiah(summaryData.totalprice), rowStart++);
+                            addFooterRow('PPN', formatRupiah(summaryData.ppn), rowStart++);
+                            addFooterRow('PPH', formatRupiah(summaryData.pph), rowStart++);
+                            addFooterRow('Diskon', formatRupiah(summaryData.diskon), rowStart++);
+                            addFooterRow('Ongkir', formatRupiah(summaryData.ongkir), rowStart++);
+                            addFooterRow('Total Bersih', formatRupiah(summaryData.income), rowStart++);
+                            addFooterRow('Biaya Admin', formatRupiah(summaryData.admin_fee), rowStart++);
+                            addFooterRow('Diterima', formatRupiah(summaryData.nominal_in), rowStart++);
+                            addFooterRow(
+                                'Piutang',
+                                formatRupiah(Math.max(summaryData.pay - summaryData.nominal_in, 0)),
+                                rowStart++
+                            );
+                            addFooterRow('Laba-Rugi', formatRupiah(summaryData.profit), rowStart++);
+                            addFooterRow('Fee', formatRupiah(summaryData.fee), rowStart++);
                         }
 
                     }, {

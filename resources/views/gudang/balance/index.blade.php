@@ -18,35 +18,29 @@
                     <div class="row mb-3">
 
                         <div class="col-md-3">
-                            <select name="year" class="form-control">
-
-                                @for($y = 2026; $y <= date('Y') + 2; $y++)
-                                    <option value="{{ $y }}"
-                                        {{ $year == $y ? 'selected' : '' }}>
-                                        {{ $y }}
-                                    </option>
-                                @endfor
-
-                            </select>
+                            <label>Tanggal Awal</label>
+                            <input type="date"
+                                   name="start_date"
+                                   class="form-control"
+                                   value="{{ request('start_date') }}">
                         </div>
 
                         <div class="col-md-3">
-                            <select name="month" class="form-control">
-
-                                @for($m = 1; $m <= 12; $m++)
-                                    <option value="{{ $m }}"
-                                        {{ $month == $m ? 'selected' : '' }}>
-                                        {{ date('F', mktime(0,0,0,$m,1)) }}
-                                    </option>
-                                @endfor
-
-                            </select>
+                            <label>Tanggal Akhir</label>
+                            <input type="date"
+                                   name="end_date"
+                                   class="form-control "
+                                   value="{{ request('end_date') }}">
                         </div>
 
-                        <div class="col-md-3">
-                            <button class="btn btn-primary">
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
                                 Filter
                             </button>
+
+                            <a href="{{ url()->current() }}" class="btn btn-secondary">
+                                Reset
+                            </a>
                         </div>
 
                     </div>

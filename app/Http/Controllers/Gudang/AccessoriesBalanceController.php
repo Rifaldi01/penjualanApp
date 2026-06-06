@@ -13,16 +13,16 @@ class AccessoriesBalanceController extends Controller
     {
         $divisiId = auth()->user()->divisi_id;
 
-        $year = $request->year ?? date('Y');
-        $month = $request->month ?? date('n');
-
         /*
         |--------------------------------------------------------------------------
-        | START SISTEM APRIL 2026
+        | FILTER TANGGAL
         |--------------------------------------------------------------------------
         */
-        if ($year == 2026 && $month < 4) {
-            $month = 4;
+        $startDate = $request->start_date ?? '2026-04-14';
+        $endDate   = $request->end_date ?? date('Y-m-d');
+
+        if ($startDate < '2026-04-14') {
+            $startDate = '2026-04-14';
         }
 
         $accessories = Accessories::where('divisi_id', $divisiId)
@@ -41,8 +41,7 @@ class AccessoriesBalanceController extends Controller
             $saldoAwal = $this->getSaldoAwal(
                 $accessory,
                 $divisiId,
-                $year,
-                $month
+                $startDate
             );
 
             /*
@@ -52,8 +51,10 @@ class AccessoriesBalanceController extends Controller
             */
             $barangMasuk = DB::table('accessories_ins')
                 ->where('accessories_id', $accessory->id)
-                ->whereYear('date_in', $year)
-                ->whereMonth('date_in', $month)
+                ->whereBetween('date_in', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('qty');
 
             /*
@@ -63,8 +64,10 @@ class AccessoriesBalanceController extends Controller
             */
             $barangTerjual = DB::table('accessories_sales')
                 ->where('accessories_id', $accessory->id)
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
+                ->whereBetween('created_at', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('qty');
 
             /*
@@ -74,8 +77,10 @@ class AccessoriesBalanceController extends Controller
             */
             $barangRetur = DB::table('sales_return_accessories')
                 ->where('accessories_id', $accessory->id)
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
+                ->whereBetween('created_at', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('qty');
 
             /*
@@ -85,8 +90,10 @@ class AccessoriesBalanceController extends Controller
             */
             $barangRusak = DB::table('accessories_rejectes')
                 ->where('code_acces', $accessory->code_acces)
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
+                ->whereBetween('created_at', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('stok');
 
             /*
@@ -100,8 +107,10 @@ class AccessoriesBalanceController extends Controller
                 ->where('a.code_acces', $accessory->code_acces)
                 ->where('p.divisi_id_asal', $divisiId)
                 ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
-                ->whereYear('p.created_at', $year)
-                ->whereMonth('p.created_at', $month)
+                ->whereBetween('p.created_at', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('da.qty');
 
             /*
@@ -115,8 +124,10 @@ class AccessoriesBalanceController extends Controller
                 ->where('a.code_acces', $accessory->code_acces)
                 ->where('p.divisi_id_tujuan', $divisiId)
                 ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
-                ->whereYear('p.created_at', $year)
-                ->whereMonth('p.created_at', $month)
+                ->whereBetween('p.created_at', [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ])
                 ->sum('da.qty');
 
             /*
@@ -169,8 +180,8 @@ class AccessoriesBalanceController extends Controller
             'gudang.balance.index',
             compact(
                 'data',
-                'year',
-                'month'
+                'startDate',
+                'endDate'
             )
         );
     }
@@ -180,90 +191,60 @@ class AccessoriesBalanceController extends Controller
     | SALDO AWAL
     |--------------------------------------------------------------------------
     */
-    private function getSaldoAwal($accessory, $divisiId, $year, $month)
+    private function getSaldoAwal($accessory, $divisiId, $startDate)
     {
         /*
         |--------------------------------------------------------------------------
-        | APRIL 2026 = SALDO AWAL 0
+        | TANGGAL AWAL SISTEM
         |--------------------------------------------------------------------------
         */
-        if ($year == 2026 && $month == 4) {
+        if ($startDate <= '2026-04-14') {
             return 0;
         }
 
-        $startDate = '2026-04-01';
+        $saldoStart = '2026-04-14';
 
-        $endDate = date(
-            'Y-m-t',
-            strtotime($year . '-' . $month . '-01 -1 month')
+        $saldoEnd = date(
+            'Y-m-d',
+            strtotime($startDate . ' -1 day')
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | MASUK
-        |--------------------------------------------------------------------------
-        */
         $masuk = DB::table('accessories_ins')
             ->where('accessories_id', $accessory->id)
-            ->whereBetween('date_in', [$startDate, $endDate])
+            ->whereBetween('date_in', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
-        /*
-        |--------------------------------------------------------------------------
-        | TERJUAL
-        |--------------------------------------------------------------------------
-        */
         $terjual = DB::table('accessories_sales')
             ->where('accessories_id', $accessory->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
-        /*
-        |--------------------------------------------------------------------------
-        | RETUR
-        |--------------------------------------------------------------------------
-        */
         $retur = DB::table('sales_return_accessories')
             ->where('accessories_id', $accessory->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
-        /*
-        |--------------------------------------------------------------------------
-        | RUSAK
-        |--------------------------------------------------------------------------
-        */
         $rusak = DB::table('accessories_rejectes')
             ->where('code_acces', $accessory->code_acces)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('stok');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERMINTAAN KELUAR
-        |--------------------------------------------------------------------------
-        */
         $keluar = DB::table('detail_accessories as da')
             ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
             ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
             ->where('a.code_acces', $accessory->code_acces)
             ->where('p.divisi_id_asal', $divisiId)
             ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
-            ->whereBetween('p.created_at', [$startDate, $endDate])
+            ->whereBetween('p.created_at', [$saldoStart, $saldoEnd])
             ->sum('da.qty');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERMINTAAN MASUK
-        |--------------------------------------------------------------------------
-        */
         $masukDivisi = DB::table('detail_accessories as da')
             ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
             ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
             ->where('a.code_acces', $accessory->code_acces)
             ->where('p.divisi_id_tujuan', $divisiId)
             ->whereRaw("TRIM(LOWER(p.status)) = 'diterima'")
-            ->whereBetween('p.created_at', [$startDate, $endDate])
+            ->whereBetween('p.created_at', [$saldoStart, $saldoEnd])
             ->sum('da.qty');
 
         return
