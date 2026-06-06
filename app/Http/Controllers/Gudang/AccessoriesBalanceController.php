@@ -51,6 +51,7 @@ class AccessoriesBalanceController extends Controller
             */
             $barangMasuk = DB::table('accessories_ins')
                 ->where('accessories_id', $accessory->id)
+                ->where('status', 'buy')
                 ->whereBetween('date_in', [
                     $startDate . ' 00:00:00',
                     $endDate . ' 23:59:59'
@@ -211,6 +212,7 @@ class AccessoriesBalanceController extends Controller
 
         $masuk = DB::table('accessories_ins')
             ->where('accessories_id', $accessory->id)
+            ->where('status', 'buy')
             ->whereBetween('date_in', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
