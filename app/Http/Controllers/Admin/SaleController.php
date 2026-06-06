@@ -251,7 +251,7 @@ class SaleController extends Controller
                             'accessories_id' => $accessory['accessories_id'],
                             'qty' => $accessory['qty'],
                             'subtotal' => $accessory['subtotal'],
-                            'acces_out' => now()
+                            'acces_out' => $request->created_at ?? now()
                         ]);
                     }
                 }

@@ -463,6 +463,31 @@ class SaleController extends Controller
 
             /*
             |--------------------------------------------------------------------------
+            | TANGGAL INVOICE ACUAN
+            |--------------------------------------------------------------------------
+            */
+
+            $tanggalInvoice = $sale->fresh()->created_at;
+
+            /*
+            |--------------------------------------------------------------------------
+            | SYNC TANGGAL DETAIL LAMA
+            |--------------------------------------------------------------------------
+            */
+
+            AccessoriesSale::where('sale_id', $sale->id)
+                ->update([
+                    'acces_out'  => $tanggalInvoice,
+                    'created_at' => $tanggalInvoice,
+                ]);
+
+            ItemSale::where('sale_id', $sale->id)
+                ->update([
+                    'created_at' => $tanggalInvoice,
+                ]);
+
+            /*
+            |--------------------------------------------------------------------------
             | UPDATE DEBT
             |--------------------------------------------------------------------------
             */
@@ -509,12 +534,6 @@ class SaleController extends Controller
 
                 foreach ($request->accessories as $row) {
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | ACCESSORIES LAMA
-                    |--------------------------------------------------------------------------
-                    */
-
                     if ($row['status'] == 'new') {
 
                         $accessory = Accessories::find(
@@ -550,54 +569,11 @@ class SaleController extends Controller
 
                             'status_return'  => 0,
 
-                            'acces_out'      => now(),
+                            'acces_out'      => $tanggalInvoice,
 
-                        ]);
+                            'created_at'     => $tanggalInvoice,
 
-                        $accessory->decrement(
-                            'stok',
-                            $row['qty']
-                        );
-                    }
-                    /*
-                    |--------------------------------------------------------------------------
-                    | ACCESSORIES BARU
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if ($row['status'] == 'new') {
-
-                        $accessory = Accessories::find(
-                            $row['accessories_id']
-                        );
-
-                        if (!$accessory) {
-                            continue;
-                        }
-
-                        if ($accessory->stok < $row['qty']) {
-
-                            DB::rollBack();
-
-                            return response()->json([
-                                'status'  => 'error',
-                                'message' => 'Stok accessories tidak cukup'
-                            ]);
-                        }
-
-                        AccessoriesSale::create([
-
-                            'sale_id'        => $sale->id,
-
-                            'accessories_id' => $row['accessories_id'],
-
-                            'qty'            => $row['qty'],
-
-                            'subtotal'       =>
-                                $accessory->price * $row['qty'],
-
-                            'return_qty'     => 0,
-                            'acces_out' => now(),
+                            'updated_at'     => now(),
 
                         ]);
 
@@ -658,7 +634,11 @@ class SaleController extends Controller
 
                             'no_seri'         => $row['no_seri'],
 
-                            'status_return'   => 0
+                            'status_return'   => 0,
+
+                            'created_at'      => $tanggalInvoice,
+
+                            'updated_at'      => now(),
 
                         ]);
 
@@ -685,12 +665,31 @@ class SaleController extends Controller
 
                         $detail->update([
 
-                            'price' => $row['price']
+                            'price' => $row['price'],
+
+                            'created_at' => $tanggalInvoice,
 
                         ]);
                     }
                 }
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | SYNC ULANG SETELAH SEMUA PROSES
+            |--------------------------------------------------------------------------
+            */
+
+            AccessoriesSale::where('sale_id', $sale->id)
+                ->update([
+                    'acces_out'  => $tanggalInvoice,
+                    'created_at' => $tanggalInvoice,
+                ]);
+
+            ItemSale::where('sale_id', $sale->id)
+                ->update([
+                    'created_at' => $tanggalInvoice,
+                ]);
 
             DB::commit();
 
@@ -1035,7 +1034,8 @@ class SaleController extends Controller
 
             ]);
         }
-    }   /**
+    }
+    /**
      * Remove the specified resource from storage.
      *
      * @param int $id
