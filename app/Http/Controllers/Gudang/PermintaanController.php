@@ -286,6 +286,15 @@ class PermintaanController extends Controller
                 }
 
                 // Catat accessories masuk
+                AccessoriesIn::create([
+                    'accessories_id' => $accessoriesTujuan->id,
+                    'price'          => $accessoriesTujuan->price,
+                    'capital_price'  => $accessoriesTujuan->capital_price,
+                    'ppn'            => 0,
+                    'qty'            => $detail->qty,
+                    'kode_msk'       => $kode_msk,
+                    'date_in'        => now(),
+                ]);
             }
 
             // Update status permintaan
