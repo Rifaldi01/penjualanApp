@@ -31,7 +31,7 @@
                         <tr>
                             <td>{{$key +1}}</td>
                             <td>{{$data->invoice}}</td>
-                            <td>{{$data->divisi->name}}</td>
+                            <td>{{$data->sale->divisi->name}}</td>
                             <td>{{ $data->accessories?->code_acces ?? '-' }}</td>
                             <td>{{ $data->accessories?->name ?? '-' }}</td>
                             <td>{{ formatRupiah($data->accessories?->price ?? 0) }}</td>
