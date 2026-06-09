@@ -39,7 +39,7 @@
                             <td>{{ $data->qty }}</td>
                             <td>{{ formatRupiah($data->subtotal) }}</td>
                             <td>{{ $data->sale?->customer?->name ?? '-' }}</td>
-                            <td>{{ date($data->sale?->created_at ?? '-' )}}</td>
+                            <td>{{ tanggal($data->sale?->created_at ?? '-' )}}</td>
                         </tr>
                     @endforeach
                     </tbody>
