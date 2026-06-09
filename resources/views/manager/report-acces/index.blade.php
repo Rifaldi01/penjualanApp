@@ -24,13 +24,14 @@
                         <th>Qty</th>
                         <th>Subtotal</th>
                         <th>Customer</th>
+                        <th>Tanggal Invoice</th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
-                            <td>{{$data->invoice}}</td>
+                            <td>{{$data->sale->invoice}}</td>
                             <td>{{$data->sale->divisi->name}}</td>
                             <td>{{ $data->accessories?->code_acces ?? '-' }}</td>
                             <td>{{ $data->accessories?->name ?? '-' }}</td>
@@ -38,6 +39,7 @@
                             <td>{{ $data->qty }}</td>
                             <td>{{ formatRupiah($data->subtotal) }}</td>
                             <td>{{ $data->sale?->customer?->name ?? '-' }}</td>
+                            <td>{{ $data->sale?->created_at ?? '-' }}</td>
                         </tr>
                     @endforeach
                     </tbody>
