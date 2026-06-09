@@ -1177,11 +1177,14 @@ class SaleController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | CEK APAKAH SUDAH DIRETUR
+            | CEK SUDAH DIRETUR
             |--------------------------------------------------------------------------
             */
 
-            $checkReturn = SalesReturn::where('sale_id', $sale->id)->first();
+            $checkReturn = SalesReturn::where(
+                'sale_id',
+                $sale->id
+            )->first();
 
             if ($checkReturn) {
 
@@ -1189,7 +1192,6 @@ class SaleController extends Controller
                     'success' => false,
                     'message' => 'Transaksi sudah pernah diretur'
                 ]);
-
             }
 
             /*
@@ -1200,27 +1202,31 @@ class SaleController extends Controller
 
             $totalReturn = 0;
 
-            // TOTAL ITEM
             foreach ($sale->itemSales as $itemSale) {
 
-                $totalReturn += $itemSale->price;
-
+                if ($itemSale->status_return == 0) {
+                    $totalReturn += $itemSale->price;
+                }
             }
 
-            // TOTAL ACCESSORIES
             foreach ($sale->accessoriesSales as $accessorySale) {
 
-                $totalReturn += $accessorySale->subtotal;
-
+                if ($accessorySale->status_return == 0) {
+                    $totalReturn += $accessorySale->subtotal;
+                }
             }
 
             /*
             |--------------------------------------------------------------------------
-            | BUAT HEADER RETUR
+            | HEADER RETURN
             |--------------------------------------------------------------------------
             */
 
-            $returnInvoice = str_replace('INV', 'RET', $sale->invoice);
+            $returnInvoice = str_replace(
+                'INV',
+                'RTR',
+                $sale->invoice
+            );
 
             $salesReturn = SalesReturn::create([
 
@@ -1236,21 +1242,21 @@ class SaleController extends Controller
 
                 'description'    => 'Retur full transaksi',
 
+                'created_at'     => now(),
+
             ]);
 
             /*
             |--------------------------------------------------------------------------
-            | RETUR ITEM SERIAL
+            | RETURN ITEM
             |--------------------------------------------------------------------------
             */
 
             foreach ($sale->itemSales as $itemSale) {
 
-                /*
-                |--------------------------------------------------------------------------
-                | KEMBALIKAN KE TABLE ITEMS
-                |--------------------------------------------------------------------------
-                */
+                if ($itemSale->status_return == 1) {
+                    continue;
+                }
 
                 Item::create([
 
@@ -1270,88 +1276,82 @@ class SaleController extends Controller
 
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | SIMPAN DETAIL RETUR ITEM
-                |--------------------------------------------------------------------------
-                */
-
                 SalesReturnItem::create([
 
                     'sale_return_id' => $salesReturn->id,
 
                     'item_sale_id'   => $itemSale->id,
 
+                    'created_at'     => $sale->created_at,
+
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | HAPUS ITEM SALE
-                |--------------------------------------------------------------------------
-                */
+                $itemSale->update([
 
-                $itemSale->delete();
+                    'status_return' => 1
 
+                ]);
             }
 
             /*
             |--------------------------------------------------------------------------
-            | RETUR ACCESSORIES
+            | RETURN ACCESSORIES
             |--------------------------------------------------------------------------
             */
 
             foreach ($sale->accessoriesSales as $accessorySale) {
 
-                /*
-                |--------------------------------------------------------------------------
-                | KEMBALIKAN STOK
-                |--------------------------------------------------------------------------
-                */
+                if ($accessorySale->status_return == 1) {
+                    continue;
+                }
 
-                Accessories::where('id', $accessorySale->accessories_id)
-                    ->increment('stok', $accessorySale->qty);
-
-                /*
-                |--------------------------------------------------------------------------
-                | SIMPAN DETAIL RETUR ACCESSORIES
-                |--------------------------------------------------------------------------
-                */
+                Accessories::where(
+                    'id',
+                    $accessorySale->accessories_id
+                )->increment(
+                    'stok',
+                    $accessorySale->qty
+                );
 
                 SalesReturnAccessories::create([
 
-                    'sale_return_id'    => $salesReturn->id,
+                    'sale_return_id'      => $salesReturn->id,
 
                     'accessories_sale_id' => $accessorySale->id,
 
-                    'accessories_id'    => $accessorySale->accessories_id,
+                    'accessories_id'      => $accessorySale->accessories_id,
 
-                    'qty'               => $accessorySale->qty,
+                    'qty'                 => $accessorySale->qty,
 
-                    'subtotal'          => $accessorySale->subtotal,
+                    'subtotal'            => $accessorySale->subtotal,
+
+                    'created_at'          => $sale->created_at,
 
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | HAPUS ACCESSORIES SALE
-                |--------------------------------------------------------------------------
-                */
+                $accessorySale->update([
 
-                $accessorySale->delete();
+                    'return_qty'    => $accessorySale->qty,
 
+                    'status_return' => 1,
+
+                ]);
             }
 
             /*
             |--------------------------------------------------------------------------
-            | HAPUS DEBT
+            | HAPUS PIUTANG
             |--------------------------------------------------------------------------
             */
 
-            Debt::where('sale_id', $sale->id)->delete();
+            Debt::where(
+                'sale_id',
+                $sale->id
+            )->delete();
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE STATUS RETUR
+            | UPDATE SALE
             |--------------------------------------------------------------------------
             */
 
@@ -1382,7 +1382,6 @@ class SaleController extends Controller
                 'message' => $e->getMessage()
 
             ], 500);
-
         }
     }
     public function salesReturn(Request $request)
