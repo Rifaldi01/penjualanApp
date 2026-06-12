@@ -187,7 +187,6 @@ class AccesoriesController extends Controller
             AccessoriesIn::where('accessories_id', $id)
                 ->update([
                     'price' => str_replace('.', '', $request->input('price')),
-                    'qty' => $request->input('stok'),
                     'capital_price' => str_replace('.', '', $request->input('capital_price')),
                     'price_bottom' => str_replace('.', '', $request->input('price_bottom'))
                 ]);
