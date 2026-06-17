@@ -194,43 +194,63 @@ class AccessoriesBalanceController extends Controller
     */
     private function getSaldoAwal($accessory, $divisiId, $startDate)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | TANGGAL AWAL SISTEM
-        |--------------------------------------------------------------------------
-        */
         if ($startDate <= '2026-04-14') {
             return 0;
         }
 
-        $saldoStart = '2026-04-14';
+        $saldoStart = '2026-04-14 00:00:00';
 
         $saldoEnd = date(
-            'Y-m-d',
+            'Y-m-d 23:59:59',
             strtotime($startDate . ' -1 day')
         );
 
+        /*
+        |--------------------------------------------------------------------------
+        | BARANG MASUK
+        |--------------------------------------------------------------------------
+        */
         $masuk = DB::table('accessories_ins')
             ->where('accessories_id', $accessory->id)
             ->where('status', 'buy')
             ->whereBetween('date_in', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
+        /*
+        |--------------------------------------------------------------------------
+        | BARANG TERJUAL
+        |--------------------------------------------------------------------------
+        */
         $terjual = DB::table('accessories_sales')
             ->where('accessories_id', $accessory->id)
             ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
+        /*
+        |--------------------------------------------------------------------------
+        | BARANG RETUR
+        |--------------------------------------------------------------------------
+        */
         $retur = DB::table('sales_return_accessories')
             ->where('accessories_id', $accessory->id)
             ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('qty');
 
+        /*
+        |--------------------------------------------------------------------------
+        | BARANG RUSAK
+        |--------------------------------------------------------------------------
+        */
         $rusak = DB::table('accessories_rejectes')
             ->where('code_acces', $accessory->code_acces)
             ->whereBetween('created_at', [$saldoStart, $saldoEnd])
             ->sum('stok');
 
+        /*
+        |--------------------------------------------------------------------------
+        | PERMINTAAN KELUAR
+        |--------------------------------------------------------------------------
+        */
         $keluar = DB::table('detail_accessories as da')
             ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
             ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
@@ -240,6 +260,11 @@ class AccessoriesBalanceController extends Controller
             ->whereBetween('p.created_at', [$saldoStart, $saldoEnd])
             ->sum('da.qty');
 
+        /*
+        |--------------------------------------------------------------------------
+        | PERMINTAAN MASUK
+        |--------------------------------------------------------------------------
+        */
         $masukDivisi = DB::table('detail_accessories as da')
             ->join('permintaans as p', 'p.id', '=', 'da.permintaan_id')
             ->join('accessories as a', 'a.id', '=', 'da.accessories_id')
