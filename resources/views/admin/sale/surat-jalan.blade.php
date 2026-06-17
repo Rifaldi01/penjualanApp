@@ -94,21 +94,30 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($data->itemSales as $key => $item)
+                            @php
+                                $no = 1;
+                            @endphp
+
+                            @foreach($data->itemSales as $item)
                                 <tr>
-                                    <td width="1%" class="text-center"
-                                        style="border-left-width:1px;">{{ $key + 1 }}</td>
+                                    <td width="1%" class="text-center" style="border-left-width:1px;">
+                                        {{ $no++ }}
+                                    </td>
                                     <td>{{ $item->name }}</td>
                                     <td class="text-center">1</td>
                                     <td class="text-right">{{ $item->no_seri }}</td>
                                 </tr>
                             @endforeach
-                            @foreach($data->accessoriesSales as $key => $accessories)
-                                <tr>
-                                    <td style="border-left-width:1px;">{{ $key + 1 }}</td>
 
-                                    {{-- Hindari error jika relasi accessories tidak ditemukan --}}
-                                    <td>{{ optional($accessories->accessories)->name ?? 'Aksesori tidak ditemukan' }}</td>
+                            @foreach($data->accessoriesSales as $accessories)
+                                <tr>
+                                    <td style="border-left-width:1px;">
+                                        {{ $no++ }}
+                                    </td>
+
+                                    <td>
+                                        {{ optional($accessories->accessories)->name ?? 'Aksesori tidak ditemukan' }}
+                                    </td>
 
                                     <td class="text-center">{{ $accessories->qty }}</td>
 
