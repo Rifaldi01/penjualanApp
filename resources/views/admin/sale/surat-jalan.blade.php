@@ -121,7 +121,7 @@
 
                                     <td class="text-center">{{ $accessories->qty }}</td>
 
-                                    <td class="text-right">-</td>
+                                    <td class="text-right"> {{ optional($accessories->accessories)->code_acces ?? 'Aksesori tidak ditemukan' }}</td>
                                 </tr>
                             @endforeach
                             </tbody>
