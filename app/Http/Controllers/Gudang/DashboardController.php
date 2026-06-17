@@ -59,6 +59,12 @@ class DashboardController extends Controller
                 'customer',
                 'user',
                 'itemSales.itemCategory',
+                'accessoriesSales' => function ($query) {
+                    $query->where(function ($q) {
+                        $q->whereNull('status_return')
+                            ->orWhere('status_return', '!=', 1);
+                    });
+                },
                 'accessoriesSales.accessories'
             ])
             ->latest()

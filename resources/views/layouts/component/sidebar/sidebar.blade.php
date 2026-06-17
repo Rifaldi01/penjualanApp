@@ -95,6 +95,13 @@
                     <div class="menu-title">Dashboard</div>
                 </a>
             </li>
+            <li>
+                <a href="{{route('gudang.return.index')}}">
+                    <div class="parent-icon"><i class='bx bx-refresh'></i>
+                    </div>
+                    <div class="menu-title"> Retur Transaction</div>
+                </a>
+            </li>
             <li class="menu-label">Items</li>
             <li>
                 <a href="javascript:;" class="has-arrow">

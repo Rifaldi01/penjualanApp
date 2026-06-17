@@ -11,6 +11,7 @@ use App\Http\Controllers\EditController;
 use App\Http\Controllers\Gudang\PermintaanController;
 use App\Http\Controllers\Gudang\PermintaanItemController;
 use App\Http\Controllers\Gudang\AccessoriesBalanceController;
+use App\Http\Controllers\Gudang\ReturnController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -110,5 +111,8 @@ Route::group(['middleware' => ['auth:web', 'role:gudang'], 'prefix' => 'gudang']
     Route::post('/accessories-balance/generate', [AccessoriesBalanceController::class, 'generateMissingYearlyBalances'])->name('accessories.balance.generate-missing');
     Route::get('/accessories-balance/data', [AccessoriesBalanceController::class, 'data'])->name('gudang.accessories.balance.data');
     Route::get('balance/{id}/detail', [AccessoriesBalanceController::class, 'show'])->name('gudang.balance.show');
+
+    //Retur Sales
+    Route::get('/return-sales', [ReturnController::class, 'salesReturn'])->name('gudang.return.index');
 
 });
