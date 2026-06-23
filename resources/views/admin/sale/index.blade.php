@@ -133,6 +133,36 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mb-3">
+                                                        <label for="input42" class="col-sm-3 col-form-label">
+                                                            Diskon
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="position-relative input-icon">
+                                                                <input type="text" class="form-control"
+                                                                       name="diskon" id="diskon{{$data->id}}"
+                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->diskon) }}">
+                                                                <span
+                                                                    class="position-absolute top-50 translate-middle-y"><i
+                                                                        class='bx bx-money'></i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <label for="input42" class="col-sm-3 col-form-label">
+                                                            Fee
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="position-relative input-icon">
+                                                                <input type="text" class="form-control"
+                                                                       name="fee" id="fee{{$data->id}}"
+                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->fee) }}">
+                                                                <span
+                                                                    class="position-absolute top-50 translate-middle-y"><i
+                                                                        class='bx bx-money'></i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
                                                         <label for="input42" class="col-sm-3 col-form-label"><i
                                                                 class="text-danger">*</i> Date</label>
                                                         <div class="col-sm-9">
@@ -221,8 +251,6 @@
             </div>
         </div>
     </div>
-
-
 
     {{-- TRANSACTION TAHUN INI --}}
     <div class="card">

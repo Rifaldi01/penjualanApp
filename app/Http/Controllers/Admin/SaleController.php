@@ -331,8 +331,7 @@ class SaleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nominal_in' => 'required',
-            'pay_debts'  => 'required',
-            'date_pay'   => 'required',
+            'date_pay'   => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -341,77 +340,105 @@ class SaleController extends Controller
                 ->withInput();
         }
 
-        // Validasi bank / lainya
-        if (empty($request->bank_id) && empty($request->description)) {
-            return back()->withErrors([
-                'bank_id' => 'Kolom Bank atau Lainya harus diisi.',
-            ])->withInput();
-        }
+        DB::beginTransaction();
 
-        // Validasi penerima
-        if (!empty($request->bank_id) && empty($request->penerima)) {
-            return back()->withErrors([
-                'penerima' => 'Masukan Nama Penerima.',
-            ])->withInput();
-        }
+        try {
 
-        // Bersihkan format rupiah
-        $nominal_in = (int) str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
-        $pay_debts = (int) str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts);
-        $admin_fee_baru = (int) str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee);
+            $nominal_in = (int) str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
+            $pay_debts  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts ?? 0);
+            $admin_fee  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee ?? 0);
+            $diskon     = (int) str_replace(['Rp', '.', ',', ' '], '', $request->diskon ?? 0);
+            $fee        = (int) str_replace(['Rp', '.', ',', ' '], '', $request->fee ?? 0);
 
-        // Ambil data sale
-        $sale = Sale::findOrFail($id);
+            $sale = Sale::findOrFail($id);
 
-        // Biaya admin lama
-        $admin_fee_lama = (int) $sale->admin_fee;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Jika biaya admin berubah
-        |--------------------------------------------------------------------------
-        */
-
-        if ($admin_fee_baru != $admin_fee_lama) {
-
-            // Hitung selisih
-            $selisih_admin = $admin_fee_baru - $admin_fee_lama;
+            $admin_fee_lama = (int) $sale->admin_fee;
+            $diskon_lama    = (int) $sale->diskon;
+            $fee_lama       = (int) $sale->fee;
 
             /*
             |--------------------------------------------------------------------------
-            | Contoh:
-            | lama = 2000
-            | baru = 3000
-            | selisih = 1000
-            | pay dikurangi 1000
+            | Hitung selisih biaya
             |--------------------------------------------------------------------------
-            |
-            | lama = 2000
-            | baru = 1000
-            | selisih = -1000
-            | pay otomatis bertambah 1000
             */
 
-            $sale->pay = $sale->pay - $selisih_admin;
+            $selisih_admin  = $admin_fee - $admin_fee_lama;
+            $selisih_diskon = $diskon - $diskon_lama;
+            $selisih_fee    = $fee - $fee_lama;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update pay
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->pay =
+                $sale->pay
+                - $selisih_admin
+                - $selisih_diskon
+                - $selisih_fee;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update sale
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->nominal_in = $nominal_in;
+            $sale->admin_fee  = $admin_fee;
+            $sale->diskon     = $diskon;
+            $sale->fee        = $fee;
+
+            $sale->save();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Buat Debt hanya jika ada pembayaran
+            |--------------------------------------------------------------------------
+            */
+
+            if ($pay_debts > 0) {
+
+                // Validasi bank / lainnya
+                if (empty($request->bank_id) && empty($request->description)) {
+                    DB::rollBack();
+
+                    return back()->withErrors([
+                        'bank_id' => 'Kolom Bank atau Lainnya harus diisi.',
+                    ])->withInput();
+                }
+
+                // Validasi penerima
+                if (!empty($request->bank_id) && empty($request->penerima)) {
+                    DB::rollBack();
+
+                    return back()->withErrors([
+                        'penerima' => 'Masukkan Nama Penerima.',
+                    ])->withInput();
+                }
+
+                Debt::create([
+                    'sale_id'     => $sale->id,
+                    'bank_id'     => $request->bank_id,
+                    'pay_debts'   => $pay_debts,
+                    'date_pay'    => $request->date_pay,
+                    'penerima'    => $request->penerima,
+                    'description' => $request->description,
+                ]);
+            }
+
+            DB::commit();
+
+            return back()->withSuccess('Data berhasil diperbarui');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => $e->getMessage()
+            ])->withInput();
         }
-
-        // Update data sale
-        $sale->nominal_in = $nominal_in;
-        $sale->admin_fee = $admin_fee_baru;
-
-        $sale->save();
-
-        // Simpan pembayaran
-        Debt::create([
-            'sale_id'     => $id,
-            'bank_id'     => $request->bank_id,
-            'pay_debts'   => $pay_debts,
-            'date_pay'    => $request->date_pay,
-            'penerima'    => $request->penerima,
-            'description' => $request->description,
-        ]);
-
-        return back()->withSuccess('Pembayaran Berhasil');
     }
 
 

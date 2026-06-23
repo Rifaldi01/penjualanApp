@@ -1136,33 +1136,123 @@ class SaleController extends Controller
     public function bayar(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'nominal_in'         => 'required',
-            'pay_debts'        => 'required|',
-            'date_pay'       => 'required',
+            'nominal_in' => 'required',
+            'date_pay'   => 'nullable',
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return back()
+                ->withErrors($validator)
+                ->withInput();
         }
-        // Format ulang input nominal_in dan pay_debts untuk menghapus simbol dan titik
-        $nominal_in = str_replace(['Rp.', '.', ' '], '', $request->input('nominal_in'));
-        $pay_debts = str_replace(['Rp.', '.', ' '], '', $request->input('pay_debts'));
 
-        // Update nominal_in di tabel sales
-        $sale = Sale::findOrFail($id);
-        $sale->nominal_in = $nominal_in;
-        $sale->save();
+        DB::beginTransaction();
 
-        // Simpan data ke tabel debts
-        $debts = Debt::create([
-            'sale_id' => $id,
-            'bank_id' => $request->input('bank_id'),
-            'pay_debts' => $pay_debts,
-            'date_pay' => $request->input('date_pay'),
-            'description' => $request->input('description'),
-        ]);
+        try {
 
-        return back()->withSuccess('Pembayaran Berhasil');
+            $nominal_in = (int) str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
+            $pay_debts  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts ?? 0);
+            $admin_fee  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee ?? 0);
+            $diskon     = (int) str_replace(['Rp', '.', ',', ' '], '', $request->diskon ?? 0);
+            $fee        = (int) str_replace(['Rp', '.', ',', ' '], '', $request->fee ?? 0);
+
+            $sale = Sale::findOrFail($id);
+
+            $admin_fee_lama = (int) $sale->admin_fee;
+            $diskon_lama    = (int) $sale->diskon;
+            $fee_lama       = (int) $sale->fee;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hitung selisih biaya
+            |--------------------------------------------------------------------------
+            */
+
+            $selisih_admin  = $admin_fee - $admin_fee_lama;
+            $selisih_diskon = $diskon - $diskon_lama;
+            $selisih_fee    = $fee - $fee_lama;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update pay
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->pay =
+                $sale->pay
+                - $selisih_admin
+                - $selisih_diskon
+                - $selisih_fee;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Jika ada pembayaran hutang
+            |--------------------------------------------------------------------------
+            */
+
+            if ($pay_debts > 0) {
+                $sale->pay -= $pay_debts;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update sale
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->nominal_in = $nominal_in;
+            $sale->admin_fee  = $admin_fee;
+            $sale->diskon     = $diskon;
+            $sale->fee        = $fee;
+
+            $sale->save();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan debt hanya jika ada pembayaran
+            |--------------------------------------------------------------------------
+            */
+
+            if ($pay_debts > 0) {
+
+                if (empty($request->bank_id) && empty($request->description)) {
+                    DB::rollBack();
+
+                    return back()->withErrors([
+                        'bank_id' => 'Kolom Bank atau Lainnya harus diisi.',
+                    ])->withInput();
+                }
+
+                if (!empty($request->bank_id) && empty($request->penerima)) {
+                    DB::rollBack();
+
+                    return back()->withErrors([
+                        'penerima' => 'Masukkan Nama Penerima.',
+                    ])->withInput();
+                }
+
+                Debt::create([
+                    'sale_id'     => $sale->id,
+                    'bank_id'     => $request->bank_id,
+                    'pay_debts'   => $pay_debts,
+                    'date_pay'    => $request->date_pay,
+                    'penerima'    => $request->penerima,
+                    'description' => $request->description,
+                ]);
+            }
+
+            DB::commit();
+
+            return back()->withSuccess('Pembayaran Berhasil');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => $e->getMessage()
+            ])->withInput();
+        }
     }
     public function returnFull($id)
     {
