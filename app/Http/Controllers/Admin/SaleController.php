@@ -36,8 +36,16 @@ class SaleController extends Controller
             ->with([
                 'customer.divisi',
                 'user',
+                'itemSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
                 'itemSales.itemCategory',
-                'accessoriesSales.accessories'
+                'accessoriesSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
+                'accessoriesSales.accessories',
+                'divisi',
+                'debt.bank'
             ])
             ->latest()
             ->get();
@@ -48,8 +56,16 @@ class SaleController extends Controller
             ->with([
                 'customer.divisi',
                 'user',
+                'itemSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
                 'itemSales.itemCategory',
-                'accessoriesSales.accessories'
+                'accessoriesSales' => function ($query) {
+                    $query->where('status_return', 0);
+                },
+                'accessoriesSales.accessories',
+                'divisi',
+                'debt.bank'
             ]);
 
         // Jika bukan ALL maka filter tahun

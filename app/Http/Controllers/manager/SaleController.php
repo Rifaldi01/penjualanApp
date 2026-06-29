@@ -49,11 +49,16 @@ class SaleController extends Controller
         */
 
         $sales = Sale::with([
-            'divisi',
-            'customer',
-            'user',
+            'itemSales' => function ($query) {
+                $query->where('status_return', 0);
+            },
             'itemSales.itemCategory',
-            'accessoriesSales.accessories'
+            'accessoriesSales' => function ($query) {
+                $query->where('status_return', 0);
+            },
+            'accessoriesSales.accessories',
+            'divisi',
+            'debt.bank'
         ])
 
             /*
@@ -137,7 +142,16 @@ class SaleController extends Controller
         | RETURN
         |--------------------------------------------------------------------------
         */
-        $salesactive = Sale::with(['divisi','customer', 'user', 'itemSales.itemCategory', 'accessoriesSales.accessories'])->get();
+        $salesactive = Sale::with(['itemSales' => function ($query) {
+            $query->where('status_return', 0);
+        },
+            'itemSales.itemCategory',
+            'accessoriesSales' => function ($query) {
+                $query->where('status_return', 0);
+            },
+            'accessoriesSales.accessories',
+            'divisi',
+            'debt.bank'])->get();
 
         return view('manager.sale.index', compact(
             'sales',
