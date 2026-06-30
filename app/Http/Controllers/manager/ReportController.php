@@ -15,10 +15,11 @@ class ReportController extends Controller
     public function index()
     {
         $currentYear = now()->year;
-
+        $currentMonth = now()->month;
         $divisi = Divisi::whereNotIn('name', ['Rental', 'rental'])->get();
 
         $report = Sale::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
             ->with([
                 'customer',
                 'debt.bank',
@@ -66,8 +67,9 @@ class ReportController extends Controller
         $fee        = $report->sum('fee');
         $diterima   = $report->sum('nominal_in');
 
-        $totalCapitalPriceItem = ItemSale::where('status_return', 0)
-            ->whereYear('created_at', $currentYear)
+        $totalCapitalPriceItem = ItemSale::where('status_return',0)
+            ->whereYear('created_at',$currentYear)
+            ->whereMonth('created_at',$currentMonth)
             ->sum('capital_price');
 
         $totalCapitalPriceAcces = 0;
@@ -113,7 +115,10 @@ class ReportController extends Controller
         $query = Sale::query();
 
         if (!$startDate && !$endDate) {
-            $query->whereYear('created_at', now()->year);
+
+            $query->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month);
+
         }
 
         if ($startDate && $endDate) {
@@ -151,6 +156,7 @@ class ReportController extends Controller
         $totalprice = 0;
         $admin_fee = 0;
         $diterima = 0;
+        $totalPiutang = 0;
 
         $totalCapitalPerSale = [];
 
@@ -165,7 +171,8 @@ class ReportController extends Controller
             &$totalCapitalPerSale,
             &$totalfee,
             &$totalprice,
-            &$diterima
+            &$diterima,
+            &$totalPiutang,
         ) {
 
             $totalIncome += $sale->pay;
@@ -177,6 +184,7 @@ class ReportController extends Controller
             $totalfee += $sale->fee;
             $totalprice += $sale->total_price;
             $diterima += $sale->nominal_in;
+            $totalPiutang += max(($sale->pay ?? 0) - ($sale->nominal_in ?? 0), 0);
 
             $accessoryCapital = 0;
 
@@ -223,7 +231,6 @@ class ReportController extends Controller
         });
 
         $profit = $totalIncome - $totalCapital;
-
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
             'report'       => $report,
@@ -237,6 +244,21 @@ class ReportController extends Controller
             'fee'          => $totalfee,
             'totalprice'   => $totalprice,
             'diterima'     => $diterima,
+
+            'footer' => [
+                'total_invoice' => $totalprice,
+                'ppn'           => $totalppn,
+                'pph'           => $totalpph,
+                'diskon'        => $totalDiskon,
+                'ongkir'        => $totalOngkir,
+                'admin'         => $admin_fee,
+                'diterima'      => $diterima,
+                'piutang'       => $totalPiutang,
+                'total_bayar'   => $totalIncome,
+                'fee'           => $totalfee,
+                'modal'         => $totalCapital,
+                'laba'          => $profit,
+            ]
         ]);
     }
 }

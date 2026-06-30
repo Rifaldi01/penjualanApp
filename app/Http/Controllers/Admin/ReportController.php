@@ -15,10 +15,12 @@ class ReportController extends Controller
     public function index()
     {
         $currentYear = now()->year;
+        $currentMonth = now()->month;
 
         // Filter laporan berdasarkan divisi pengguna dan tahun berjalan
         $report = Sale::where('divisi_id', Auth::user()->divisi_id)
             ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
             ->with('customer', 'accessories', 'itemSales', 'debt.bank')
             ->orderBy('created_at', 'asc')
             ->get();
@@ -44,7 +46,8 @@ class ReportController extends Controller
         $pph = $report->sum('pph');
         $fee = $report->sum('fee');
 
-        $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->sum('capital_price');
+        $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->whereMonth('created_at', $currentMonth)
+            ->sum('capital_price');
         $totalCapitalPriceAcces = Accessories::sum('capital_price');
 
         $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
@@ -73,7 +76,10 @@ class ReportController extends Controller
 
         // Filter tahun berjalan jika tidak ada filter tanggal
         if (!$startDate && !$endDate) {
-            $query->whereYear('created_at', now()->year);
+
+            $query->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month);
+
         }
 
         // Filter tanggal jika disediakan
@@ -96,9 +102,25 @@ class ReportController extends Controller
         $totalppn = 0;
         $totalpph = 0;
         $totalfee = 0;
+        $totalPiutang = 0;
+        $diterima = 0;
+        $admin_fee = 0;
         $totalCapitalPerSale = [];
 
-        $report->each(function ($sale) use (&$totalIncome, &$totalCapital, &$totalDiskon, &$totalOngkir, &$totalppn, &$totalpph, &$totalCapitalPerSale, &$totalfee, &$totalprice) {
+        $report->each(function ($sale) use (
+            &$totalIncome,
+            &$totalCapital,
+            &$totalDiskon,
+            &$totalOngkir,
+            &$totalppn,
+            &$totalpph,
+            &$totalCapitalPerSale,
+            &$totalfee,
+            &$totalprice,
+            &$totalPiutang,
+            &$diterima,
+            &$admin_fee,
+        ) {
             $totalIncome += $sale->pay;
             $totalDiskon += $sale->diskon;
             $totalOngkir += $sale->ongkir;
@@ -106,6 +128,9 @@ class ReportController extends Controller
             $totalpph += $sale->pph;
             $totalfee += $sale->fee;
             $totalprice += $sale->total_price;
+            $diterima += $sale->nominal_in;
+            $admin_fee += $sale->admin_fee;
+            $totalPiutang += max(($sale->pay ?? 0) - ($sale->nominal_in ?? 0), 0);
 
             $accessoryCapital = $sale->accessories->sum(function ($accessory) {
                 return $accessory->pivot->qty * $accessory->capital_price;
@@ -133,15 +158,31 @@ class ReportController extends Controller
 
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
-            'report' => $report,
-            'income' => $totalIncome,
-            'profit' => $profit,
-            'diskon' => $totalDiskon,
-            'ongkir' => $totalOngkir,
-            'ppn'    => $totalppn,
-            'pph'    => $totalpph,
-            'fee'    => $totalfee,
-            'totalprice' => $totalprice
+            'report'       => $report,
+            'admin_fee'    => $admin_fee,
+            'income'       => $totalIncome,
+            'profit'       => $profit,
+            'diskon'       => $totalDiskon,
+            'ongkir'       => $totalOngkir,
+            'ppn'          => $totalppn,
+            'pph'          => $totalpph,
+            'fee'          => $totalfee,
+            'totalprice'   => $totalprice,
+            'diterima'     => $diterima,
+
+            'footer' => [
+                'total_invoice' => $totalprice,
+                'ppn'           => $totalppn,
+                'pph'           => $totalpph,
+                'diskon'        => $totalDiskon,
+                'ongkir'        => $totalOngkir,
+                'admin'         => $admin_fee,
+                'diterima'      => $diterima,
+                'piutang'       => $totalPiutang,
+                'total_bayar'   => $totalIncome,
+                'fee'           => $totalfee,
+                'laba'          => $profit,
+            ]
         ]);
     }
 }

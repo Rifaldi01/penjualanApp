@@ -82,48 +82,64 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th colspan="6" class="text-center">Total Invoice</th>
-                        <th colspan="6" class="text-center" id="total-bersih">0</th>
+                        <th class="text-center" colspan="7">Total</th>
+                        <th class="text-center" id="ttl_inv"></th>
+                        <th class="text-center" id="ttl_ppn"></th>
+                        <th class="text-center" id="ttl_pph"></th>
+                        <th class="text-center" id="ttl_diskon"></th>
+                        <th class="text-center" id="ttl_ongkir"></th>
+                        <th class="text-center" id="ttl_biaya_admin"></th>
+                        <th class="text-center" id="ttl_diterima"></th>
+                        <th class="text-center" id="ttl_piutang"></th>
+                        <th class="text-center" id="ttl_bayar"></th>
+                        <th class="text-center" id="ttl_fee"></th>
+                        <th class="text-center" id="ttl_modal"></th>
+                        <th class="text-center" id="ttl_laba"></th>
+                        <th></th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Total Bersih</th>
-                        <th colspan="6" class="text-center" id="total-income">0</th>
+                        <th colspan="10" class="text-center">Total Invoice</th>
+                        <th colspan="10" class="text-center" id="total-bersih">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Laba-Rugi</th>
-                        <th colspan="6" class="text-center" id="profit">0</th>
+                        <th colspan="10" class="text-center">Total Bersih</th>
+                        <th colspan="10" class="text-center" id="total-income">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">PPN</th>
-                        <th colspan="6" class="text-center" id="ppn">0</th>
+                        <th colspan="10" class="text-center">Laba-Rugi</th>
+                        <th colspan="10" class="text-center" id="profit">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">PPH</th>
-                        <th colspan="6" class="text-center" id="pph">0</th>
+                        <th colspan="10" class="text-center">PPN</th>
+                        <th colspan="10" class="text-center" id="ppn">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Fee</th>
-                        <th colspan="6" class="text-center" id="fee">0</th>
+                        <th colspan="10" class="text-center">PPH</th>
+                        <th colspan="10" class="text-center" id="pph">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Biaya Admin</th>
-                        <th colspan="6" class="text-center" id="admin">0</th>
+                        <th colspan="10" class="text-center">Fee</th>
+                        <th colspan="10" class="text-center" id="fee">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Diskon</th>
-                        <th colspan="6" class="text-center" id="diskon">0</th>
+                        <th colspan="10" class="text-center">Biaya Admin</th>
+                        <th colspan="10" class="text-center" id="admin">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Ongkir</th>
-                        <th colspan="6" class="text-center" id="ongkir">0</th>
+                        <th colspan="10" class="text-center">Diskon</th>
+                        <th colspan="10" class="text-center" id="diskon">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Diterima</th>
-                        <th colspan="6" class="text-center" id="diterima">0</th>
+                        <th colspan="10" class="text-center">Ongkir</th>
+                        <th colspan="10" class="text-center" id="ongkir">0</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-center">Piutang</th>
-                        <th colspan="6" class="text-center" id="piutang">0</th>
+                        <th colspan="10" class="text-center">Diterima</th>
+                        <th colspan="10" class="text-center" id="diterima">0</th>
+                    </tr>
+                    <tr>
+                        <th colspan="10" class="text-center">Piutang</th>
+                        <th colspan="10" class="text-center" id="piutang">0</th>
                     </tr>
                     </tfoot>
                 </table>
@@ -171,6 +187,18 @@
                         $('#total-bersih').text(formatRupiah(response.totalprice));
                         $('#piutang').text(formatRupiah(response.piutang));
                         $('#diterima').text(formatRupiah(response.diterima));
+                        $('#ttl_inv').text(formatRupiah(response.footer.total_invoice));
+                        $('#ttl_ppn').text(formatRupiah(response.footer.ppn));
+                        $('#ttl_pph').text(formatRupiah(response.footer.pph));
+                        $('#ttl_diskon').text(formatRupiah(response.footer.diskon));
+                        $('#ttl_ongkir').text(formatRupiah(response.footer.ongkir));
+                        $('#ttl_biaya_admin').text(formatRupiah(response.footer.admin));
+                        $('#ttl_diterima').text(formatRupiah(response.footer.diterima));
+                        $('#ttl_piutang').text(formatRupiah(response.footer.piutang));
+                        $('#ttl_bayar').text(formatRupiah(response.footer.total_bayar));
+                        $('#ttl_fee').text(formatRupiah(response.footer.fee));
+                        $('#ttl_modal').text(formatRupiah(response.footer.modal));
+                        $('#ttl_laba').text(formatRupiah(response.footer.laba));
 
                         let totalCapital = response.totalCapital;
 
@@ -302,7 +330,7 @@
                 });
             }
 
-            loadData();
+            // loadData();
 
             $('#filter-btn').on('click', function () {
                 var startDate = $('input[name="start_date"]').val();
@@ -349,6 +377,38 @@
                         customize: function (xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var $sheet = $(sheet);
+                            var styles = xlsx.xl['styles.xml'];
+                            var $styles = $(styles);
+
+                            // jumlah font yang ada
+                            var fontCount = parseInt($styles.find('fonts').attr('count'));
+
+// Tambah font merah bold
+                            $styles.find('fonts').append(`
+<font>
+    <b/>
+    <sz val="11"/>
+    <color rgb="FFFF0000"/>
+    <name val="Calibri"/>
+</font>
+`);
+
+                            $styles.find('fonts').attr('count', fontCount + 1);
+
+// jumlah cellXfs
+                            var xfCount = parseInt($styles.find('cellXfs').attr('count'));
+
+                            $styles.find('cellXfs').append(`
+<xf xfId="0"
+    fontId="${fontCount}"
+    fillId="0"
+    borderId="0"
+    applyFont="1"/>
+`);
+
+                            $styles.find('cellXfs').attr('count', xfCount + 1);
+
+                            var redStyle = xfCount;
 
                             // Hapus tag HTML <ul> dan <li> dari setiap cell
                             $('row c is t', sheet).each(function () {
@@ -384,7 +444,56 @@
                                     </row>`;
                                 $sheet.find('sheetData').append(row);
                             }
+                            var row =
+                                `<row r="${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="A${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="B${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="C${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="D${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="E${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="F${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="G${rowStart}"><is><t>TOTAL</t></is></c>
 
+    <c s="${redStyle}" t="inlineStr" r="H${rowStart}">
+        <is><t>${getFooterText('ttl_inv')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="I${rowStart}">
+        <is><t>${getFooterText('ttl_ppn')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="J${rowStart}">
+        <is><t>${getFooterText('ttl_pph')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="K${rowStart}">
+        <is><t>${getFooterText('ttl_diskon')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="L${rowStart}">
+        <is><t>${getFooterText('ttl_ongkir')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="M${rowStart}">
+        <is><t>${getFooterText('ttl_biaya_admin')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="N${rowStart}">
+        <is><t>${getFooterText('ttl_diterima')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="O${rowStart}">
+        <is><t>${getFooterText('ttl_piutang')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="P${rowStart}">
+        <is><t>${getFooterText('ttl_bayar')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="Q${rowStart}">
+        <is><t>${getFooterText('ttl_fee')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="R${rowStart}">
+        <is><t>${getFooterText('ttl_modal')}</t></is>
+    </c>
+    <c s="${redStyle}" t="inlineStr" r="S${rowStart}">
+        <is><t>${getFooterText('ttl_laba')}</t></is>
+    </c>
+</row>`;
+
+                            $sheet.find('sheetData').append(row);
+                            rowStart++;
                             var rowStart = $sheet.find('sheetData row').length + 1;
                             addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
                             addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
@@ -562,7 +671,30 @@
 
             table.buttons().container()
                 .appendTo('#filter-table_wrapper .col-md-6:eq(0)');
+            loadData();
         });
     </script>
+    <script>
 
+        document.addEventListener("DOMContentLoaded",function(){
+
+            let now = new Date();
+
+            let firstDay =
+                now.getFullYear() + "-" +
+                String(now.getMonth()+1).padStart(2,'0') +
+                "-01";
+
+            let lastDay =
+                now.getFullYear() + "-" +
+                String(now.getMonth()+1).padStart(2,'0') +
+                "-" +
+                new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+
+            $('#starDate').val(firstDay);
+            $('#endDate').val(lastDay);
+
+        });
+
+    </script>
 @endpush
