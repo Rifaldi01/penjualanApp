@@ -77,7 +77,7 @@
                                     Filter
                                 </button>
 
-                                <a href="{{ route('manager.sale.return.index') }}"
+                                <a href="{{ route('admin.return.index') }}"
                                    class="btn btn-secondary">
 
                                     Reset
