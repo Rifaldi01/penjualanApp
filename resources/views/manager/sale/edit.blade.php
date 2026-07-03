@@ -350,7 +350,8 @@
                 ]
 
             });
-
+            let deletedAccessories = [];
+            let deletedItems = [];
             // ACCESSORIES
             // ACCESSORIES
             let accessories = @json($sale->accessoriesSales);
@@ -603,6 +604,34 @@
                     }
 
                 });
+                deletedAccessories.forEach(function(data){
+
+                    accessories.push({
+
+                        sale_detail_id: data.sale_detail_id,
+                        accessories_id: data.accessories_id,
+                        qty: data.qty,
+                        status: 'deleted'
+
+                    });
+
+                });
+
+                deletedItems.forEach(function(data){
+
+                    items.push({
+
+                        sale_detail_id: data.sale_detail_id,
+                        itemcategory_id: data.itemcategory_id,
+                        no_seri: data.code,
+                        name: data.name,
+                        price: data.price,
+                        qty: 1,
+                        status: 'deleted'
+
+                    });
+
+                });
 
                 $.ajax({
 
@@ -687,141 +716,33 @@
 // DELETE / RETURN
             $(document).on('click', '.btn-delete', function () {
 
-                let button = $(this);
-
-                let row = button.closest('tr');
-
+                let row = $(this).closest('tr');
                 let data = table.row(row).data();
 
-                /*
-                |--------------------------------------------------------------------------
-                | AMBIL QTY
-                |--------------------------------------------------------------------------
-                */
-
-                let qty = parseInt(
-                    row.find('.qty-input').val()
-                ) || 1;
-
-                /*
-                |--------------------------------------------------------------------------
-                | JIKA BARANG BARU
-                |--------------------------------------------------------------------------
-                */
-
                 if (data.status === 'new') {
-
                     table.row(row).remove().draw();
-
                     calculateTotal();
-
                     return;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | KONFIRMASI RETUR
-                |--------------------------------------------------------------------------
-                */
-
                 Swal.fire({
-
-                    title: 'Retur Barang?',
-                    text: 'Stok akan dikembalikan',
+                    title: 'Hapus Barang?',
+                    text: 'Perubahan akan disimpan setelah klik Save',
                     icon: 'warning',
+                    showCancelButton: true
+                }).then((result)=>{
 
-                    showCancelButton: true,
+                    if(result.isConfirmed){
 
-                    confirmButtonText: 'Ya',
-                    cancelButtonText: 'Batal'
+                        if(data.type === 'accessory'){
+                            deletedAccessories.push(data);
+                        }else{
+                            deletedItems.push(data);
+                        }
 
-                }).then((result) => {
+                        table.row(row).remove().draw();
 
-                    if (result.isConfirmed) {
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | URL RETURN
-                        |--------------------------------------------------------------------------
-                        */
-
-                        let url = data.type === 'accessory'
-                            ? `{{ route('sale.accessory.return', ':id') }}`
-                            : `{{ route('sale.item.return', ':id') }}`;
-
-                        url = url.replace(':id', data.sale_detail_id);
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | AJAX RETURN
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $.ajax({
-
-                            url: url,
-
-                            method: 'POST',
-
-                            data: {
-
-                                _token: '{{ csrf_token() }}',
-
-                                return_qty: qty
-
-                            },
-
-                            success: function (response) {
-
-                                if (response.status === 'success') {
-
-                                    /*
-                                    |--------------------------------------------------------------------------
-                                    | HAPUS ROW TABLE
-                                    |--------------------------------------------------------------------------
-                                    */
-
-                                    table.row(row).remove().draw();
-
-                                    calculateTotal();
-
-                                    Swal.fire({
-
-                                        icon: 'success',
-
-                                        title: 'Berhasil',
-
-                                        text: response.message,
-
-                                        timer: 1500,
-
-                                        showConfirmButton: false
-
-                                    });
-
-                                } else {
-
-                                    Swal.fire(
-                                        'Error',
-                                        response.message,
-                                        'error'
-                                    );
-
-                                }
-
-                            },
-
-                            error: function (xhr) {
-
-                                Swal.fire(
-                                    'Error',
-                                    xhr.responseJSON?.message ?? 'Terjadi kesalahan',
-                                    'error'
-                                );
-
-                            }
-
-                        });
+                        calculateTotal();
 
                     }
 

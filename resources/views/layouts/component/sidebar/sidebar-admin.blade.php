@@ -37,6 +37,12 @@
                         Transaction
                     </a>
                 </li>
+                <li>
+                    <a href="{{route('admin.return.index')}}">
+                        <i class='bx bx-refresh'></i>
+                        Retur Transaction
+                    </a>
+                </li>
             </ul>
         </li>
         <li>

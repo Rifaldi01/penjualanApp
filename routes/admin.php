@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SupllierController;
 use App\Http\Controllers\Admin\PembelianController;
+use App\Http\Controllers\Admin\ReturnController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,5 +71,6 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
     Route::get('/pembelian/get-items-by-invoice/{kode_msk}', [PembelianController::class, 'loadItemsByInvoice']);
     //end pembelian
 
-
+    //Retur Sales
+    Route::get('/return-sales', [ReturnController::class, 'salesReturn'])->name('admin.return.index');
 });
