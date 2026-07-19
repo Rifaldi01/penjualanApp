@@ -29,5 +29,7 @@ Route::group(['middleware' => ['auth:web', 'role:superAdmin'], 'prefix' => 'supe
 
     //divisi
     Route::resource('/divisi', DivisiController::class)->names('superadmin.divisi');
+    Route::put('/non-active-divisi/{id}', [DivisiController::class, 'bolck'])->name('superadmin.divisi.block');
+    Route::put('/active-divisi/{id}', [DivisiController::class, 'activ'])->name('superadmin.divisi.activ');
     //end divisi
 });

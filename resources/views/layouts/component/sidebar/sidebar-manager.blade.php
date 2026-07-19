@@ -164,7 +164,8 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{route('manager.acces.accesout')}}">
+{{--                    <a href="{{route('manager.acces.accesout')}}">--}}
+                    <a href="{{route('manager.acces.report')}}">
                         <i class='bx bx-radio-circle'></i>
                         Accessories
                     </a>
@@ -172,32 +173,39 @@
             </ul>
         </li>
         <li>
-            <a href="javascript:;" class="has-arrow">
+            <a href="{{route('manager.report.index')}}">
                 <div class="parent-icon"><i class='bx bx-file'></i>
                 </div>
                 <div class="menu-title">Report</div>
             </a>
-            <ul>
-                <li>
-                    <a href="{{route('manager.item.report')}}">
-                        <i class='bx bx-circle'></i>
-                        Report Item Sale
-                    </a>
-                </li>
-                <li>
-                    <a href="{{route('manager.acces.report')}}">
-                        <i class='bx bx-circle'></i>
-                        Report Accessories Sale
-                    </a>
-                </li>
-                <li>
-                    <a href="{{route('manager.report.index')}}">
-                        <i class='bx bx-circle'></i>
-                        Report Sale
-                    </a>
-                </li>
-            </ul>
         </li>
+{{--        <li>--}}
+{{--            <a href="javascript:;" class="has-arrow">--}}
+{{--                <div class="parent-icon"><i class='bx bx-file'></i>--}}
+{{--                </div>--}}
+{{--                <div class="menu-title">Report</div>--}}
+{{--            </a>--}}
+{{--            <ul>--}}
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.item.report')}}">--}}
+{{--                        <i class='bx bx-circle'></i>--}}
+{{--                        Report Item Sale--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.acces.report')}}">--}}
+{{--                        <i class='bx bx-circle'></i>--}}
+{{--                        Report Accessories Sale--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--                <li>--}}
+{{--                    <a href="{{route('manager.report.index')}}">--}}
+{{--                        <i class='bx bx-circle'></i>--}}
+{{--                        Report Sale--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--            </ul>--}}
+{{--        </li>--}}
 {{--        <li class="menu-label">Permintaan Barang</li>--}}
 {{--        <li>--}}
 {{--            @if(isset($notiff) && $notiff > 0)--}}

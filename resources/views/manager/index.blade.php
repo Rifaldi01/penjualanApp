@@ -9,7 +9,8 @@
                     <div class="d-flex align-items-center">
                         <div>
                             <p class="mb-0 text-secondary">Total Divisi</p>
-                            <h4 class="my-1 text-primary">{{$totaldivisi}}</h4>
+                            <h4 class="my-1 text-primary">{{$totaldivisiactive}} Aktif</h4>
+                            <p class="mb-0 font-13">Dari {{$totaldivisi}} divisi</p>
                         </div>
                         <div class="widgets-icons-2 rounded-circle bg-gradient-deepblue text-white ms-auto"><i
                                 class='lni lni-apartment'></i>
@@ -26,13 +27,15 @@
                             <div>
                                 <p class="mb-0 text-secondary">{{$data->name}}</p>
 
-                                    @if($data->status == 0)
+                                    @if($data->status == 'active')
                                     <h4 class="my-1 text-primary">
                                         <i class="bx bx-check-circle"></i>
+                                        Aktif
                                     </h4>
                                     @else
                                     <h4 class="my-1 text-danger">
                                         <i class="bx bx-x-circle"></i>
+                                        Non-Aktif
                                     </h4>
                                     @endif
                             </div>
@@ -54,9 +57,9 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
-                            <p class="mb-0 text-secondary">Total Items</p>
+                            <p class="mb-0 text-secondary">Total Alat</p>
                             <h4 class="my-1 text-warning">{{$item}}</h4>
-                            <p class="mb-0 font-13">All Items</p>
+                            <p class="mb-0 font-13">Semua Alat</p>
                         </div>
                         <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto"><i
                                 class='bx bxs-box'></i>

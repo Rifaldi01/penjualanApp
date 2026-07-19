@@ -21,11 +21,12 @@ class DashboardController extends Controller
             ->get();
         $item = Item::all()->count();
         $divisi = Divisi::all();
+        $totaldivisiactive = Divisi::where('status', 'active')->count();
         $totaldivisi = Divisi::all()->count();
         $user = User::whereHas('roles', function ($query) {
             $query->where('name', '!=', 'superadmin')
                 ->where('name', '!=', 'manager');
         })->get();
-        return view('manager.index', compact('user', 'itemsByCategory', 'item', 'divisi', 'totaldivisi'));
+        return view('manager.index', compact('user', 'itemsByCategory', 'item', 'divisi', 'totaldivisi', 'totaldivisiactive'));
     }
 }

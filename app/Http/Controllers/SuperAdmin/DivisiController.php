@@ -136,4 +136,18 @@ class DivisiController extends Controller
         $divisi->save();
         return redirect()->route('superadmin.divisi.index')->withSuccess('Divisi successfully Added');
     }
+    public function bolck($id)
+    {
+        $block = Divisi::whereId($id)->first();
+        $block->status = 'non active';
+        $block->save();
+        return back()->withSuccess('Divisi successfully Non-Active');
+    }
+    public function activ($id)
+    {
+        $active = Divisi::whereId($id)->first();
+        $active->status = 'active';
+        $active->save();
+        return back()->withSuccess('Divisi successfully Active');
+    }
 }

@@ -24,7 +24,10 @@ class PembelianController extends Controller
     public function index()
     {
         $userDivisi = Divisi::where('name')->get();
-        $divisi = Divisi::all();
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
         $title = 'Hapus Data!';
         $text = "Yakin Ingin Menghapus Data Ini?";
         confirmDelete($title, $text);

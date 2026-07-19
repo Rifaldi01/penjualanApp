@@ -130,7 +130,10 @@ class SaleController extends Controller
 
         $bank = Bank::all();
 
-        $divisi = Divisi::all();
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
 
         $years = Sale::selectRaw('YEAR(created_at) as year')
             ->distinct()

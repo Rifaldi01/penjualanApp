@@ -72,7 +72,9 @@ class DashboardController extends Controller
 
         // Opsional: Jika user bukan divisi 1,
         // daftar divisi di dropdown mungkin hanya perlu menampilkan divisinya saja
-        $divisis = Divisi::where('id', '!=', 6);
+        $divisis = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name');
         if ($user->divisi_id != 1) {
             $divisis->where('id', $user->divisi_id);
         }

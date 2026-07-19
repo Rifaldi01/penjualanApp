@@ -18,8 +18,14 @@ class SupllierController extends Controller
      */
     public function index(Request $request)
     {
-        $divisiUser = Divisi::all(); // Mengambil semua data divisi
-        $divisi = Divisi::all();
+        $divisiUser = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get(); // Mengambil semua data divisi
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
 
         if ($request->ajax()) {
             $query = Supplier::query();

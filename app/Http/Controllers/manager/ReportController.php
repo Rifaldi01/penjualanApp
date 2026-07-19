@@ -16,7 +16,10 @@ class ReportController extends Controller
     {
         $currentYear = now()->year;
         $currentMonth = now()->month;
-        $divisi = Divisi::whereNotIn('name', ['Rental', 'rental'])->get();
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
 
         $report = Sale::whereYear('created_at', $currentYear)
             ->whereMonth('created_at', $currentMonth)

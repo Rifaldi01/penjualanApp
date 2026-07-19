@@ -20,14 +20,17 @@ class AccessoriesBalanceController extends Controller
             $startDate = '2026-04-14';
         }
 
-        $query = Accessories::query();
+        $query = Accessories::whereHas('divisi', function ($q) {
+            $q->where('status', 'active')
+                ->where('name', '!=', 'Rental');
+        });
 
         if (!empty($divisiId)) {
             $query->where('divisi_id', $divisiId);
         }
 
         $accessories = $query
-            ->orderBy('name', 'asc')
+            ->orderBy('name')
             ->get();
 
         $data = [];
@@ -138,8 +141,10 @@ class AccessoriesBalanceController extends Controller
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values();
 
-        $divisis = Divisi::orderBy('name')->get();
-
+        $divisis = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
         return view(
             'manager.balance.index',
             compact(
