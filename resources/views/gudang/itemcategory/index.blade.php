@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR KATEGORI ALAT')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List category</h4>
                     </div>
                 </div>
                 <div class="col-6">
@@ -21,8 +21,8 @@
                     <thead>
                     <tr>
                         <th width="2%">No</th>
-                        <th>Name</th>
-                        <th class="text-center" width="9%">Action</th>
+                        <th>Nama</th>
+                        <th class="text-center" width="9%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>

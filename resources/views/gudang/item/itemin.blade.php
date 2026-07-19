@@ -1,17 +1,15 @@
 @extends('layouts.master')
-
+@if(request()->routeIs('gudang.item.itemin'))
+    @section('title', 'DAFTAR ALAT MASUK')
+@else
+    @section('title', 'DAFTAR ALAT KELUAR')
+@endif
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
-                    <div class="container mt-3">
-                        @if(request()->routeIs('gudang.item.itemin'))
-                        <h4 class="text-uppercase">List Items IN</h4>
-                        @else
-                        <h4 class="text-uppercase">List Items OUT</h4>
-                        @endif
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -23,9 +21,9 @@
                     <tr>
                         <th class="text-center" width="15%">Tanggal</th>
                         <th width="15%">No Seri</th>
-                        <th>Nama Item</th>
-                        <th>Category</th>
-                        <th>Price</th>
+                        <th>Nama Alat</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
                     </tr>
                     </thead>
                     <tbody>

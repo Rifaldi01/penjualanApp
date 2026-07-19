@@ -1,11 +1,8 @@
 @extends('layouts.master')
-
+@section('title', 'TAMBAH AKSESORIS RUSAK')
 @section('content')
    <div class="card">
        <div class="container">
-           <div class="card-header">
-               <h4>Tambah Accessories Reject</h4>
-           </div>
            <div class="card-body">
                <!-- Menampilkan notifikasi success -->
                @if(session('success'))

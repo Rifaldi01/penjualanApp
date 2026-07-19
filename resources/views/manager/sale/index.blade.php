@@ -1,11 +1,12 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR TRANSAKSI')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Trasaction Active</h4>
+                        <h4 class="text-uppercase">Daftar Transaksi Aktif</h4>
                     </div>
                 </div>
             </div>
@@ -245,7 +246,7 @@
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Trasaction</h4>
+                        <h4 class="text-uppercase">Daftar Transaksi Selesai</h4>
                     </div>
                 </div>
                 <div class="col-6 mt-3">

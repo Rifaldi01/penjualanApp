@@ -1,15 +1,7 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS KELUAR')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Accessories Sale</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="example" class="table table-striped table-bordered" style="width:100%">

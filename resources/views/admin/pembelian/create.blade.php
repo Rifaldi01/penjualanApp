@@ -1,9 +1,8 @@
 @extends('layouts.master')
-
+@section('title', 'EDIT PEMBELIAN')
 @section('content')
     <div class="card">
         <div class="card-body">
-            <h5 class="mb-4">{{ isset($pembelian) ? 'Edit' : 'Tambah' }} Pembelian</h5>
             <form action="{{ $url }}" method="POST">
                 @csrf
                 @isset($pembelian)

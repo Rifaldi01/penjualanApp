@@ -1,22 +1,7 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6">
-                    <div class="container mt-3">
-                        <h4 class="text-uppercase">List Accessories</h4>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Add Barcode"
-                       href="{{ route('manager.acces.create') }}"
-                       class="btn btn-dnd float-end me-3 mt-3 btn-sm shadow">
-                        <i class="bx bx-plus"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="box-header with-border">
                 <!-- Form untuk cetak barcode -->

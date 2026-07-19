@@ -19,14 +19,14 @@
                    <thead>
                    <tr>
                        <th width="4%">No</th>
-                       <th class="text-center" width="5%">Deadlines</th>
-                       <th>Customer</th>
+                       <th class="text-center" width="5%">Tenggang Waktu</th>
+                       <th>Pelanggan</th>
                        <th class="text-center" width="5%">Total Item</th>
                        <th class="text-center" width="5%">Uang Masuk</th>
-                       <th class="text-center" width="5%">Total Price</th>
+                       <th class="text-center" width="5%">Total Harga</th>
                        <th class="text-center" width="5%">Diskon</th>
                        <th class="text-center" width="5%">Ongkir</th>
-                       <th class="text-center" width="5%">Total Pay</th>
+                       <th class="text-center" width="5%">Total Bayar</th>
                        <th width="5%">Kasir</th>
                        <th class="text-center" width="5%">Action</th>
                    </tr>

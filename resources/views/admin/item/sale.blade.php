@@ -1,15 +1,7 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR ALAT TERJUAL')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Item Sale</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="example" class="table table-striped table-bordered" style="width:100%">
@@ -18,10 +10,10 @@
                         <th width="4%">No</th>
                         <th>Invoice</th>
                         <th>No Seri</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Pembeli</th>
+                        <th>Nama Alat</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Pelanggan</th>
                     </tr>
                     </thead>
                     <tbody>

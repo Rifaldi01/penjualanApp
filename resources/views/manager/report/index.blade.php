@@ -1,29 +1,17 @@
 @extends('layouts.master')
+@section('title', 'LAPORAN TRANSAKSI')
 @section('content')
-    <div class="card">
-        <div class="card-body">
-            <div class="col">
-                <div class="row">
-                    <div class="col-sm">
-                        <h4 class="mb-0 text-uppercase">Transaction Report</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <hr/>
     <div class="card table-timbang">
         <div class="card-head">
             <div class="row">
                 <form id="filter" method="GET">
                     <div class="row">
                         <div class="col-sm-4 ms-5 mt-2">
-                            <label class="form-label">Start Date</label>
+                            <label class="form-label">Tanggal Mulai</label>
                             <input type="date" class="form-control" name="start_date" id="starDate">
                         </div>
                         <div class="col-sm-4 mt-2">
-                            <label class="form-label">End Date</label>
+                            <label class="form-label">Tanggal Berakhir</label>
                             <input type="date" class="form-control" name="end_date" id="endDate">
                         </div>
                         <div class="col-sm-3 mt-2">
@@ -58,9 +46,9 @@
                         <th width="4%">No</th>
                         <th class="text-center" width="5%">Tanggal</th>
                         <th class="text-center" width="5%"> Invoice</th>
-                        <th>Customer</th>
-                        <th>Item</th>
-                        <th>Accessories</th>
+                        <th>Pelanggan</th>
+                        <th>Alat</th>
+                        <th>Aksesoris</th>
                         <th class="text-center" width="5%">Total Item</th>
                         <th class="text-center" width="5%">Total Invoice</th>
                         <th class="text-center" width="5%">PPN</th>

@@ -1,9 +1,10 @@
 @extends('layouts.master')
+@section('title', 'RETUE PERMINTAAN ALAT')
 @section('content')
     <div class="card">
         <div class="container">
             <div class="card-header mb-3 mt-3">
-                <h4>DAFTAR RETUR PERMINTAAN ITEM</h4>
+                <h4>DAFTAR RETUR PERMINTAAN ALAT</h4>
             </div>
             <div class="card-body">
                 <table class="table table-bordered table-striped" id="retur">

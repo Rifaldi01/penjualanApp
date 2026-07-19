@@ -1,13 +1,14 @@
 @extends('layouts.master')
+@if(isset($cust))
+    @section('title', 'EDIT PELANGGAN')
+@else
+    @section('title', 'REGISTER PELANGGAN')
+@endif
 @section('content')
     <div class="card">
         <div class="row">
             <div class="col-sm-6 mt-3 ">
-                @if(isset($cust))
-                    <h5 class="mb-4 ms-3">Edit Customer<i class="bx bx-edit"></i></h5>
-                @else
-                    <h5 class="mb-4 ms-3">Register Customer<i class="bx bx-user-plus"></i></h5>
-                @endif
+
             </div>
             <div class="col-sm-6 mt-3">
                 @if(isset($cust))
@@ -39,17 +40,17 @@
                 @method('PUT')
             @endif
             <div class="row mb-3">
-                <label for="input42" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Customer Name</label>
+                <label for="input42" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Nama Pelanggan</label>
                 <div class="col-sm-9">
                     <div class="position-relative input-icon">
                         <input type="text" name="name" class="form-control" id="input42"
-                               placeholder="Enter Csutomer Name" value="{{isset($cust) ? $cust->name : null}}">
+                               placeholder="Masukan Nama pelanggan" value="{{isset($cust) ? $cust->name : null}}">
                         <span class="position-absolute top-50 translate-middle-y"><i class='bx bx-user'></i></span>
                     </div>
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="input43" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Phone Whatsapp</label>
+                <label for="input43" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Whatsapp</label>
                 <div class="col-sm-9">
                     <div class="position-relative input-icon">
                         <input type="number" name="phone_wa" class="form-control" id="input43" placeholder="81XXXXXXXXXX"
@@ -59,7 +60,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="input43" class="col-sm-3 col-form-label">&nbsp;&nbsp; Phone </label>
+                <label for="input43" class="col-sm-3 col-form-label">&nbsp;&nbsp; Nomor Telpon </label>
                 <div class="col-sm-9">
                     <div class="position-relative input-icon">
                         <input type="number" name="phone" class="form-control" id="input43" placeholder="(optional)"
@@ -69,7 +70,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="input47" class="col-sm-3 col-form-label">&nbsp;&nbsp;Company</label>
+                <label for="input47" class="col-sm-3 col-form-label">&nbsp;&nbsp;Perusahaan</label>
                 <div class="col-sm-9">
                     <div class="position-relative input-icon">
                         <input class="form-control" name="company" id="input47" placeholder="(Optional)"
@@ -79,14 +80,14 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="input47" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Address</label>
+                <label for="input47" class="col-sm-3 col-form-label"><i class="text-danger">*</i> Alamat</label>
                 <div class="col-sm-9">
-                    <textarea class="form-control" name="addres" id="input47" rows="3" placeholder="Address"
+                    <textarea class="form-control" name="addres" id="input47" rows="3" placeholder="Alamat"
                               value="">{{isset($cust) ? $cust->addres : null}}</textarea>
                 </div>
             </div>
             <div class="d-md-flex d-grid align-items-center gap-3 float-end">
-                <button type="submit" class="btn btn-dnd px-4" id="btn">Save <i class="bx bx-save me-0"></i></button>
+                <button type="submit" class="btn btn-dnd px-4" id="btn">Simpan <i class="bx bx-save me-0"></i></button>
             </div>
         </form>
     </div>

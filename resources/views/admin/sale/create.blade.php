@@ -1,12 +1,11 @@
 @extends('layouts.master')
-
+@section('title', 'TRANSAKSI BARU')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
                 <div class="row">
                     <div class="col-sm-4">
-                        <h4>New Transaction</h4>
                     </div>
                     <div class="col-sm-4">
                         <div class="float-end">
@@ -66,11 +65,11 @@
             <table class="table mt-2 table-sale">
                 <thead>
                 <tr>
-                    <th scope="col" width="12%">Code/No Seri</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Price</th>
+                    <th scope="col" width="12%">Kode/No Seri</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Harga</th>
                     <th scope="col">Qty</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Aksi</th>
                 </tr>
                 </thead>
                 <tbody id="accessoriesTableBody"></tbody>
@@ -136,10 +135,10 @@
                     <div class="col-lg-4">
                         <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
-                            <label for="customer" class="col-lg-4 control-label">Customer</label>
+                            <label for="customer" class="col-lg-4 control-label">Pelanggan</label>
                             <div class="col-lg-8">
                                 <select name="customer_id" id="single-select-field"
-                                        data-placeholder="--Pilih Customer--" class="form-control accessory-select">
+                                        data-placeholder="--Pilih Pelanggan--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customer as $data)
                                         <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -148,7 +147,7 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
-                            <label for="totalrp" class="col-lg-4 control-label">Total Price</label>
+                            <label for="totalrp" class="col-lg-4 control-label">Total Harga</label>
                             <div class="col-lg-8">
                                 <input type="text" id="totalrp" class="form-control" value="0" readonly>
                             </div>

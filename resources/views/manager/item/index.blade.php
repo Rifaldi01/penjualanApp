@@ -1,12 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR ALAT')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
-                    <div class="container mt-3">
-                        <h4 class="text-uppercase">List Items</h4>
-                    </div>
+
                 </div>
                 <div class="col-6">
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Add Item"
@@ -38,13 +37,13 @@
                         </th>
                         <th width="2%">No</th>
                         <th>Divisi</th>
-                        <th>Name</th>
+                        <th>Nama Alat</th>
                         <th>No Seri</th>
-                        <th>Price Cost</th>
-                        <th>Price Bottom</th>
-                        <th>Sale Price</th>
+                        <th>Harga Modal</th>
+                        <th>Harga Terendah</th>
+                        <th>Harga Jual</th>
                         <th class="text-center" width="5%">Jumalah Barcode</th>
-                        <th class="text-center" width="15%">Action</th>
+                        <th class="text-center" width="15%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>

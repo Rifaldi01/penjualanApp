@@ -22,19 +22,19 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-money'></i>
                 </div>
-                <div class="menu-title">Transaction</div>
+                <div class="menu-title">Transaksi</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('manager.sale.create')}}">
                         <i class='bx bx-money'></i>
-                        New Transaction
+                       Transaksi Baru
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.sale.index')}}">
                         <i class='bx bx-download'></i>
-                        Transaction
+                        Transaksi
                     </a>
                 </li>
                 <li>
@@ -49,19 +49,19 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='lni lni-users'></i>
                 </div>
-                <div class="menu-title">Customer</div>
+                <div class="menu-title">Pelanggan</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('manager.customer.create')}}">
                         <i class='bx bx-user-plus'></i>
-                        Register Customer
+                        Register Pelanggan
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.customer.index')}}">
                         <i class='bx bx-list-ul'></i>
-                        List Customer
+                        Daftar Pelanggan
                     </a>
                 </li>
             </ul>
@@ -71,19 +71,19 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-box'></i>
                 </div>
-                <div class="menu-title">Items</div>
+                <div class="menu-title">Alat</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('manager.item.index')}}">
                         <i class='bx bx-box'></i>
-                        Items
+                        Daftar Alat
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.cat.index')}}">
                         <i class='bx bx-category'></i>
-                        Category
+                        Kategori Alat
                     </a>
                 </li>
             </ul>
@@ -92,31 +92,31 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-collection'></i>
                 </div>
-                <div class="menu-title">Accessories</div>
+                <div class="menu-title">Aksesoris</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('manager.acces.editmultiple')}}">
                         <i class='bx bx-plus'></i>
-                        Add Accessories
+                        Tambah stok Aksesoris
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.acces.create')}}">
                         <i class='bx bx-barcode'></i>
-                        Add Barcode
+                        Tambah Barcode
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.acces.index')}}">
                         <i class='bx bx-list-ul'></i>
-                        Accessories Redy
+                        Aksesoris Redy
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.accesKosong')}}">
                         <i class='bx bx-list-ul'></i>
-                        Accessories Habis
+                        Aksesoris Habis
                     </a>
                 </li>
             </ul>
@@ -125,7 +125,7 @@
             <a href="{{route('manager.balance.index')}}">
                 <div class="parent-icon"><i class='bx bx-data'></i>
                 </div>
-                <div class="menu-title">Accessories Balance
+                <div class="menu-title">Aksesoris Balance
                 </div>
             </a>
         </li>
@@ -139,13 +139,13 @@
                 <li>
                     <a href="{{route('manager.item.itemin')}}">
                         <i class='bx bx-radio-circle'></i>
-                        Items
+                        Alat
                     </a>
                 </li>
                 <li>
                     <a href="{{route('manager.acces.accesin')}}">
                         <i class='bx bx-radio-circle'></i>
-                        Accessories
+                        Aksesoris
                     </a>
                 </li>
             </ul>
@@ -160,14 +160,14 @@
                 <li>
                     <a href="{{route('manager.item.itemout')}}">
                         <i class='bx bx-radio-circle'></i>
-                        Items
+                        Alat
                     </a>
                 </li>
                 <li>
 {{--                    <a href="{{route('manager.acces.accesout')}}">--}}
                     <a href="{{route('manager.acces.report')}}">
                         <i class='bx bx-radio-circle'></i>
-                        Accessories
+                        Aksesoris
                     </a>
                 </li>
             </ul>
@@ -176,7 +176,7 @@
             <a href="{{route('manager.report.index')}}">
                 <div class="parent-icon"><i class='bx bx-file'></i>
                 </div>
-                <div class="menu-title">Report</div>
+                <div class="menu-title">Laporan</div>
             </a>
         </li>
 {{--        <li>--}}

@@ -1,4 +1,5 @@
 @extends('layouts.master')
+@section('title', 'RETUR PERMINTAAN AKSESORIS')
 @section('content')
     <div class="card">
         <div class="container">

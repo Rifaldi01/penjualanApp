@@ -1,14 +1,15 @@
 @extends('layouts.master')
+@if(isset($item))
+    @section('title', 'EDIT ALAT')
+@else
+    @section('title', 'TAMBAH ALAT')
+@endif
+
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(isset($item))
-                    <h3 class="mb-4 ms-3">Edit Item<i class="bx bx-edit"></i></h3>
-                @else
-                    <h3 class="mb-4 ms-3">Add Item<i class="bx bx-user-plus"></i></h3>
-                @endif
-                <hr>
+
             </div>
 
         </div>
@@ -37,7 +38,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="mb-2">
-                        <label class="col-form-label">Name Item</label>
+                        <label class="col-form-label">Nama Alat</label>
                         <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
                                value="{{isset($item) ? $item->name : null}}">
                     </div>
@@ -78,7 +79,7 @@
                 </div>
                 <div class="col-sm-4">
                     <div class="mt-3 mb-2">
-                        <label for="single-select-field" class="form-label">Category</label>
+                        <label for="single-select-field" class="form-label">Kategori</label>
                         <select name="itemcategory_id" class="form-control" id="category"
                                 data-placeholder="Pilih Category">
                             @foreach($cat as $category)
@@ -95,7 +96,7 @@
                 </div>
                 <div class="col-sm-4">
                     <div class="mt-3 mb-2">
-                        <label for="single-select-field" class="form-label">Region</label>
+                        <label for="single-select-field" class="form-label">Negara</label>
                         <select name="region" class="form-control">
                             <option value="">-- Pilih --</option>
                             <option value="Dalam Negeri"
@@ -116,14 +117,14 @@
                        value="{{isset($item) ? $item->no_seri : null}}">
             </div>
             <div class="mt-3 mb-2">
-                <label class="col-form-label">Capital Price</label>
+                <label class="col-form-label">Harga Modal</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                     <input type="text" name="capital_price" class="form-control" onkeyup="formatRupiah(this)"
                            value="{{isset($item) ? $item->capital_price : null}}" placeholder="0">
                 </div>
             </div>
             <div class="mt-3 mb-2">
-                <label class="col-form-label">Price Bottom</label>
+                <label class="col-form-label">Harga Terendah</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                     <input type="text" name="price_bottom" class="form-control" onkeyup="formatRupiah(this)"
                            value="{{isset($item) ? $item->price_bottom : null}}" placeholder="0">
@@ -131,20 +132,20 @@
             </div>
 
             <div class="mb-2">
-                <label class="col-form-label">Price</label>
+                <label class="col-form-label">Harga Jual</label>
                 <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                     <input type="text" name="price" class="form-control" onkeyup="formatRupiah(this)"
                            value="{{isset($item) ? $item->price : null}}" placeholder="0">
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Save<i
+                    <button type="submit" class="btn btn-dnd float-end" id="submitBtn">Simpan<i
                             class="bx bx-save"></i></button>
                     @if(isset($item))
                         <a href="{{route('manager.item.index')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-undo"></i>Back</a>
+                                class="bx bx-undo"></i>Kembali</a>
                     @else
                         <a href="{{route('manager.item.index')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-list-ul"></i>List Item</a>
+                                class="bx bx-list-ul"></i>Daftar Alat</a>
                     @endif
                 </div>
             </div>

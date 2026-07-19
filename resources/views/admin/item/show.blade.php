@@ -1,12 +1,12 @@
 @extends('layouts.master')
+@section('title')
+    DAFTAR ALAT {{ $cat->name }}
+@endsection
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Item {{$cat->name}}</h4>
-                    </div>
                 </div>
                 <div class="col-6 mt-3">
                     <div class="container">
@@ -22,7 +22,7 @@
                     <tr>
                         <th width="4%">No</th>
                         <th>No Seri</th>
-                        <th>Name Item</th>
+                        <th>Name Alat</th>
                         <th>Divisi</th>
                         <th>Harga Bottom</th>
                         <th>Harga Jual</th>

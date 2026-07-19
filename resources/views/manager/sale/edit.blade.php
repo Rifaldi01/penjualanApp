@@ -1,5 +1,5 @@
 @extends('layouts.master')
-
+@section('title', 'EDIT TRANSAKSI')
 @section('content')
 
     <div class="card">
@@ -7,7 +7,7 @@
             <div class="container mt-3">
                 <div class="row">
                     <div class="col-sm-4">
-                        <h4>Edit Transaction</h4>
+                        <h4>Edit Transaksi</h4>
                         <h4>{{$sale->invoice}}</h4>
                     </div>
                     <div class="col-sm-6">
@@ -72,10 +72,10 @@
                 <tr>
                     <th width="15%">Code</th>
                     <th>Name</th>
-                    <th width="15%">Price</th>
+                    <th width="15%">Harga</th>
                     <th width="10%">Qty</th>
                     <th width="15%">Status</th>
-                    <th width="10%">Action</th>
+                    <th width="10%">Aksi</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
@@ -144,10 +144,10 @@
                     <div class="col-lg-4">
                         <input type="hidden" id="total_item">
                         <div class="form-group row mb-2">
-                            <label class="col-lg-4 control-label">Customer</label>
+                            <label class="col-lg-4 control-label">Pelanggan</label>
                             <div class="col-lg-8">
                                 <select name="customer_id" id="customer_id"
-                                        data-placeholder="--Pilih Customer--" class="form-control accessory-select">
+                                        data-placeholder="--Pilih Pelanggan--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customers as $customer)
                                         <option value="{{ $customer->id }}"

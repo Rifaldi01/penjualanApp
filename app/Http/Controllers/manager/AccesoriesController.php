@@ -277,7 +277,7 @@ class AccesoriesController extends Controller
     public function accesin()
     {
         $accesin = AccessoriesIn::with(['accessories' => function ($query) {
-            $query->select('id', 'price', 'name', 'code_acces', 'divisi_id');
+            $query->select('id', 'price', 'capital_price', 'name', 'code_acces', 'divisi_id');
         }, 'accessories.divisi' => function ($query) {
             $query->select('id', 'name');
         }])

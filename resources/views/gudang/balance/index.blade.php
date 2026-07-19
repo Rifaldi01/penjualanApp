@@ -1,17 +1,7 @@
 @extends('layouts.master')
+@section('title', 'AKSESORIS BALANCE')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">Accessories Balance</h4>
-                    </div>
-                </div>
-                <div class="col-6 mt-3">
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <form method="GET">
@@ -48,8 +38,8 @@
                 <table id="tabelBalance" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
-                        <th>Kode</th>
-                        <th>Accessories</th>
+                        <th>Kode Barcode</th>
+                        <th>Aksesoris</th>
                         <th>Saldo Awal</th>
                         <th>Masuk</th>
                         <th>Retur</th>

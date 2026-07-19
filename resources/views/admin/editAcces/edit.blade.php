@@ -1,16 +1,7 @@
 @extends('layouts.master')
+@section('title', 'EDIT AKSESORIS')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="container mt-3">
-                @if(isset($acces))
-                    <h3>Ubah Aksesori<span class="bx bx-barcode"></span></h3>
-                @else
-                    <h3>Tambah Barcode<span class="bx bx-barcode"></span></h3>
-                @endif
-                <hr>
-            </div>
-        </div>
         @if ($errors->any())
             @foreach ($errors->all() as $error)
                 <div class="alert border-0 border-start border-5 border-danger alert-dismissible fade show py-2">
@@ -37,7 +28,7 @@
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}" placeholder="Masukkan Nama Aksesori">
                 </div>
                 <div class="mb-2">
-                    <label class="col-form-label">Harga Bottom</label>
+                    <label class="col-form-label">Harga Terendah</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="price_bottom" class="form-control" readonly
                                value="{{formatRupiah($acces->price_bottom )}}" placeholder="0">

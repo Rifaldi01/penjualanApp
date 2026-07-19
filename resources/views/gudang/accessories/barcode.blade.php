@@ -1,15 +1,14 @@
 @extends('layouts.master')
-
+@if(isset($acces))
+    @section('title', 'EDIT BARCODE AKSESORIS')
+@else
+    @section('title', 'TAMABAH BARCODE AKSESORIS')
+@endif
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(isset($acces))
-                    <h3>Edit Accessories Multiple</h3>
-                @else
-                    <h3>Tambah Accessories Multiple</h3>
-                @endif
-                <hr>
+
             </div>
         </div>
 
@@ -31,9 +30,9 @@
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th width="45%">Nama Accessories</th>
-                        <th width="35%">Region</th>
-                        <th width="20%">Action</th>
+                        <th width="45%">Nama Aksesoris</th>
+                        <th width="35%">Negara</th>
+                        <th width="20%">Aksi</th>
                     </tr>
                     </thead>
 

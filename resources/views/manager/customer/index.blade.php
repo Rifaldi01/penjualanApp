@@ -1,11 +1,12 @@
 @extends('layouts.master')
+@section('title', 'MANAGEMEN PELANGGAN')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Customer</h4>
+                        <h4 class="text-uppercase">Daftar Pelanggan</h4>
                     </div>
                 </div>
                 <div class="col-6 mt-3">
@@ -51,11 +52,12 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Name</th>
+                        <th>Nama Pelanggan</th>
                         <th>WhatsApp</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th width="12%">Action</th>
+                        <th>Telepon</th>
+                        <th>Alamat</th>
+                        <th>Divisi</th>
+                        <th width="12%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -74,6 +76,7 @@
                                 @endif
                             </td>
                             <td>{{ Str::limit($data->addres, 80, '...') }}</td>
+                            <td>{{$data->divisi->name}}</td>
                             <td>
                                 <a href="{{route('manager.customer.destroy', $data->id)}}" data-confirm-delete="true"
                                    type="submit" class=" bx bx-trash btn btn-sm btn-danger"

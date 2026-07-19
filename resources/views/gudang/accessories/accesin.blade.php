@@ -1,12 +1,8 @@
 @extends('layouts.master')
-
+@section('title', 'DAFTAR AKSESORIS MASUK')
 @section('content')
     <div class="card">
         <div class="card-head">
-            <div class="container mt-3">
-                    <h4 class="text-uppercase">List Accessories In</h4>
-               
-            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -14,13 +10,13 @@
                         <thead>
                         <tr>
                             <th class="text-center">Tanggal</th>
-                            <th>Code Accessories</th>
+                            <th>Kode Barcode</th>
                             <th>Kode/Invoice</th>
-                            <th>Nam Accessories</th>
-                            <th>Price</th>
+                            <th>Nama Aksesoris</th>
+                            <th>Harga</th>
                             <th class="text-center" width="10%">Stok</th>
                             <th>Total Harga</th>
-                            <th>Action</th>
+                            <th>Aksi</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -97,9 +93,9 @@
                     {
                         extend: 'excel',
                         exportOptions: {
-                            
+
                         }
-                    },   
+                    },
                     {
                         extend: 'pdf',
                         exportOptions: {

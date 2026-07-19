@@ -1,10 +1,9 @@
 @extends('layouts.master')
+@section('title', 'TAMBAH STOK AKSESORIS')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>Add Accessories<span class="bx bx-barcode"></span></h3>
-                <hr>
             </div>
         </div>
         <div class="card-body">
@@ -12,12 +11,12 @@
                 @csrf
                 <div class="form-group row">
                     <label for="code_access" class="col-lg-2 mt-2">
-                        <strong> Kode Accessories : </strong>
+                        <strong> Kode AKSESORIS : </strong>
                     </label>
                     <div class="col-lg-5">
                         <div class="input-group">
                             <input type="hidden" name="id" id="idAccess">
-                            <input type="text" class="form-control" name="code_access" id="code_access" placeholder="Enter Code Accessories">
+                            <input type="text" class="form-control" name="code_access" id="code_access" placeholder="Masukan Kode Aksesoris">
                         </div>
                     </div>
                 </div>
@@ -26,18 +25,18 @@
                 <thead>
                 <tr>
                     <th scope="col">No</th>
-                    <th scope="col">Code Acces</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Price</th>
+                    <th scope="col">Kode Aksesoris</th>
+                    <th scope="col">nama</th>
+                    <th scope="col">Harga</th>
                     <th scope="col">Stok</th>
                     <th scope="col">Kode/Invoice</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Aksi</th>
                 </tr>
                 </thead>
                 <tbody id="accessoriesTableBody"></tbody>
             </table>
             <div class="box-footer">
-                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Save</button>
+                <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i> Simpan</button>
             </div>
         </div>
     </div>

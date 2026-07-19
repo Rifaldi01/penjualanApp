@@ -1,4 +1,5 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS')
 @section('content')
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="breadcrumb-title pe-3">Nama Divisi</div>
@@ -23,26 +24,26 @@
     </div>
 
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Accessories</h4>
+            <div class="card-head">
+                <div class="row">
+                    <div class="col-6 mt-3">
+                        <div class="container">
+                            <h4 class="text-uppercase">Daftar Aksesoris Semua Divisi</h4>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="accessoriesTable" class="table table-striped table-bordered">
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Nama Accessories</th>
+                        <th>Nama Aksesoris</th>
                         <th>Divisi</th>
-                        <th>Harga Bottom</th>
+                        <th>Harga Terendah</th>
                         <th>Harga Jual</th>
-                        <th>Code Accessories</th>
+                        <th>Code Barcode</th>
                         <th>Stok</th>
                     </tr>
                     </thead>
@@ -70,7 +71,7 @@
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Accessories Divisi {{Auth::user()->divisi->name}}</h4>
+                        <h4 class="text-uppercase">Daftar Aksesoris Divisi {{Auth::user()->divisi->name}}</h4>
                     </div>
                 </div>
             </div>
@@ -81,11 +82,11 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Nama Accessories</th>
+                        <th>Nama Aksesoris</th>
                         <th>Divisi</th>
-                        <th>Harga Bottom</th>
+                        <th>Harga Terendah</th>
                         <th>Harga Jual</th>
-                        <th>Code Accessories</th>
+                        <th>Code Barcode</th>
                         <th>Stok</th>
                     </tr>
                     </thead>

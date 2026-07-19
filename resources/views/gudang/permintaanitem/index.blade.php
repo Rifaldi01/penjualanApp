@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR MEMINTA ALAT')
 @section('content')
     <div class="card">
         <div class="container">
             <div class="card-header mt-3 mb-3">
                 <div class="row">
                     <div class="col-sm">
-                        <h4>DAFTAR MEMINTA</h4>
                     </div>
                     <div class="col-sm">
                         <div class="float-end">
@@ -111,7 +111,7 @@
                     <tr>
                         <th>No</th>
                         <th>Tanggal</th>
-                        <th>Kode</th>
+                        <th>Kode Permintaan</th>
                         <th>Barang</th>
                         <th>No Seri</th>
                         <th>Jumlah</th>

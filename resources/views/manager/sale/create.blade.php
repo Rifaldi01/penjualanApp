@@ -1,12 +1,12 @@
 @extends('layouts.master')
-
+@section('title', 'TRANSAKSI')
 @section('content')
     <div class="card">
         <div class="card-header">
             <div class="container mt-3">
                 <div class="row">
                     <div class="col-sm-4">
-                        <h4>New Transaction</h4>
+                        <h4>Transaksi Baru</h4>
                     </div>
                     <div class="col-sm-4">
                         <div class="float-end">
@@ -73,10 +73,10 @@
                 <thead>
                 <tr>
                     <th scope="col" width="12%">Code/No Seri</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Price</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Harga</th>
                     <th scope="col">Qty</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Aksi</th>
                 </tr>
                 </thead>
                 <tbody id="accessoriesTableBody"></tbody>
@@ -134,10 +134,10 @@
                     <div class="col-lg-4">
                         <input type="hidden" name="total_item" id="total_item" readonly>
                         <div class="form-group row mb-2">
-                            <label for="customer" class="col-lg-4 control-label">Customer</label>
+                            <label for="customer" class="col-lg-4 control-label">Pelanggan</label>
                             <div class="col-lg-8">
                                 <select name="customer_id" id="single-select-field"
-                                        data-placeholder="--Pilih Customer--" class="form-control accessory-select">
+                                        data-placeholder="--Pilih Pelanggan--" class="form-control accessory-select">
                                     <option value=""></option>
                                     @foreach($customer as $data)
                                         <option value="{{ $data->id }}">{{ $data->name }}</option>

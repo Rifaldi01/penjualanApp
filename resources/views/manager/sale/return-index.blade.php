@@ -1,5 +1,5 @@
 @extends('layouts.master')
-
+@section('title', 'DAFTAR RETUR TRANSAKSI')
 @section('content')
 
     <div class="card">
@@ -10,9 +10,7 @@
 
                 <div class="col-md-6">
 
-                    <h4 class="text-uppercase mt-2">
-                        List Transaksi Retur
-                    </h4>
+
 
                 </div>
 

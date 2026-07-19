@@ -1,4 +1,5 @@
 @extends('layouts.master')
+@section('title', 'DETAIL PELANGGAN')
 @section('content')
     <div class="card">
         <div class="card-head">
@@ -21,11 +22,11 @@
                     <tr>
                         <th width="2%">No</th>
                         <th width="10%">Tanggal</th>
-                        <th>Name</th>
-                        <th>Item</th>
-                        <th>Accessories</th>
+                        <th>Nama</th>
+                        <th>Alat</th>
+                        <th>Aksesoris</th>
                         <th width="2%">Total Item</th>
-                        <th>Total Pay</th>
+                        <th>Total Bayar</th>
                     </tr>
                     </thead>
                     <tbody>

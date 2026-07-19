@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List Accessories</h4>
                     </div>
                 </div>
                 <div class="col-6">
@@ -34,15 +34,15 @@
                                 <th width="5%">
                                     <input type="checkbox" id="select_all">
                                 </th>
-                                <th width="2%">Code </th>
-                                <th>Name</th>
+                                <th width="2%">Kode Barcode </th>
+                                <th>Nama Alat</th>
                                 <th>Divisi</th>
-                                <th>Price Cost</th>
-                                <th>Price Bottom</th>
-                                <th>Sale Price</th>
+                                <th>Harga Modal</th>
+                                <th>Harga Terendah</th>
+                                <th>Harga Jual</th>
                                 <th class="text-center">Jmlh Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
-                                <th class="text-center" width="10%">Action</th>
+                                <th class="text-center" width="10%">Aksi</th>
                             </tr>
                             </thead>
                             <tbody>

@@ -1,11 +1,9 @@
 @extends('layouts.master')
-
+@section('title', 'TAMBAH STOK AKSESORIS')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h3>Add Accessories <span class="bx bx-barcode"></span></h3>
-                <hr>
             </div>
         </div>
 
@@ -14,12 +12,12 @@
             {{-- INPUT ATAS --}}
             <div class="form-group row mb-3">
                 <label class="col-lg-2 mt-2">
-                    <strong>Kode/Nama Accessories :</strong>
+                    <strong>Kode/Nama Aksesoris :</strong>
                 </label>
                 <div class="col-lg-5">
                     <input type="text"
                            class="form-control scan-accessories"
-                           placeholder="Enter Code Accessories">
+                           placeholder="Masukan kode/nama Aksesoris">
                 </div>
             </div>
 
@@ -28,8 +26,8 @@
                 <thead>
                 <tr>
                     <th width="5%">No</th>
-                    <th>Code Acces</th>
-                    <th>Name</th>
+                    <th>Kode Barcode</th>
+                    <th>Nama Aksesoris</th>
                     <th>Asal Pembelian</th>
                     <th>Price</th>
                     <th>Stok</th>
@@ -44,18 +42,18 @@
             {{-- INPUT BAWAH --}}
             <div class="form-group row mt-3">
                 <label class="col-lg-2 mt-2">
-                    <strong>Kode/Nama Accessories :</strong>
+                    <strong>Kode/Nama Aksesoris :</strong>
                 </label>
                 <div class="col-lg-5">
                     <input type="text"
                            class="form-control scan-accessories"
-                           placeholder="Enter Code Accessories">
+                           placeholder="Masukan kode/nama Aksesoris">
                 </div>
             </div>
 
             <div class="box-footer mt-3">
                 <button type="button" class="btn btn-primary btn-sm float-end btn-simpan">
-                    <i class="bx bx-save"></i> Save
+                    <i class="bx bx-save"></i> Simpan
                 </button>
             </div>
 

@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS KELUAR')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Accessories Sale</h4>
                     </div>
                 </div>
             </div>
@@ -19,11 +19,11 @@
                         <th>Invoice</th>
                         <th>Divisi</th>
                         <th>Kode produk</th>
-                        <th>Name</th>
+                        <th>Nama Aksesoris</th>
                         <th>Harga</th>
                         <th>Qty</th>
                         <th>Subtotal</th>
-                        <th>Customer</th>
+                        <th>Pelanggan</th>
                         <th>Tanggal Invoice</th>
                     </tr>
                     </thead>

@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR AKSESORIS RUSAK')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List reject accessories</h4>
                     </div>
                 </div>
                 <div class="col-6">

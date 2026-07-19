@@ -1,76 +1,66 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR PEMBELIAN BARANG')
 @section('content')
     <div class="card">
-        <div class="container mt-3">
-            <div class="card-head">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h4>Pembelian Barang</h4>
-                    </div>
-                    <div class="col-sm-6">
-
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="pembelian" class="table table-striped table-bordered" style="width:100%">
-                        <thead>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="pembelian" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th style="border-top: 2px">No</th>
+                        <th>Invoice</th>
+                        <th>Supplier</th>
+                        <th>Total Barang</th>
+                        <th>Total Harga</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($pembelian as $key => $data)
                         <tr>
-                            <th  style="border-top: 2px">No</th>
-                            <th >Invoice</th>
-                            <th >Supplier</th>
-                            <th >Total Barang</th>
-                            <th >Total Harga</th>
-                            <th >Status</th>
-                            <th >Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($pembelian as $key => $data)
-                            <tr>
-                                <td>{{$key +1}}</td>
-                                <td>{{$data->invoice}}</td>
-                                <td>
-                                    @if($data->supplier_id)
-                                        {{$data->supplier->name}}
-                                    @else
-                                        <div class="text-danger">Lengkapi pembelian</div>
-                                    @endif
-                                </td>
+                            <td>{{$key +1}}</td>
+                            <td>{{$data->invoice}}</td>
+                            <td>
+                                @if($data->supplier_id)
+                                    {{$data->supplier->name}}
+                                @else
+                                    <div class="text-danger">Lengkapi pembelian</div>
+                                @endif
+                            </td>
 
-                                <td>{{$data->total_item}}</td>
-                                <td>{{formatRupiah($data->total_harga)}}</td>
-                                <td>
-                                    @if($data->status == 0)
-                                        <span class="badge bg-success">Lunas</span>
-                                    @else
-                                        <span class="badge bg-danger">Belum Lunas</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="{{route('admin.pembelian.edit', $data->id)}}"
-                                       class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
-                                       data-bs-placement="top" title="Edit Data"></a>
+                            <td>{{$data->total_item}}</td>
+                            <td>{{formatRupiah($data->total_harga)}}</td>
+                            <td>
+                                @if($data->status == 0)
+                                    <span class="badge bg-success">Lunas</span>
+                                @else
+                                    <span class="badge bg-danger">Belum Lunas</span>
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{route('admin.pembelian.edit', $data->id)}}"
+                                   class="btn btn-warning btn-sm bx bx-edit" data-bs-toggle="tooltip"
+                                   data-bs-placement="top" title="Edit Data"></a>
 
-                                    <a href="{{ route('admin.pembelian.destroy', $data->id) }}" data-confirm-delete="true"
-                                       class="btn btn-danger btn-sm bx bx-trash" data-bs-toggle="tooltip"
-                                       data-bs-placement="top" title="Delete">
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <th colspan="5" class="text-end">Total Hutang</th>
-                            <td colspan="2" class="text-center">{{ formatRupiah($totalHarga) }}</td>
+                                <a href="{{ route('admin.pembelian.destroy', $data->id) }}" data-confirm-delete="true"
+                                   class="btn btn-danger btn-sm bx bx-trash" data-bs-toggle="tooltip"
+                                   data-bs-placement="top" title="Delete">
+                                </a>
+                            </td>
                         </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                    @endforeach
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="5" class="text-end">Total Hutang</th>
+                        <td colspan="2" class="text-center">{{ formatRupiah($totalHarga) }}</td>
+                    </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
+    </div>
     </div>
 @endsection
 @push('head')

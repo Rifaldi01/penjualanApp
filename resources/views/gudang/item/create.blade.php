@@ -1,15 +1,13 @@
 @extends('layouts.master')
+@if(isset($item))
+    @section('title', 'EDIT ALAT')
+@else
+    @section('title', 'TAMBAH ALAT')
+@endif
 @section('content')
     <div class="card">
         <div class="card-head">
-            <div class="container mt-3">
-                @if(isset($item))
-                    <h3 class="mb-4 ms-3">Edit Item<i class="bx bx-edit"></i></h3>
-                @else
-                    <h3 class="mb-4 ms-3">Tambah Item<i class="bx bx-user-plus"></i></h3>
-                @endif
-                <hr>
-            </div>
+
 
         </div>
         @if ($errors->any())
@@ -43,12 +41,12 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Nama Alat</th>
                         <th>Tanggal</th>
                         <th>Invoice</th>
                         <th>Kategori</th>
                         <th>No Seri</th>
-                        <th>Region</th>
+                        <th>Negara</th>
                         <th>Aksi</th>
                     </tr>
                     </thead>

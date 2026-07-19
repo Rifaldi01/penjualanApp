@@ -1,18 +1,6 @@
 @extends('layouts.master')
+@section('title', 'LAPORAN TRANSAKSI')
 @section('content')
-    <div class="card">
-        <div class="card-body">
-            <div class="col">
-                <div class="row">
-                    <div class="col-sm">
-                        <h4 class="mb-0 text-uppercase">Transaction Report</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <hr/>
     <div class="">
         <div class="text-danger">
             <span>* No. Invoice manual baru tersedia di Divisi PTP</span><br>
@@ -25,11 +13,11 @@
                 <form id="filter" method="GET">
                     <div class="row">
                         <div class="col-5 ms-2 mt-2">
-                            <label class="form-label">Start Date</label>
+                            <label class="form-label">Tanggal Mulai</label>
                             <input type="date" class="form-control" name="start_date" id="starDate">
                         </div>
                         <div class="col-6 mt-2">
-                            <label class="form-label">End Date</label>
+                            <label class="form-label">Tanggal Berakhir</label>
                             <input type="date" class="form-control" name="end_date" id="endDate">
                         </div>
                     </div>
@@ -51,9 +39,9 @@
                         <th class="text-center">Tanggal</th>
                         <th class="text-center">Invoice Manual</th>
                         <th class="text-center">Invoice</th>
-                        <th>Customer</th>
-                        <th>Item</th>
-                        <th>Accessories</th>
+                        <th>Pelanggan</th>
+                        <th>Alat</th>
+                        <th>Aksesoris</th>
                         <th class="text-center">Total Item</th>
                         <th class="text-center">Total Invoice</th>
                         <th class="text-center">PPN</th>

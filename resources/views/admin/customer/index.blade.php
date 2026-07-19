@@ -1,12 +1,10 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR PELANGGAN')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Customer</h4>
-                    </div>
                 </div>
                 <div class="col-6 mt-3">
                     <div class="container">
@@ -51,12 +49,12 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Name</th>
+                        <th>Nama Pelanggan</th>
                         <th>WhatsApp</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Company</th>
-                        <th width="12%">Action</th>
+                        <th>Telpon</th>
+                        <th>Alamat</th>
+                        <th>Perusahaan</th>
+                        <th width="12%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>

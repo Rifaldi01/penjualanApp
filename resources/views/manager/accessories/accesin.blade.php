@@ -1,10 +1,9 @@
 @extends('layouts.master')
-
+@section('title', 'DAFTAR ALAT MASUK')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                <h4 class="text-uppercase">List Accessories In</h4>
             </div>
         </div>
         <div class="card-body">
@@ -13,13 +12,14 @@
                     <thead>
                     <tr>
                         <th class="text-center">Tanggal</th>
-                        <th>Code Acces</th>
+                        <th>Kode Barcode</th>
                         <th>Divisi</th>
                         <th>Kode/Invoice</th>
-                        <th>Nam Accessories</th>
-                        <th>Price</th>
+                        <th>Nama Aksesoris</th>
+                        <th>Harga Modal</th>
+                        <th>Harga Jual</th>
                         <th class="text-center" width="10%">Stok</th>
-                        <th>Total Harga</th>
+                        <th>Total Harga Jual</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -33,6 +33,9 @@
                                 <a class="text-dark">{{ $data->accessories?->name ?? '-' }}</a>
                             </td>
                             <td>
+                                <a class="text-dark">{{ $data->accessories ? formatRupiah($data->accessories->capital_price) : '0' }}
+                                    ,-</a>
+                            </td>  <td>
                                 <a class="text-dark">{{ $data->accessories ? formatRupiah($data->accessories->price) : '0' }}
                                     ,-</a>
                             </td>

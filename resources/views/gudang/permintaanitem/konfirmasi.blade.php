@@ -1,9 +1,9 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR PERMINTAAN ALAT')
 @section('content')
     <div class="card">
         <div class="container">
             <div class="card-header mb-3 mt-3">
-                <h4>DAFTAR PERMINTAAN</h4>
                 <form method="GET" class="mb-3">
 
                     <div class="row">
@@ -101,7 +101,7 @@
                     <tr>
                         <th>No</th>
                         <th>Tanggal</th>
-                        <th>Kode</th>
+                        <th>Kode Permintaan</th>
                         <th>Barang</th>
                         <th>No Seri</th>
                         <th>Jumlah</th>

@@ -28,13 +28,13 @@
                     <div class="parent-icon">
                         <i class='bx bx-collection'></i>
                     </div>
-                    <div class="menu-title">Request Accessories</div>
+                    <div class="menu-title">Request Aksesoris</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaan.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
-                            Minta Accessories
+                            Minta Aksesoris
                             @if($minta > 0)
                                 <span class="badge bg-danger">{{$minta}}</span>
                             @else
@@ -44,7 +44,7 @@
                     <li>
                         <a href="{{route('gudang.permintaan.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
-                            Permintaan Accessories
+                            Permintaan Aksesoris
                             @if($notif > 0)
                                 <span class="badge bg-danger">{{$notif}}</span>
                             @else
@@ -61,13 +61,13 @@
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-box'></i>
                     </div>
-                    <div class="menu-title">Request Item</div>
+                    <div class="menu-title">Request Alat</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaanitem.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
-                            Minta Item
+                            Minta Alat
                             @if($mintaitem > 0)
                                 <span class="badge bg-danger">{{$mintaitem}}</span>
                             @else
@@ -77,7 +77,7 @@
                     <li>
                         <a href="{{route('gudang.permintaanitem.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
-                            Permintaan Item
+                            Permintaan Alat
                             @if($notifitem > 0)
                                 <span class="badge bg-danger">{{$notifitem}}</span>
                             @else
@@ -99,7 +99,7 @@
                 <a href="{{route('gudang.return.index')}}">
                     <div class="parent-icon"><i class='bx bx-refresh'></i>
                     </div>
-                    <div class="menu-title"> Retur Transaction</div>
+                    <div class="menu-title"> Retur Transaksi</div>
                 </a>
             </li>
             <li class="menu-label">Items</li>
@@ -107,19 +107,19 @@
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-box'></i>
                     </div>
-                    <div class="menu-title">Items</div>
+                    <div class="menu-title">Alat</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.item.index')}}">
                             <i class='bx bx-box'></i>
-                            Items
+                            Daftar Alat
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.cat.index')}}">
                             <i class='bx bx-category'></i>
-                            Category
+                            Kategori Alat
                         </a>
                     </li>
                 </ul>
@@ -128,31 +128,31 @@
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-collection'></i>
                     </div>
-                    <div class="menu-title">Accessories</div>
+                    <div class="menu-title">Aksesoris</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.acces.editmultiple')}}">
                             <i class='bx bx-plus'></i>
-                            Add Accessories
+                            Tambah Stok Aksesoris
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.acces.create')}}">
                             <i class='bx bx-barcode'></i>
-                            Add Barcode
+                            Tambah Barcode Aksesoris
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.acces.index')}}">
                             <i class='bx bx-list-ul'></i>
-                            Accessories Redy
+                            Aksesoris Redy
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.accesKosong')}}">
                             <i class='bx bx-list-ul'></i>
-                            Accessories Habis
+                            Aksesoris Habis
                         </a>
                     </li>
                 </ul>
@@ -161,19 +161,19 @@
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-error'></i>
                     </div>
-                    <div class="menu-title">Accessories Reject</div>
+                    <div class="menu-title">Aksesoris Rusak</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.acces.kembali')}}">
                             <i class='bx bx-plus'></i>
-                            Reject
+                            Tambah Aksesories Rusak
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.acces.listreject')}}">
                             <i class='bx bx-list-ul'></i>
-                            List Reject
+                            Daftar Aksesoris Rusak
                         </a>
                     </li>
                 </ul>
@@ -188,13 +188,13 @@
                     <li>
                         <a href="{{route('gudang.item.itemin')}}">
                             <i class='bx bx-radio-circle'></i>
-                            Items
+                            Alat
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.acces.accesin')}}">
                             <i class='bx bx-radio-circle'></i>
-                            Accessories
+                            Aksesoris
                         </a>
                     </li>
                 </ul>
@@ -209,13 +209,13 @@
                     <li>
                         <a href="{{route('gudang.item.itemout')}}">
                             <i class='bx bx-radio-circle'></i>
-                            Items
+                            Alat
                         </a>
                     </li>
                     <li>
-                        <a href="{{route('gudang.acces.accesout')}}">
+                        <a href="{{route('gudang.acces.report')}}">
                             <i class='bx bx-radio-circle'></i>
-                            Accessories
+                            Aksesoris
                         </a>
                     </li>
                 </ul>
@@ -224,24 +224,24 @@
                 <a href="{{route('gudang.balance.index')}}">
                     <div class="parent-icon"><i class='bx bx-data'></i>
                     </div>
-                    <div class="menu-title">Accessories Balance
+                    <div class="menu-title">Aksesoris Balance
                     </div>
                 </a>
             </li>
-            <li>
-                <a href="{{route('gudang.item.report')}}">
-                    <div class="parent-icon"><i class='bx bx-file'></i>
-                    </div>
-                    <div class="menu-title">Report Item</div>
-                </a>
-            </li>
-            <li>
-                <a href="{{route('gudang.acces.report')}}">
-                    <div class="parent-icon"><i class='bx bx-file'></i>
-                    </div>
-                    <div class="menu-title">Report Accessories</div>
-                </a>
-            </li>
+{{--            <li>--}}
+{{--                <a href="{{route('gudang.item.report')}}">--}}
+{{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
+{{--                    </div>--}}
+{{--                    <div class="menu-title">Report Item</div>--}}
+{{--                </a>--}}
+{{--            </li>--}}
+{{--            <li>--}}
+{{--                <a href="{{route('gudang.acces.report')}}">--}}
+{{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
+{{--                    </div>--}}
+{{--                    <div class="menu-title">Report Accessories</div>--}}
+{{--                </a>--}}
+{{--            </li>--}}
             <li class="menu-label">Permintaan Barang</li>
             <li>
                 @if(isset($notiff) && $notiff > 0)
@@ -252,13 +252,13 @@
                     <div class="parent-icon">
                         <i class='bx bx-collection'></i>
                     </div>
-                    <div class="menu-title">Request Accessories</div>
+                    <div class="menu-title">Request Aksesoris</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaan.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
-                            Minta Accessories
+                            Minta Aksesoris
                             @if($minta > 0)
                                 <span class="badge bg-danger">{{$minta}}</span>
                             @else
@@ -268,7 +268,7 @@
                     <li>
                         <a href="{{route('gudang.permintaan.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
-                            Permintaan Accessories
+                            Permintaan Aksesoris
                             @if($notif > 0)
                                 <span class="badge bg-danger">{{$notif}}</span>
                             @else
@@ -278,7 +278,7 @@
                     <li>
                         <a href="{{route('gudang.permintaan.retur')}}">
                             <i class='bx bx-repost'></i>
-                            Retur Accessories
+                            Retur Aksesoris
                             @if($notifretur > 0)
                                 <span class="badge bg-danger">{{$notifretur}}</span>
                             @else
@@ -295,13 +295,13 @@
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-box'></i>
                     </div>
-                    <div class="menu-title">Request Item</div>
+                    <div class="menu-title">Request Alat</div>
                 </a>
                 <ul>
                     <li>
                         <a href="{{route('gudang.permintaanitem.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
-                            Minta Item
+                            Minta Alat
                             @if($mintaitem > 0)
                                 <span class="badge bg-danger">{{$mintaitem}}</span>
                             @else
@@ -311,7 +311,7 @@
                     <li>
                         <a href="{{route('gudang.permintaanitem.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
-                            Permintaan Item
+                            Permintaan Alat
                             @if($notifitem > 0)
                                 <span class="badge bg-danger">{{$notifitem}}</span>
                             @else

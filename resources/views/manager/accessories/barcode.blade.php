@@ -1,14 +1,13 @@
 @extends('layouts.master')
+@if(isset($acces))
+    @section('title', 'EDIT BARCODE')
+@else
+    @section('title', 'TAMBAH BARCODE')
+@endif
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="container mt-3">
-                @if(isset($acces))
-                    <h3>Ubah Aksesori<span class="bx bx-barcode"></span></h3>
-                @else
-                    <h3>Tambah Barcode<span class="bx bx-barcode"></span></h3>
-                @endif
-                <hr>
             </div>
         </div>
         @if ($errors->any())
@@ -36,7 +35,7 @@
                 @endisset
                 <input type="hidden" name="redirect_url" value="{{ url()->previous() }}">
                 <div class="mb-2">
-                    <label class="col-form-label">Nama Aksesori</label>
+                    <label class="col-form-label">Nama Aksesoris</label>
                     <input type="text" name="name" class="form-control" value="{{isset($acces) ? $acces->name : null}}"
                            placeholder="Masukkan Nama Aksesori">
                 </div>
@@ -61,21 +60,21 @@
                            value="{{isset($acces) ? $acces->stok : null}}" placeholder="0">
                 </div>
                 <div class=" mb-2">
-                    <label class="col-form-label">Capital Price</label>
+                    <label class="col-form-label">Harga Modal</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="capital_price" class="form-control" onkeyup="formatRupiah(this)"
                                value="{{isset($acces) ? $acces->capital_price : null}}" placeholder="0">
                     </div>
                 </div>
                 <div class="mt-3 mb-2">
-                    <label class="col-form-label">Price Bottom</label>
+                    <label class="col-form-label">Harga Terendah</label>
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="price_bottom" class="form-control" onkeyup="formatRupiah(this)"
                                value="{{isset($acces) ? $acces->price_bottom : null}}" placeholder="0">
                     </div>
                 </div>
                 <div class="mb-2">
-                    <label class="col-form-label">Harga</label>
+                    <label class="col-form-label">Harga Jual</label>
                     <div class="input-group">
                         <span class="input-group-text" id="basic-addon1">Rp.</span>
                         <input type="text" name="price" class="form-control"

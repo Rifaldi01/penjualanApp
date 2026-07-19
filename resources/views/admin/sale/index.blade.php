@@ -1,5 +1,5 @@
 @extends('layouts.master')
-
+@section('title', 'DAFTAR TRANSAKSI')
 @section('content')
 
     {{-- TRANSACTION ACTIVE --}}
@@ -8,7 +8,7 @@
             <div class="row">
                 <div class="col-6 mt-3">
                     <div class="container">
-                        <h4 class="text-uppercase">List Transaction Active</h4>
+                        <h4 class="text-uppercase">List Transaksi Aktif</h4>
                     </div>
                 </div>
             </div>
@@ -22,18 +22,18 @@
                         <th width="4%">No</th>
                         <th>Tanggal</th>
                         <th>Invoice</th>
-                        <th>Customer</th>
+                        <th>Pelanggan</th>
                         <th>Total Item</th>
                         <th>Uang Masuk</th>
-                        <th>Total Price</th>
+                        <th>Total Harga</th>
                         <th>PPN</th>
                         <th>PPH</th>
                         <th>Diskon</th>
                         <th>Ongkir</th>
                         <th>Biaya Admin</th>
-                        <th>Total Pay</th>
+                        <th>Total Bayar</th>
                         <th>Kasir</th>
-                        <th>Action</th>
+                        <th>Aksi</th>
                     </tr>
                     </thead>
 
@@ -259,7 +259,7 @@
                 <div class="col-6 mt-3">
                     <div class="container">
                         <h4 class="text-uppercase">
-                            List Transaction Tahun {{ $year }}
+                            List Transaksi Tahun {{ $year }}
                         </h4>
                     </div>
                 </div>
@@ -313,17 +313,17 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Invoice</th>
-                        <th>Customer</th>
+                        <th>Pelanggan</th>
                         <th>Total Item</th>
-                        <th>Total Price</th>
+                        <th>Total Haga</th>
                         <th>PPN</th>
                         <th>PPH</th>
                         <th>Diskon</th>
                         <th>Ongkir</th>
                         <th>Biaya Admin</th>
-                        <th>Total Pay</th>
+                        <th>Total Bayar</th>
                         <th>Kasir</th>
-                        <th>Action</th>
+                        <th>Aksi</th>
                     </tr>
                     </thead>
 

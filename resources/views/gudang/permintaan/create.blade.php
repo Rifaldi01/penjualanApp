@@ -1,11 +1,8 @@
 @extends('layouts.master')
-
+@section('title', 'FORM PERMINTAAN AKSESORIS')
 @section('content')
     <div class="card">
         <div class="container">
-            <div class="card-head mt-2">
-                <h4>Form Permintaan Accessories</h4>
-            </div>
             <div class="card-body">
                 <form action="{{ route('gudang.permintaan.store') }}" method="POST">
                     @csrf

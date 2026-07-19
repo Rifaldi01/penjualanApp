@@ -1,11 +1,11 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR ALAT')
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List Items</h4>
                     </div>
                 </div>
                 <div class="col-6">
@@ -79,12 +79,12 @@
                             <input type="checkbox" id="select_all">
                         </th>
                         <th width="2%">No</th>
-                        <th>Nama Item</th>
+                        <th>Nama Alat</th>
                         <th>No Seri</th>
-                        <th>Price</th>
-                        <th class="text-center" width="5%">Jumalah Barcode</th>
+                        <th>Harga</th>
+                        <th class="text-center" width="5%">Jumlah Barcode</th>
                         <th class="text-center" width="5%">Status</th>
-                        <th class="text-center" width="15%">Action</th>
+                        <th class="text-center" width="15%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>

@@ -4,8 +4,9 @@
             <div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
             </div>
                 <a href="avascript:;" class="btn d-flex align-items-center"></a>
-
-
+            <h4 class="text-white card-title">
+                @yield('title', 'DASHBOARD')
+            </h4>
             <div class="top-menu ms-auto">
                 <ul class="navbar-nav align-items-center gap-1">
 

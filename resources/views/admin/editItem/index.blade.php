@@ -1,15 +1,7 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR ALAT')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6">
-                    <div class="container mt-3">
-                        <h4 class="text-uppercase">List Items</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="box-header with-border">
                 <!-- Form untuk cetak barcode -->
@@ -21,11 +13,11 @@
                     <tr>
                         <th width="2%">No</th>
                         <th>Divisi</th>
-                        <th>Name</th>
+                        <th>Nama Alat</th>
                         <th>No Seri</th>
-                        <th>Harga Bottom</th>
+                        <th>Harga Terendah</th>
                         <th>Harga Jual</th>
-                        <th class="text-center" width="15%">Action</th>
+                        <th class="text-center" width="15%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>

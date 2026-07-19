@@ -22,25 +22,25 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-money'></i>
                 </div>
-                <div class="menu-title">Transaction</div>
+                <div class="menu-title">Transaksi</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('admin.sale.create')}}">
                         <i class='bx bx-money'></i>
-                        New Transaction
+                        Transaksi Baru
                     </a>
                 </li>
                 <li>
                     <a href="{{route('admin.sale.index')}}">
                         <i class='bx bx-download'></i>
-                        Transaction
+                        Daftar Transaksi
                     </a>
                 </li>
                 <li>
                     <a href="{{route('admin.return.index')}}">
                         <i class='bx bx-refresh'></i>
-                        Retur Transaction
+                        Retur Transaksi
                     </a>
                 </li>
             </ul>
@@ -49,30 +49,30 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='lni lni-users'></i>
                 </div>
-                <div class="menu-title">Customer</div>
+                <div class="menu-title">Pelanggan</div>
             </a>
             <ul>
                 <li>
                     <a href="{{route('admin.customer.create')}}">
                         <i class='bx bx-user-plus'></i>
-                        Register Customer
+                        Register Pelanggan
                     </a>
                 </li>
                 <li>
                     <a href="{{route('admin.customer.index')}}">
                         <i class='bx bx-list-ul'></i>
-                        List Customer
+                        Daftar Pelanggan
                     </a>
                 </li>
             </ul>
         </li>
-        <li class="menu-label">Items</li>
+        <li class="menu-label">Alat</li>
         <li>
             <a href="{{route('admin.item.index')}}">
                 <div class="parent-icon">
                     <i class='bx bx-box'></i>
                 </div>
-                <div class="menu-title">Items</div>
+                <div class="menu-title">Daftar Alat</div>
             </a>
         </li>
         <li>
@@ -80,7 +80,7 @@
                 <div class="parent-icon">
                     <i class='bx bx-collection'></i>
                 </div>
-                <div class="menu-title">Accessories</div>
+                <div class="menu-title">Aksesoris</div>
             </a>
         </li>
 
@@ -94,13 +94,13 @@
                 <li>
                     <a href="{{route('admin.item.editItem')}}">
                         <i class='bx bx-box'></i>
-                        Item
+                        Alat
                     </a>
                 </li>
                 <li>
                     <a href="{{route('admin.acces.editAcces')}}">
                         <i class='bx bx-collection'></i>
-                        Accessories
+                        Aksesoris
                     </a>
                 </li>
             </ul>
@@ -109,21 +109,21 @@
             <a href="{{route('admin.item.sale')}}">
                 <div class="parent-icon"><i class='bx bx-dollar'></i>
                 </div>
-                <div class="menu-title">Item Sale</div>
+                <div class="menu-title">Alat Terjual</div>
             </a>
         </li>
         <li>
             <a href="{{route('admin.acces.sale')}}">
                 <div class="parent-icon"><i class='bx bx-dollar'></i>
                 </div>
-                <div class="menu-title">Accesories Sale</div>
+                <div class="menu-title">Aksesoris Terjual</div>
             </a>
         </li>
         <li>
             <a href="{{route('admin.report.index')}}">
                 <div class="parent-icon"><i class='bx bx-file'></i>
                 </div>
-                <div class="menu-title">Report</div>
+                <div class="menu-title">Laporan</div>
             </a>
         </li>
         <li class="menu-label">PEMBELIAN BARANG</li>

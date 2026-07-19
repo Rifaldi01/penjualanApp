@@ -1,11 +1,8 @@
 @extends('layouts.master')
-
+@section('title', 'FORM PERMINTAAN ALAT')
 @section('content')
     <div class="card">
         <div class="container">
-            <div class="card-head mt-2">
-                <h4>Form Permintaan Item</h4>
-            </div>
             <div class="card-body">
                 <form action="{{ route('gudang.permintaanitem.store') }}" method="POST">
                     @csrf
@@ -38,7 +35,7 @@
                     <table class="table table-bordered" id="itemTable">
                         <thead>
                         <tr>
-                            <th>Nama Barang</th>
+                            <th>Nama Alat</th>
                             <th>No Seri</th>
                             <th>Jumlah</th>
                             <th width="2%">Aksi</th>
@@ -48,7 +45,7 @@
                         <tr>
                             <td>
                                 <select name="item_in_id[]" class="form-control single-select-field @error('item_in_id') is-invalid @enderror" style="width: 100%" onchange="updateNoSeri(this)">
-                                    <option value="">-- Pilih Item --</option>
+                                    <option value="">-- Pilih Alat --</option>
                                 </select>
                                 @error('item_in_id')
                                 <div class="invalid-feedback">{{ $message }}</div>

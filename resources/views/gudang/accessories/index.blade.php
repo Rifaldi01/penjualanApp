@@ -1,11 +1,15 @@
 @extends('layouts.master')
+@if(request()->routeIs('gudang.accesKosong'))
+    @section('title', 'DAFTAR AKSESORIS HABIS')
+@else
+    @section('title', 'DAFTAR AKSESORIS REDY')
+@endif
 @section('content')
     <div class="card">
         <div class="card-head">
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">List Accessories</h4>
                     </div>
                 </div>
                 <div class="col-6">
@@ -37,12 +41,12 @@
                                 <th width="5%">
                                     <input type="checkbox" id="select_all">
                                 </th>
-                                <th width="2%">Code Access</th>
-                                <th>Nama Accessories</th>
-                                <th>Price</th>
+                                <th width="2%">Kode Barcode</th>
+                                <th>Nama Aksesoris</th>
+                                <th>Harga</th>
                                 <th class="text-center">Jumlah Barcode</th>
                                 <th class="text-center" width="10%">Stok</th>
-                                <th class="text-center" width="10%">Action</th>
+                                <th class="text-center" width="10%">Aksi</th>
                             </tr>
                             </thead>
                             <tbody>

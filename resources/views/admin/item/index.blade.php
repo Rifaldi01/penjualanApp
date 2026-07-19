@@ -1,22 +1,14 @@
 @extends('layouts.master')
+@section('title', 'DAFTAR KATEGORI ALAT')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="row">
-                <div class="col-6 mt-3">
-                    <div class="container">
-                        <h4 class="text-uppercase">List Item</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="example" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                     <tr>
                         <th width="4%">No</th>
-                        <th>Name Item</th>
+                        <th>Nama Kategori</th>
                         <th>Stok</th>
                     </tr>
                     </thead>

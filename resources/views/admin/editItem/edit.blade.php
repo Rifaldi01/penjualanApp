@@ -1,17 +1,7 @@
 @extends('layouts.master')
+@section('title', 'EDIT ALAT')
 @section('content')
     <div class="card">
-        <div class="card-head">
-            <div class="container mt-3">
-                @if(isset($item))
-                    <h3 class="mb-4 ms-3">Edit Item<i class="bx bx-edit"></i></h3>
-                @else
-                    <h3 class="mb-4 ms-3">Add Item<i class="bx bx-user-plus"></i></h3>
-                @endif
-                <hr>
-            </div>
-
-        </div>
         @if ($errors->any())
             @foreach ($errors->all() as $error)
                 <div class="alert border-0 border-start border-5 border-danger alert-dismissible fade show py-2">
@@ -38,7 +28,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="mb-2">
-                        <label class="col-form-label">Name Item</label>
+                        <label class="col-form-label">Nama Alat</label>
                         <input type="text" name="name" class="form-control" placeholder="Enter Namae Item"
                                value="{{isset($item) ? $item->name : null}}">
                     </div>
@@ -92,11 +82,11 @@
                            value="{{isset($item) ? $item->price : null}}" placeholder="0">
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-dnd float-end">Save<i
+                    <button type="submit" class="btn btn-dnd float-end">Simpan<i
                             class="bx bx-save"></i></button>
 
                         <a href="{{route('admin.item.editItem')}}" class="btn btn-warning float-end me-2"><i
-                                class="bx bx-undo"></i>Back</a>
+                                class="bx bx-undo"></i>Kembali</a>
 
                 </div>
             </div>
