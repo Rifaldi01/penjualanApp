@@ -36,7 +36,7 @@
                         <div class="card-body">
                             <div class="p-4">
                                 <div class="mb-3 text-center">
-                                    <img src="{{URL::to('images/dnd.png')}}" width="60%" alt=""/>
+                                    <img src="{{URL::to('images/pos.png')}}" width="60%" alt=""/>
                                     <p class="mb-0">Please log in to your account</p>
                                 </div>
                                 <div class="form-body">
