@@ -92,7 +92,7 @@
             <div class="row">
                 <div class="col-6">
                     <div class="container mt-3">
-                        <h4 class="text-uppercase">Activity Account</h4>
+                        <h4 class="text-uppercase">Aktivitas Akun</h4>
                     </div>
                 </div>
 
