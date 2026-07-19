@@ -364,40 +364,38 @@
     <c t="inlineStr" r="D${rowStart}"><is><t></t></is></c>
     <c t="inlineStr" r="E${rowStart}"><is><t></t></is></c>
     <c t="inlineStr" r="F${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="G${rowStart}"><is><t>TOTAL</t></is></c>
+    <c t="inlineStr" r="G${rowStart}"><is><t></t></is></c>
+    <c s="${redStyle}" t="inlineStr" r="H${rowStart}"><is><t>TOTAL</t></is></c>
 
-    <c s="${redStyle}" t="inlineStr" r="H${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="I${rowStart}">
         <is><t>${getFooterText('ttl_inv')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="I${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="J${rowStart}">
         <is><t>${getFooterText('ttl_ppn')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="J${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="K${rowStart}">
         <is><t>${getFooterText('ttl_pph')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="K${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="L${rowStart}">
         <is><t>${getFooterText('ttl_diskon')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="L${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="M${rowStart}">
         <is><t>${getFooterText('ttl_ongkir')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="M${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="N${rowStart}">
         <is><t>${getFooterText('ttl_biaya_admin')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="N${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="O${rowStart}">
         <is><t>${getFooterText('ttl_diterima')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="O${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="P${rowStart}">
         <is><t>${getFooterText('ttl_piutang')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="P${rowStart}">
+    <c s="${redStyle}" t="inlineStr" r="Q${rowStart}">
         <is><t>${getFooterText('ttl_bayar')}</t></is>
     </c>
-    <c s="${redStyle}" t="inlineStr" r="Q${rowStart}">
-        <is><t>${getFooterText('ttl_fee')}</t></is>
-    </c>
     <c s="${redStyle}" t="inlineStr" r="R${rowStart}">
-        <is><t>${getFooterText('ttl_modal')}</t></is>
+        <is><t>${getFooterText('ttl_fee')}</t></is>
     </c>
     <c s="${redStyle}" t="inlineStr" r="S${rowStart}">
         <is><t>${getFooterText('ttl_laba')}</t></is>
