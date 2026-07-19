@@ -19,11 +19,19 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $cust = Customer::latest()->paginate();
         $title = 'Delete Data!';
-        $text = "Are you sure you want to delete?";
+        $text = 'Are you sure you want to delete?';
+
         confirmDelete($title, $text);
-        $cust = Customer::all();
+
+        $cust = Customer::with('divisi')
+            ->whereHas('divisi', function ($query) {
+                $query->where('status', 'active')
+                    ->where('name', '!=', 'Rental');
+            })
+            ->orderBy('name')
+            ->get();
+
         return view('manager.customer.index', compact('cust'));
     }
 
@@ -34,17 +42,24 @@ class CustomerController extends Controller
      */
     public function create($id = null)
     {
-        $inject = [
-            'url' => route('manager.customer.store'),
-            'divisi'=> Divisi::pluck('name', 'id')->toArray(),
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get()
+            ->pluck('name', 'id');
 
+        $inject = [
+            'url'    => route('manager.customer.store'),
+            'divisi' => $divisi,
         ];
-        if ($id){
-            $cust = Customer::whereId($id)->first();
+
+        if ($id) {
+            $cust = Customer::findOrFail($id);
+
             $inject = [
-                'url' => route('manager.customer.update', $id),
-                'divisi'=> Divisi::pluck('name', 'id')->toArray(),
-                'cust' => $cust
+                'url'    => route('manager.customer.update', $id),
+                'divisi' => $divisi,
+                'cust'   => $cust,
             ];
         }
         return view('manager.customer.create', $inject);

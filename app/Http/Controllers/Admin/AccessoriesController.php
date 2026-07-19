@@ -16,8 +16,17 @@ class AccessoriesController extends Controller
     public function index()
     {
         $userDivisi = auth()->user()->divisi->name; // Asumsikan user memiliki relasi ke divisi
-        $acces = Accessories::with('divisi')->get();
-        $divisi = Divisi::all();
+        $acces = Accessories::with('divisi')
+            ->whereHas('divisi', function ($query) {
+                $query->where('status', 'active')
+                    ->where('name', '!=', 'Rental');
+            })
+            ->orderBy('name')
+            ->get();
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
         $accessories = Accessories::where('divisi_id', Auth::user()->divisi_id)->get();
 
         return view('admin.accessories.index', compact('acces', 'divisi', 'userDivisi', 'accessories'));
