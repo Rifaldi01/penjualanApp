@@ -49,7 +49,7 @@
         @endforeach
     </div>
     <hr>
-    <h3>List Stok Item</h3>
+    <h3>Daftar Stok Alat</h3>
     <hr>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
         <div class="col">
