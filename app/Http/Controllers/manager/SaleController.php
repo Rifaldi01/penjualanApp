@@ -610,6 +610,44 @@ class SaleController extends Controller
                         continue;
 
                     }
+                    if ($row['status'] == 'new') {
+
+                        $accessory = Accessories::find($row['accessories_id']);
+
+                        if (!$accessory) {
+                            continue;
+                        }
+
+                        if ($accessory->stok < $row['qty']) {
+
+                            DB::rollBack();
+
+                            return response()->json([
+                                'status'  => 'error',
+                                'message' => 'Stok accessories '.$accessory->name.' tidak mencukupi.'
+                            ]);
+                        }
+
+                        AccessoriesSale::create([
+
+                            'sale_id'        => $sale->id,
+                            'accessories_id' => $accessory->id,
+                            'qty'            => $row['qty'],
+                            'subtotal'       => $accessory->price * $row['qty'],
+                            'acces_out'      => $tanggalInvoice,
+
+                            'return_qty'     => 0,
+                            'status_return'  => 0,
+
+                            'created_at'     => $tanggalInvoice,
+                            'updated_at'     => now(),
+
+                        ]);
+
+                        $accessory->decrement('stok', $row['qty']);
+
+                        continue;
+                    }
 
                     if ($row['status'] == 'old') {
 
