@@ -79,7 +79,7 @@ class PermintaanController extends Controller
      */
     public function create()
     {
-        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)->get();
+        $divisi = Divisi::where('id', '!=', Auth::user()->divisi_id)->where('status', 'active')->get();
         return view('gudang.permintaan.create', compact('divisi'));
     }
 
