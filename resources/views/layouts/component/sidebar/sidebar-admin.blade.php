@@ -4,7 +4,8 @@
             <img src="{{URL::to('assets/images/asd.png')}}" class="logo-icon" alt="logo icon">
         </div>
         <div>
-            <h4 class="logo-text"><i>DND</i><i style="color:black">SURVEY</i></h4>
+            <h4 class="logo-text"><i>S A</i><i style="color:black"> L E S</i></h4>
+            {{--            <h4 class="logo-text"><i>DND</i><i style="color:black">SURVEY</i></h4>--}}
         </div>
         <div class="toggle-icon ms-auto"><i class='bx bx-arrow-back'></i>
         </div>
