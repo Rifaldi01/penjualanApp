@@ -39,12 +39,13 @@ class ReportController extends Controller
         });
 
         // Hitung total income dan lainnya
-        $income = $report->sum('pay');
-        $diskon = $report->sum('diskon');
-        $ongkir = $report->sum('ongkir');
-        $ppn = $report->sum('ppn');
-        $pph = $report->sum('pph');
-        $fee = $report->sum('fee');
+        $income    = $report->sum('pay');
+        $diskon    = $report->sum('diskon');
+        $ongkir    = $report->sum('ongkir');
+        $ppn       = $report->sum('ppn');
+        $pph       = $report->sum('pph');
+        $admin = $report->sum('admin_fee');
+        $fee       = $report->sum('fee');
 
         $totalCapitalPriceItem = ItemSale::whereYear('created_at', $currentYear)->whereMonth('created_at', $currentMonth)
             ->sum('capital_price');
@@ -60,6 +61,7 @@ class ReportController extends Controller
             'ongkir',
             'ppn',
             'pph',
+            'admin',
             'fee',
         ));
     }
@@ -104,7 +106,7 @@ class ReportController extends Controller
         $totalfee = 0;
         $totalPiutang = 0;
         $diterima = 0;
-        $admin_fee = 0;
+        $admin = 0;
         $totalCapitalPerSale = [];
 
         $report->each(function ($sale) use (
@@ -119,7 +121,7 @@ class ReportController extends Controller
             &$totalprice,
             &$totalPiutang,
             &$diterima,
-            &$admin_fee,
+            &$admin,
         ) {
             $totalIncome += $sale->pay;
             $totalDiskon += $sale->diskon;
@@ -129,7 +131,7 @@ class ReportController extends Controller
             $totalfee += $sale->fee;
             $totalprice += $sale->total_price;
             $diterima += $sale->nominal_in;
-            $admin_fee += $sale->admin_fee;
+            $admin += $sale->admin_fee;
             $totalPiutang += max(($sale->pay ?? 0) - ($sale->nominal_in ?? 0), 0);
 
             $accessoryCapital = $sale->accessories->sum(function ($accessory) {
@@ -159,7 +161,7 @@ class ReportController extends Controller
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
             'report'       => $report,
-            'admin_fee'    => $admin_fee,
+            'admin'        => $admin,
             'income'       => $totalIncome,
             'profit'       => $profit,
             'diskon'       => $totalDiskon,
@@ -176,7 +178,7 @@ class ReportController extends Controller
                 'pph'           => $totalpph,
                 'diskon'        => $totalDiskon,
                 'ongkir'        => $totalOngkir,
-                'admin'         => $admin_fee,
+                'admin'         => $admin,
                 'diterima'      => $diterima,
                 'piutang'       => $totalPiutang,
                 'total_bayar'   => $totalIncome,

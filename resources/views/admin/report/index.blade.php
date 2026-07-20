@@ -98,6 +98,10 @@
                         <th colspan="10" class="text-center" id="pph">0</th>
                     </tr>
                     <tr>
+                        <th colspan="10" class="text-center">Biaya Admin</th>
+                        <th colspan="10" class="text-center" id="biaya_admin">0</th>
+                    </tr>
+                    <tr>
                         <th colspan="10" class="text-center">Fee</th>
                         <th colspan="10" class="text-center" id="fee">0</th>
                     </tr>
@@ -145,6 +149,7 @@
                         $('#ongkir').text(formatRupiah(response.ongkir));
                         $('#ppn').text(formatRupiah(response.ppn));
                         $('#pph').text(formatRupiah(response.pph));
+                        $('#biaya_admin').text(formatRupiah(response.admin));
                         $('#fee').text(formatRupiah(response.fee));
                         $('#total-bersih').text(formatRupiah(response.totalprice));
                         $('#ttl_inv').text(formatRupiah(response.footer.total_invoice));
@@ -399,7 +404,7 @@
                             addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
                             addFooterRow('PPN', getFooterText('ppn'), rowStart++);
                             addFooterRow('PPH', getFooterText('pph'), rowStart++);
-                            addFooterRow('Biaya Admin', getFooterText('admin'), rowStart++);
+                            addFooterRow('Biaya Admin', getFooterText('ttl_biaya_admin'), rowStart++);
                             addFooterRow('Fee', getFooterText('fee'), rowStart++);
                             addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
                             addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
