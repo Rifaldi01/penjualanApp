@@ -394,21 +394,15 @@
                             rowStart++;
 
                             var rowStart = $sheet.find('sheetData row').length + 1;
-                            addFooterRow('Total Invoice', formatRupiah(summaryData.totalprice), rowStart++);
-                            addFooterRow('PPN', formatRupiah(summaryData.ppn), rowStart++);
-                            addFooterRow('PPH', formatRupiah(summaryData.pph), rowStart++);
-                            addFooterRow('Diskon', formatRupiah(summaryData.diskon), rowStart++);
-                            addFooterRow('Ongkir', formatRupiah(summaryData.ongkir), rowStart++);
-                            addFooterRow('Total Bersih', formatRupiah(summaryData.income), rowStart++);
-                            addFooterRow('Biaya Admin', formatRupiah(summaryData.admin_fee), rowStart++);
-                            addFooterRow('Diterima', formatRupiah(summaryData.nominal_in), rowStart++);
-                            addFooterRow(
-                                'Piutang',
-                                formatRupiah(Math.max(summaryData.pay - summaryData.nominal_in, 0)),
-                                rowStart++
-                            );
-                            addFooterRow('Laba-Rugi', formatRupiah(summaryData.profit), rowStart++);
-                            addFooterRow('Fee', formatRupiah(summaryData.fee), rowStart++);
+                            addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
+                            addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
+                            addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
+                            addFooterRow('PPN', getFooterText('ppn'), rowStart++);
+                            addFooterRow('PPH', getFooterText('pph'), rowStart++);
+                            addFooterRow('Biaya Admin', getFooterText('admin'), rowStart++);
+                            addFooterRow('Fee', getFooterText('fee'), rowStart++);
+                            addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
+                            addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
                         }
 
                     }, {
