@@ -1,130 +1,130 @@
-{{--<!doctype html>--}}
-{{--<html lang="en">--}}
+<!doctype html>
+<html lang="en">
 
 
-{{--<!-- Mirrored from codervent.com/rocker/demo/vertical/auth-basic-signin.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 May 2024 06:28:07 GMT -->--}}
-{{--<head>--}}
-{{--    <!-- Required meta tags -->--}}
-{{--    <meta charset="utf-8">--}}
-{{--    <meta name="viewport" content="width=device-width, initial-scale=1">--}}
-{{--    <!--favicon-->--}}
-{{--    <link rel="icon" href="{{URL::to('assets/images/asd.png')}}" type="image/png')}}"/>--}}
-{{--    <!--plugins-->--}}
-{{--    <link href="{{URL::to('assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet"/>--}}
-{{--    <link href="{{URL::to('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet"/>--}}
-{{--    <link href="{{URL::to('assets/plugins/metismenu/css/metisMenu.min.css')}}" rel="stylesheet"/>--}}
-{{--    <!-- loader-->--}}
-{{--    <link href="{{URL::to('assets/css/pace.min.css')}}" rel="stylesheet"/>--}}
-{{--    <script src="{{URL::to('assets/js/pace.min.js')}}"></script>--}}
-{{--    <!-- Bootstrap CSS -->--}}
-{{--    <link href="{{URL::to('assets/css/bootstrap.min.css')}}" rel="stylesheet">--}}
-{{--    <link href="{{URL::to('assets/css/bootstrap-extended.css')}}" rel="stylesheet">--}}
-{{--    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">--}}
-{{--    <link href="{{URL::to('assets/css/app.css')}}" rel="stylesheet">--}}
-{{--    <link href="{{URL::to('assets/css/icons.css')}}" rel="stylesheet">--}}
-{{--    <title>DNDSURVEY - LOGIN</title>--}}
-{{--</head>--}}
+<!-- Mirrored from codervent.com/rocker/demo/vertical/auth-basic-signin.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 May 2024 06:28:07 GMT -->
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--favicon-->
+    <link rel="icon" href="{{URL::to('assets/images/asd.png')}}" type="image/png')}}"/>
+    <!--plugins-->
+    <link href="{{URL::to('assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet"/>
+    <link href="{{URL::to('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet"/>
+    <link href="{{URL::to('assets/plugins/metismenu/css/metisMenu.min.css')}}" rel="stylesheet"/>
+    <!-- loader-->
+    <link href="{{URL::to('assets/css/pace.min.css')}}" rel="stylesheet"/>
+    <script src="{{URL::to('assets/js/pace.min.js')}}"></script>
+    <!-- Bootstrap CSS -->
+    <link href="{{URL::to('assets/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{URL::to('assets/css/bootstrap-extended.css')}}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+    <link href="{{URL::to('assets/css/app.css')}}" rel="stylesheet">
+    <link href="{{URL::to('assets/css/icons.css')}}" rel="stylesheet">
+    <title>DNDSURVEY - LOGIN</title>
+</head>
 
-{{--<body class="">--}}
-{{--<!--wrapper-->--}}
-{{--<div class="wrapper">--}}
-{{--    <div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0">--}}
-{{--        <div class="container">--}}
-{{--            <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">--}}
-{{--                <div class="col mx-auto">--}}
-{{--                    <div class="card mb-0">--}}
-{{--                        <div class="card-body">--}}
-{{--                            <div class="p-4">--}}
-{{--                                <div class="mb-3 text-center">--}}
-{{--                                    <img src="{{URL::to('images/pos.png')}}" width="60%" alt=""/>--}}
-{{--                                    <p class="mb-0">Please log in to your account</p>--}}
-{{--                                </div>--}}
-{{--                                <div class="form-body">--}}
-{{--                                    <form class="row g-3" method="POST" action="{{ route('login') }}">--}}
-{{--                                        @csrf--}}
-{{--                                        <div class="col-12">--}}
-{{--                                            <label for="inputEmailAddress" class="form-label">Email</label>--}}
-{{--                                            <input type="email"--}}
-{{--                                                   class="form-control @error('email') is-invalid @enderror"--}}
-{{--                                                   name="email" value="{{ old('email') }}" required autocomplete="email"--}}
-{{--                                                   autofocus id="email" placeholder="Enter Email">--}}
-{{--                                            @error('email')--}}
-{{--                                            <span class="invalid-feedback" role="alert">--}}
-{{--                                                <strong>{{ $message }}</strong>--}}
-{{--                                            </span>--}}
-{{--                                            @enderror--}}
-{{--                                        </div>--}}
-{{--                                        <div class="col-12">--}}
-{{--                                            <label for="inputChoosePassword" class="form-label">Password</label>--}}
-{{--                                            <div class="input-group" id="show_hide_password">--}}
-{{--                                                <input id="password" type="password"--}}
-{{--                                                       class="form-control border-end-0 @error('password') is-invalid @enderror"--}}
-{{--                                                       name="password" placeholder="Enter Password"--}}
-{{--                                                       required autocomplete="current-password">--}}
-{{--                                                <a href="javascript:;" class="input-group-text bg-transparent"><i--}}
-{{--                                                        class='bx bx-hide'></i></a>--}}
-{{--                                                @error('password')--}}
-{{--                                                <span class="invalid-feedback" role="alert">--}}
-{{--                                                    <strong>{{ $message }}</strong>--}}
-{{--                                                 </span>--}}
-{{--                                                @enderror--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="col-md-6">--}}
-{{--                                            <div class="form-check form-switch">--}}
-{{--                                                <input class="form-check-input" type="checkbox" name="remember"--}}
-{{--                                                       id="remember" {{ old('remember') ? 'checked' : '' }}>--}}
-{{--                                                <label class="form-check-label" for="flexSwitchCheckChecked">Remember--}}
-{{--                                                    Me</label>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="col-12">--}}
-{{--                                            <div class="d-grid">--}}
-{{--                                                <button type="submit" class="btn btn-dnd">Sign in</button>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </form>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--            <!--end row-->--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}
-{{--<!--end wrapper-->--}}
-{{--<!-- Bootstrap JS -->--}}
-{{--<script src="{{URL::to('assets/js/bootstrap.bundle.min.js')}}"></script>--}}
-{{--<!--plugins-->--}}
-{{--<script src="{{URL::to('assets/js/jquery.min.js')}}"></script>--}}
-{{--<script src="{{URL::to('assets/plugins/simplebar/js/simplebar.min.js')}}"></script>--}}
-{{--<script src="{{URL::to('assets/plugins/metismenu/js/metisMenu.min.js')}}"></script>--}}
-{{--<script src="{{URL::to('assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js')}}"></script>--}}
-{{--<!--Password show & hide js -->--}}
-{{--<script>--}}
-{{--    $(document).ready(function () {--}}
-{{--        $("#show_hide_password a").on('click', function (event) {--}}
-{{--            event.preventDefault();--}}
-{{--            if ($('#show_hide_password input').attr("type") == "text") {--}}
-{{--                $('#show_hide_password input').attr('type', 'password');--}}
-{{--                $('#show_hide_password i').addClass("bx-hide");--}}
-{{--                $('#show_hide_password i').removeClass("bx-show");--}}
-{{--            } else if ($('#show_hide_password input').attr("type") == "password") {--}}
-{{--                $('#show_hide_password input').attr('type', 'text');--}}
-{{--                $('#show_hide_password i').removeClass("bx-hide");--}}
-{{--                $('#show_hide_password i').addClass("bx-show");--}}
-{{--            }--}}
-{{--        });--}}
-{{--    });--}}
-{{--</script>--}}
-{{--<!--app JS-->--}}
-{{--<script src="{{URL::to('assets/js/app.js')}}"></script>--}}
-{{--</body>--}}
+<body class="">
+<!--wrapper-->
+<div class="wrapper">
+    <div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+                <div class="col mx-auto">
+                    <div class="card mb-0">
+                        <div class="card-body">
+                            <div class="p-4">
+                                <div class="mb-3 text-center">
+                                    <img src="{{URL::to('images/pos.png')}}" width="60%" alt=""/>
+                                    <p class="mb-0">Please log in to your account</p>
+                                </div>
+                                <div class="form-body">
+                                    <form class="row g-3" method="POST" action="{{ route('login') }}">
+                                        @csrf
+                                        <div class="col-12">
+                                            <label for="inputEmailAddress" class="form-label">Email</label>
+                                            <input type="email"
+                                                   class="form-control @error('email') is-invalid @enderror"
+                                                   name="email" value="{{ old('email') }}" required autocomplete="email"
+                                                   autofocus id="email" placeholder="Enter Email">
+                                            @error('email')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                            @enderror
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="inputChoosePassword" class="form-label">Password</label>
+                                            <div class="input-group" id="show_hide_password">
+                                                <input id="password" type="password"
+                                                       class="form-control border-end-0 @error('password') is-invalid @enderror"
+                                                       name="password" placeholder="Enter Password"
+                                                       required autocomplete="current-password">
+                                                <a href="javascript:;" class="input-group-text bg-transparent"><i
+                                                        class='bx bx-hide'></i></a>
+                                                @error('password')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                 </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="remember"
+                                                       id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="flexSwitchCheckChecked">Remember
+                                                    Me</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-dnd">Sign in</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end row-->
+        </div>
+    </div>
+</div>
+<!--end wrapper-->
+<!-- Bootstrap JS -->
+<script src="{{URL::to('assets/js/bootstrap.bundle.min.js')}}"></script>
+<!--plugins-->
+<script src="{{URL::to('assets/js/jquery.min.js')}}"></script>
+<script src="{{URL::to('assets/plugins/simplebar/js/simplebar.min.js')}}"></script>
+<script src="{{URL::to('assets/plugins/metismenu/js/metisMenu.min.js')}}"></script>
+<script src="{{URL::to('assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js')}}"></script>
+<!--Password show & hide js -->
+<script>
+    $(document).ready(function () {
+        $("#show_hide_password a").on('click', function (event) {
+            event.preventDefault();
+            if ($('#show_hide_password input').attr("type") == "text") {
+                $('#show_hide_password input').attr('type', 'password');
+                $('#show_hide_password i').addClass("bx-hide");
+                $('#show_hide_password i').removeClass("bx-show");
+            } else if ($('#show_hide_password input').attr("type") == "password") {
+                $('#show_hide_password input').attr('type', 'text');
+                $('#show_hide_password i').removeClass("bx-hide");
+                $('#show_hide_password i').addClass("bx-show");
+            }
+        });
+    });
+</script>
+<!--app JS-->
+<script src="{{URL::to('assets/js/app.js')}}"></script>
+</body>
 
 
-{{--</html>--}}
+</html>
 
 {{--error page--}}
 {{--<!DOCTYPE html>--}}
@@ -190,273 +190,276 @@
 
 {{--<!-- Mirrored from codervent.com/rocker/demo/vertical/errors-500-error.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 May 2024 06:28:18 GMT -->--}}
 {{--</html>--}}
-    <!DOCTYPE html>
-<html lang="en">
-<head>
 
-    <meta charset="UTF-8">
-    <title>Maintenance</title>
+{{--maintenance page--}}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{{--    <!DOCTYPE html>--}}
+{{--<html lang="en">--}}
+{{--<head>--}}
 
-    <link rel="icon" href="{{URL::to('assets/images/asd.png')}}" type="image/png')}}"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{{--    <meta charset="UTF-8">--}}
+{{--    <title>Maintenance</title>--}}
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+{{--    <meta name="viewport" content="width=device-width, initial-scale=1">--}}
 
-    <style>
+{{--    <link rel="icon" href="{{URL::to('assets/images/asd.png')}}" type="image/png')}}"/>--}}
+{{--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">--}}
 
-        body{
+{{--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">--}}
 
-            margin:0;
-            height:100vh;
+{{--    <style>--}}
 
-            display:flex;
-            justify-content:center;
-            align-items:center;
+{{--        body{--}}
 
-            background:linear-gradient(135deg,#1f2937,#0f172a,#111827);
+{{--            margin:0;--}}
+{{--            height:100vh;--}}
 
-            overflow:hidden;
+{{--            display:flex;--}}
+{{--            justify-content:center;--}}
+{{--            align-items:center;--}}
 
-            color:white;
+{{--            background:linear-gradient(135deg,#1f2937,#0f172a,#111827);--}}
 
-            font-family:Segoe UI;
+{{--            overflow:hidden;--}}
 
-        }
+{{--            color:white;--}}
 
-        .card-maintenance{
+{{--            font-family:Segoe UI;--}}
 
-            width:650px;
+{{--        }--}}
 
-            border:none;
+{{--        .card-maintenance{--}}
 
-            border-radius:25px;
+{{--            width:650px;--}}
 
-            background:rgba(255,255,255,.08);
+{{--            border:none;--}}
 
-            backdrop-filter:blur(15px);
+{{--            border-radius:25px;--}}
 
-            padding:50px;
+{{--            background:rgba(255,255,255,.08);--}}
 
-            text-align:center;
+{{--            backdrop-filter:blur(15px);--}}
 
-            box-shadow:0 20px 60px rgba(0,0,0,.4);
+{{--            padding:50px;--}}
 
-            animation:fadeIn 1s;
+{{--            text-align:center;--}}
 
-        }
+{{--            box-shadow:0 20px 60px rgba(0,0,0,.4);--}}
 
-        .gear{
+{{--            animation:fadeIn 1s;--}}
 
-            font-size:90px;
+{{--        }--}}
 
-            color:#ffc107;
+{{--        .gear{--}}
 
-            animation:spin 6s linear infinite;
+{{--            font-size:90px;--}}
 
-        }
+{{--            color:#ffc107;--}}
 
-        h1{
+{{--            animation:spin 6s linear infinite;--}}
 
-            margin-top:20px;
+{{--        }--}}
 
-            font-weight:bold;
+{{--        h1{--}}
 
-        }
+{{--            margin-top:20px;--}}
 
-        p{
+{{--            font-weight:bold;--}}
 
-            color:#d7d7d7;
+{{--        }--}}
 
-            margin-top:15px;
+{{--        p{--}}
 
-            font-size:18px;
+{{--            color:#d7d7d7;--}}
 
-        }
+{{--            margin-top:15px;--}}
 
-        .progress{
+{{--            font-size:18px;--}}
 
-            height:15px;
+{{--        }--}}
 
-            border-radius:30px;
+{{--        .progress{--}}
 
-            overflow:hidden;
+{{--            height:15px;--}}
 
-            margin-top:40px;
+{{--            border-radius:30px;--}}
 
-        }
+{{--            overflow:hidden;--}}
 
-        .progress-bar{
+{{--            margin-top:40px;--}}
 
-            width:0;
+{{--        }--}}
 
-            animation:loading 12s linear infinite;
+{{--        .progress-bar{--}}
 
-        }
+{{--            width:0;--}}
 
-        .count{
+{{--            animation:loading 12s linear infinite;--}}
 
-            font-size:35px;
+{{--        }--}}
 
-            font-weight:bold;
+{{--        .count{--}}
 
-            color:#ffc107;
+{{--            font-size:35px;--}}
 
-            margin-top:20px;
+{{--            font-weight:bold;--}}
 
-        }
+{{--            color:#ffc107;--}}
 
-        @keyframes spin{
+{{--            margin-top:20px;--}}
 
-            from{
+{{--        }--}}
 
-                transform:rotate(0deg);
+{{--        @keyframes spin{--}}
 
-            }
+{{--            from{--}}
 
-            to{
+{{--                transform:rotate(0deg);--}}
 
-                transform:rotate(360deg);
+{{--            }--}}
 
-            }
+{{--            to{--}}
 
-        }
+{{--                transform:rotate(360deg);--}}
 
-        @keyframes loading{
+{{--            }--}}
 
-            from{
+{{--        }--}}
 
-                width:0%;
+{{--        @keyframes loading{--}}
 
-            }
+{{--            from{--}}
 
-            to{
+{{--                width:0%;--}}
 
-                width:100%;
+{{--            }--}}
 
-            }
+{{--            to{--}}
 
-        }
+{{--                width:100%;--}}
 
-        @keyframes fadeIn{
+{{--            }--}}
 
-            from{
+{{--        }--}}
 
-                opacity:0;
+{{--        @keyframes fadeIn{--}}
 
-                transform:translateY(40px);
+{{--            from{--}}
 
-            }
+{{--                opacity:0;--}}
 
-            to{
+{{--                transform:translateY(40px);--}}
 
-                opacity:1;
+{{--            }--}}
 
-                transform:translateY(0);
+{{--            to{--}}
 
-            }
+{{--                opacity:1;--}}
 
-        }
+{{--                transform:translateY(0);--}}
 
-        .dot{
+{{--            }--}}
 
-            position:absolute;
+{{--        }--}}
 
-            width:10px;
+{{--        .dot{--}}
 
-            height:10px;
+{{--            position:absolute;--}}
 
-            background:white;
+{{--            width:10px;--}}
 
-            border-radius:50%;
+{{--            height:10px;--}}
 
-            opacity:.3;
+{{--            background:white;--}}
 
-            animation:float 8s linear infinite;
+{{--            border-radius:50%;--}}
 
-        }
+{{--            opacity:.3;--}}
 
-        @keyframes float{
+{{--            animation:float 8s linear infinite;--}}
 
-            from{
+{{--        }--}}
 
-                transform:translateY(100vh);
+{{--        @keyframes float{--}}
 
-            }
+{{--            from{--}}
 
-            to{
+{{--                transform:translateY(100vh);--}}
 
-                transform:translateY(-100px);
+{{--            }--}}
 
-            }
+{{--            to{--}}
 
-        }
+{{--                transform:translateY(-100px);--}}
 
-    </style>
+{{--            }--}}
 
-</head>
+{{--        }--}}
 
-<body>
+{{--    </style>--}}
 
-@for($i=0;$i<40;$i++)
+{{--</head>--}}
 
-    <div class="dot"
-         style="
-        left:{{ rand(1,100) }}%;
-        animation-delay:{{ rand(1,8) }}s;
-        animation-duration:{{ rand(5,15) }}s;
-">
-    </div>
+{{--<body>--}}
 
-@endfor
+{{--@for($i=0;$i<40;$i++)--}}
 
+{{--    <div class="dot"--}}
+{{--         style="--}}
+{{--        left:{{ rand(1,100) }}%;--}}
+{{--        animation-delay:{{ rand(1,8) }}s;--}}
+{{--        animation-duration:{{ rand(5,15) }}s;--}}
+{{--">--}}
+{{--    </div>--}}
 
-<div class="card-maintenance">
+{{--@endfor--}}
 
-    <i class="fas fa-gears gear"></i>
 
-    <h1>System Maintenance</h1>
+{{--<div class="card-maintenance">--}}
 
-    <p>
+{{--    <i class="fas fa-gears gear"></i>--}}
 
-        Kami sedang melakukan peningkatan sistem agar memberikan pelayanan yang lebih baik.
+{{--    <h1>System Maintenance</h1>--}}
 
-    </p>
+{{--    <p>--}}
 
-    <div class="progress mt-4">
+{{--        Kami sedang melakukan peningkatan sistem agar memberikan pelayanan yang lebih baik.--}}
 
-        <div class="progress-bar bg-warning"></div>
+{{--    </p>--}}
 
-    </div>
+{{--    <div class="progress mt-4">--}}
 
-    <div class="count" id="countdown">
-        😁
-    </div>
+{{--        <div class="progress-bar bg-warning"></div>--}}
 
-    <small>
+{{--    </div>--}}
 
-        Hormat kami, <a href="https://satyasoftware.id/">Satya Software Media</a>
+{{--    <div class="count" id="countdown">--}}
+{{--        😁--}}
+{{--    </div>--}}
 
-    </small>
+{{--    <small>--}}
 
-</div>
+{{--        Hormat kami, <a href="https://satyasoftware.id/">Satya Software Media</a>--}}
 
-<script>
+{{--    </small>--}}
 
+{{--</div>--}}
 
+{{--<script>--}}
 
-    setInterval(function(){
 
-        second--;
 
-        document.getElementById("countdown").innerHTML = second;
+{{--    setInterval(function(){--}}
 
+{{--        second--;--}}
 
+{{--        document.getElementById("countdown").innerHTML = second;--}}
 
-    },1000);
 
-</script>
 
-</body>
-</html>
+{{--    },1000);--}}
+
+{{--</script>--}}
+
+{{--</body>--}}
+{{--</html>--}}
