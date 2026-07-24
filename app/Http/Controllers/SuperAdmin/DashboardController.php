@@ -27,6 +27,21 @@ class DashboardController extends Controller
         })->get();
         return view('superadmin.index', compact('user', 'sale'));
     }
+    public function userStatus()
+    {
+        $users = User::whereHas('roles', function ($query) {
+            $query->where('name', '!=', 'superadmin');
+        })->get();
+
+        $data = $users->map(function ($user) {
+            return [
+                'id'     => $user->id,
+                'online' => $user->isOnline(),
+            ];
+        });
+
+        return response()->json($data);
+    }
     public function updateError(Request $request, $id)
     {
         $request->validate([

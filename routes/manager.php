@@ -117,4 +117,9 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('/accessories-balance/data', [AccessoriesBalanceController::class, 'data'])->name('accessories.balance.data');
     Route::get('balance/{id}/detail', [AccessoriesBalanceController::class, 'show'])->name('manager.balance.show');
 
+    //status online
+    Route::get('/user-status', [DashboardController::class, 'userStatus'])
+        ->name('manager.user.status');
+    //end
+
 });

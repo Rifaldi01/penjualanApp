@@ -159,7 +159,7 @@
                                     <td>{{$key +1}}</td>
                                     <td>{{$data->name}}</td>
                                     <td>{{$role->name}}</td>
-                                    <td class="text-center">
+                                    <td class="text-center user-status-{{ $data->id }}">
                                         @if($data->isOnline())
                                             <span class="badge bg-success">Online</span>
                                         @else
@@ -225,6 +225,33 @@
             });
 
         });
+    </script>
+    <script>
+        setInterval(function () {
+
+            $.ajax({
+                url: "{{ route('superadmin.user.status') }}",
+                type: "GET",
+                success: function (users) {
+
+                    users.forEach(function(user){
+
+                        let html = '';
+
+                        if(user.online){
+                            html = '<span class="badge bg-success">Online</span>';
+                        }else{
+                            html = '<span class="badge bg-danger">Offline</span>';
+                        }
+
+                        $('.user-status-' + user.id).html(html);
+
+                    });
+
+                }
+            });
+
+        }, 3000);
     </script>
 @endpush
 

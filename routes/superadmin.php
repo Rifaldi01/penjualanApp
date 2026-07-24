@@ -35,4 +35,9 @@ Route::group(['middleware' => ['auth:web', 'role:superAdmin'], 'prefix' => 'supe
 
     //fix error
     Route::put('fix-error/{id}', [DashboardController::class, 'updateError'])->name('superadmin.error.update');
+    //end
+
+    //status online
+    Route::get('/user-status', [DashboardController::class, 'userStatus'])
+        ->name('superadmin.user.status');
 });

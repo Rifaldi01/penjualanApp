@@ -29,4 +29,19 @@ class DashboardController extends Controller
         })->get();
         return view('manager.index', compact('user', 'itemsByCategory', 'item', 'divisi', 'totaldivisi', 'totaldivisiactive'));
     }
+    public function userStatus()
+    {
+        $users = User::whereHas('roles', function ($query) {
+            $query->where('name', '!=', 'superadmin');
+        })->get();
+
+        $data = $users->map(function ($user) {
+            return [
+                'id'     => $user->id,
+                'online' => $user->isOnline(),
+            ];
+        });
+
+        return response()->json($data);
+    }
 }
