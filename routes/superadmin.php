@@ -32,4 +32,7 @@ Route::group(['middleware' => ['auth:web', 'role:superAdmin'], 'prefix' => 'supe
     Route::put('/non-active-divisi/{id}', [DivisiController::class, 'bolck'])->name('superadmin.divisi.block');
     Route::put('/active-divisi/{id}', [DivisiController::class, 'activ'])->name('superadmin.divisi.activ');
     //end divisi
+
+    //fix error
+    Route::put('fix-error/{id}', [DashboardController::class, 'updateError'])->name('superadmin.error.update');
 });
