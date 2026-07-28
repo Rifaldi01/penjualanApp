@@ -16,6 +16,7 @@ use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\SalesReturnAccessories;
 use App\Models\SalesReturnItem;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -509,17 +510,37 @@ class SaleController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($sale->debt()->exists()) {
+            if ((float) $request->nominal_in == 0) {
 
-                $sale->debt()->update([
+                // Hapus debt jika ada
+                $sale->debt()->delete();
 
-                    'bank_id'     => $request->bank_id,
-                    'penerima'    => $request->penerima,
-                    'description' => $request->description,
+            } else {
 
-                ]);
+                if ($sale->debt()->exists()) {
+
+                    // Update debt
+                    $sale->debt()->update([
+                        'bank_id'     => $request->bank_id,
+                        'penerima'    => $request->penerima,
+                        'description' => $request->description,
+                        'pay_debts'   => $request->nominal_in,
+                    ]);
+
+                } else {
+
+                    // Buat debt baru
+                    $sale->debt()->create([
+                        'sale_id'    => $sale->id,
+                        'bank_id'     => $request->bank_id,
+                        'penerima'    => $request->penerima,
+                        'description' => $request->description,
+                        'pay_debts'   => $request->nominal_in,
+                        'date_pay'     => Carbon::now(),
+                    ]);
+
+                }
             }
-
             /*
             |--------------------------------------------------------------------------
             | GENERATE RETURN INVOICE
