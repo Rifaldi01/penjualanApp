@@ -39,6 +39,8 @@
 
                     <tbody>
                     @foreach($salesActive as $key => $data)
+                        @if($data->nominal_in >= $data->pay)
+                        @else
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ tanggal($data->created_at) }}</td>
@@ -244,6 +246,7 @@
                             </td>
 
                         </tr>
+                        @endif
                     @endforeach
                     </tbody>
 
@@ -330,6 +333,8 @@
                     <tbody>
 
                     @foreach($sales as $key => $data)
+                        @if($data->nominal_in >= $data->pay)
+
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ tanggal($data->created_at) }}</td>
@@ -362,6 +367,8 @@
                                 @include('admin.sale.invoice')
                             </td>
                         </tr>
+                        @else
+                        @endif
                     @endforeach
 
                     </tbody>
