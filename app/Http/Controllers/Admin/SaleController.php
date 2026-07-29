@@ -32,7 +32,7 @@ class SaleController extends Controller
 
         // Semua transaksi aktif (semua tahun)
         $salesActive = Sale::where('divisi_id', Auth::user()->divisi_id)
-            ->whereColumn('nominal_in', '<', 'pay')
+           
             ->with([
                 'customer.divisi',
                 'user',
@@ -52,7 +52,7 @@ class SaleController extends Controller
 
         // Query transaksi lunas
         $salesQuery = Sale::where('divisi_id', Auth::user()->divisi_id)
-            ->whereColumn('nominal_in', '>=', 'pay')
+
             ->with([
                 'customer.divisi',
                 'user',
