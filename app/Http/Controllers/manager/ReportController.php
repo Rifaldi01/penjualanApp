@@ -247,6 +247,7 @@ class ReportController extends Controller
             'fee'          => $totalfee,
             'totalprice'   => $totalprice,
             'diterima'     => $diterima,
+            'piutang'      => $totalPiutang,
 
             'footer' => [
                 'total_invoice' => $totalprice,
