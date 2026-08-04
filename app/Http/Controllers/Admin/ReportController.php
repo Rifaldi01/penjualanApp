@@ -156,7 +156,7 @@ class ReportController extends Controller
             })->implode(', ') : '-';
         });
 
-        $profit = $totalIncome - $totalCapital;
+        $profit = $totalIncome - $totalCapital - $totalfee;
 
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,

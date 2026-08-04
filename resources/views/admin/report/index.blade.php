@@ -214,7 +214,7 @@
                                 formatRupiah(Math.max((data.pay ?? 0) - (data.nominal_in ?? 0), 0)),
                                 formatRupiah(data.pay ?? 0),
                                 formatRupiah(data.fee ?? 0),
-                                formatRupiah(Math.max((data.pay ?? 0) - (totalCapital?.[data.id]))),
+                                formatRupiah(Math.max((data.pay ?? 0) - (data.fee ?? 0) - (totalCapital?.[data.id]))),
                                 debtList ?? 'N/A'
                             ]).draw(false);
                         });

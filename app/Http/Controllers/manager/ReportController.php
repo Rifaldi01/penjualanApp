@@ -233,7 +233,7 @@ class ReportController extends Controller
                 : '-';
         });
 
-        $profit = $totalIncome - $totalCapital;
+        $profit = $totalIncome - $totalCapital - $totalfee;
         return response()->json([
             'totalCapital' => $totalCapitalPerSale,
             'report'       => $report,

@@ -180,19 +180,21 @@
                                        onkeyup="formatRupiah(this)">
                             </div>
                         </div>
-{{--                        <div class="form-group row mb-2">--}}
-{{--                            <label for="ongkir" class="col-lg-4 control-label">Admin E-Commerce</label>--}}
-{{--                            <div class="col-lg-8">--}}
-{{--                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0"--}}
-{{--                                       onkeyup="formatRupiah(this)">--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                        {{--                        <div class="form-group row mb-2">--}}
+                        {{--                            <label for="ongkir" class="col-lg-4 control-label">Admin E-Commerce</label>--}}
+                        {{--                            <div class="col-lg-8">--}}
+                        {{--                                <input type="text" name="admin_fee" id="admin_fee" class="form-control" value="0"--}}
+                        {{--                                       onkeyup="formatRupiah(this)">--}}
+                        {{--                            </div>--}}
+                        {{--                        </div>--}}
                         <div class="form-group row mb-2">
                             <label for="bayar" class="col-lg-4 control-label">Bayar</label>
                             <div class="col-lg-8">
                                 <input type="text" id="bayarrp" name="bayar" class="form-control" value="0" readonly>
                             </div>
                         </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -201,8 +203,6 @@
         <button type="submit" class="btn btn-primary btn-sm float-end btn-simpan"><i class="bx bx-save"></i>
             Save
         </button>
-    </div>
-    </div>
     </div>
 @endsection
 
@@ -303,11 +303,7 @@
                     admin_fee = 0;
                 }
                 bayar -= admin_fee;
-                let fee = parseFloat($('#fee').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
-                if (isNaN(admin_fee)) {
-                    fee = 0;
-                }
-                bayar -= fee;
+
 
                 let ppn = parseFloat($('#ppn').val().replace(/[^0-9,-]/g, "").replace(',', '.'));
                 if (isNaN(ppn)) {

@@ -1103,8 +1103,7 @@ class SaleController extends Controller
             $sale->pay =
                 $sale->pay
                 - $selisih_admin
-                - $selisih_diskon
-                - $selisih_fee;
+                - $selisih_diskon;
 
             /*
             |--------------------------------------------------------------------------
