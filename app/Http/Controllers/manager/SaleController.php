@@ -155,7 +155,9 @@ class SaleController extends Controller
             },
             'accessoriesSales.accessories',
             'divisi',
-            'debt.bank'])->get();
+            'debt.bank'])
+            ->where('status_return', 0)
+            ->get();
 
         return view('manager.sale.index', compact(
             'sales',
@@ -1038,9 +1040,6 @@ class SaleController extends Controller
             ], 500);
         }
     }
-
-
-
     public function fetchData(Request $request)
     {
         $codeSale = $request->get('code');
@@ -1354,7 +1353,7 @@ class SaleController extends Controller
             | HAPUS PIUTANG
             |--------------------------------------------------------------------------
             */
-
+            $sale->delete();
             Debt::where(
                 'sale_id',
                 $sale->id

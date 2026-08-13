@@ -15,6 +15,8 @@ use App\Models\Item;
 use App\Models\ItemSale;
 use App\Models\Sale;
 use App\Models\SalesReturn;
+use App\Models\SalesReturnAccessories;
+use App\Models\SalesReturnItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +50,7 @@ class SaleController extends Controller
                 'divisi',
                 'debt.bank'
             ])
-            ->latest()
+            ->where('status_return', 0)
             ->get();
 
         // Query transaksi lunas
@@ -468,73 +470,218 @@ class SaleController extends Controller
         DB::beginTransaction();
 
         try {
-            $sale = Sale::findOrFail($id);
 
-            // ===============================
-            // 1. BUAT DATA RETUR SALES
-            // ===============================
-            $invoiceRetur = str_replace('INV', 'INR', $sale->invoice);
+            $sale = Sale::with([
+                'itemSales',
+                'accessoriesSales'
+            ])->findOrFail($id);
 
-            SalesReturn::create([
-                'invoice_retur' => $invoiceRetur,
-                'sales_id'      => $sale->id,
-                'user_id'       => auth()->id(),
-                'divisi_id'     => $sale->divisi_id,
+            /*
+            |--------------------------------------------------------------------------
+            | CEK SUDAH DIRETUR
+            |--------------------------------------------------------------------------
+            */
+
+            $checkReturn = SalesReturn::where(
+                'sale_id',
+                $sale->id
+            )->first();
+
+            if ($checkReturn) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi sudah pernah diretur'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | HITUNG TOTAL RETUR
+            |--------------------------------------------------------------------------
+            */
+
+            $totalReturn = 0;
+
+            foreach ($sale->itemSales as $itemSale) {
+
+                if ($itemSale->status_return == 0) {
+                    $totalReturn += $itemSale->price;
+                }
+            }
+
+            foreach ($sale->accessoriesSales as $accessorySale) {
+
+                if ($accessorySale->status_return == 0) {
+                    $totalReturn += $accessorySale->subtotal;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | HEADER RETURN
+            |--------------------------------------------------------------------------
+            */
+
+            $returnInvoice = str_replace(
+                'INV',
+                'RTR',
+                $sale->invoice
+            );
+
+            $salesReturn = SalesReturn::create([
+
+                'sale_id'        => $sale->id,
+
+                'user_id'        => auth()->id(),
+
+                'return_invoice' => $returnInvoice,
+
+                'type'           => 'full',
+
+                'total_return'   => $totalReturn,
+
+                'description'    => 'Retur full transaksi',
+
+                'created_at'     => now(),
+
             ]);
 
-            // ===============================
-            // 2. KEMBALIKAN ITEM SERIAL
-            // ===============================
-            $itemSales = ItemSale::where('sale_id', $sale->id)->get();
+            /*
+            |--------------------------------------------------------------------------
+            | RETURN ITEM
+            |--------------------------------------------------------------------------
+            */
 
-            foreach ($itemSales as $itemSale) {
+            foreach ($sale->itemSales as $itemSale) {
+
+                if ($itemSale->status_return == 1) {
+                    continue;
+                }
+
                 Item::create([
-                    'divisi_id'        => $itemSale->divisi_id,
+
+                    'divisi_id'       => $sale->divisi_id,
+
                     'itemcategory_id' => $itemSale->itemcategory_id,
+
                     'name'            => $itemSale->name,
+
                     'price'           => $itemSale->price,
+
                     'capital_price'   => $itemSale->capital_price,
+
                     'no_seri'         => $itemSale->no_seri,
-                    'status'          => 1, // tersedia
+
+                    'status'          => 1,
+
                 ]);
 
-                $itemSale->delete();
+                SalesReturnItem::create([
+
+                    'sale_return_id' => $salesReturn->id,
+
+                    'item_sale_id'   => $itemSale->id,
+
+                    'created_at'     => $sale->created_at,
+
+                ]);
+
+                $itemSale->update([
+
+                    'status_return' => 1
+
+                ]);
             }
 
-            // ===============================
-            // 3. KEMBALIKAN STOK ACCESSORIES
-            // ===============================
-            $accessoriesSales = AccessoriesSale::where('sale_id', $sale->id)->get();
+            /*
+            |--------------------------------------------------------------------------
+            | RETURN ACCESSORIES
+            |--------------------------------------------------------------------------
+            */
 
-            foreach ($accessoriesSales as $accessorySale) {
-                Accessories::where('id', $accessorySale->accessories_id)
-                    ->increment('stok', $accessorySale->qty);
+            foreach ($sale->accessoriesSales as $accessorySale) {
 
-                $accessorySale->delete();
+                if ($accessorySale->status_return == 1) {
+                    continue;
+                }
+
+                Accessories::where(
+                    'id',
+                    $accessorySale->accessories_id
+                )->increment(
+                    'stok',
+                    $accessorySale->qty
+                );
+
+                SalesReturnAccessories::create([
+
+                    'sale_return_id'      => $salesReturn->id,
+
+                    'accessories_sale_id' => $accessorySale->id,
+
+                    'accessories_id'      => $accessorySale->accessories_id,
+
+                    'qty'                 => $accessorySale->qty,
+
+                    'subtotal'            => $accessorySale->subtotal,
+
+                    'created_at'          => $sale->created_at,
+
+                ]);
+
+                $accessorySale->update([
+
+                    'return_qty'    => $accessorySale->qty,
+
+                    'status_return' => 1,
+
+                ]);
             }
 
-            // ===============================
-            // 4. HAPUS DEBT
-            // ===============================
-            Debt::where('sale_id', $sale->id)->delete();
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS PIUTANG
+            |--------------------------------------------------------------------------
+            */
+            $sale->delete();
+            Debt::where(
+                'sale_id',
+                $sale->id
+            )->delete();
 
-            // ===============================
-            // 5. HAPUS SALE
-            // ===============================
-            $sale->delete(); // soft delete jika pakai SoftDeletes
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE SALE
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->update([
+
+                'status_return' => 1
+
+            ]);
 
             DB::commit();
 
             return response()->json([
+
                 'success' => true,
-                'message' => 'Transaksi berhasil dibatalkan dan dicatat sebagai retur'
+
+                'message' => 'Full transaksi berhasil diretur'
+
             ]);
+
         } catch (\Exception $e) {
+
             DB::rollBack();
 
             return response()->json([
+
                 'success' => false,
+
                 'message' => $e->getMessage()
+
             ], 500);
         }
     }
