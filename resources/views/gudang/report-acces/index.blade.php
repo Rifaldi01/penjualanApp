@@ -8,6 +8,7 @@
                     <thead>
                     <tr>
                         <th width="4%">No</th>
+                        <th>Tanggal Invoice</th>
                         <th>No Invoice</th>
                         <th>Kode produk</th>
                         <th>Name</th>
@@ -21,6 +22,7 @@
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
+                            <td>{{$data->sale->created_at ?? 'null'}}</td>
                             <td>{{$data->sale->invoice ?? 'null'}}</td>
                             <td>{{$data->accessories->code_acces}}</td>
                             <td>{{$data->accessories->name}}</td>
