@@ -22,7 +22,7 @@
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
-                            <td>{{tanggal($data->sale->created_at )}}</td>
+                            <td>{{tanggal($data->sale->created_at ) ?? null}}</td>
                             <td>{{$data->sale->invoice ?? 'null'}}</td>
                             <td>{{$data->accessories->code_acces}}</td>
                             <td>{{$data->accessories->name}}</td>
