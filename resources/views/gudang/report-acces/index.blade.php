@@ -21,7 +21,7 @@
                     @foreach ($report as $key => $data)
                         <tr>
                             <td>{{$key +1}}</td>
-                            <td>{{$data->sale->invoice}}</td>
+                            <td>{{$data->sale->invoice ?? '-'}}</td>
                             <td>{{$data->accessories->code_acces}}</td>
                             <td>{{$data->accessories->name}}</td>
                             <td>{{formatRupiah($data->accessories->price)}}</td>
