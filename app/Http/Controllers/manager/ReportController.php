@@ -3,266 +3,1449 @@
 namespace App\Http\Controllers\manager;
 
 use App\Http\Controllers\Controller;
-use App\Models\Accessories;
-use App\Models\Divisi;
-use App\Models\ItemSale;
 use App\Models\Sale;
+use App\Models\Debt;
+use App\Models\Divisi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    /**
+     * ============================================================
+     * HALAMAN LAPORAN
+     * ============================================================
+     */
     public function index()
     {
-        $currentYear = now()->year;
-        $currentMonth = now()->month;
-        $divisi = Divisi::where('status', 'active')
+        $divisis = Divisi::where('status', 'active')
             ->where('name', '!=', 'Rental')
             ->orderBy('name')
             ->get();
 
-        $report = Sale::whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->with([
-                'customer',
-                'debt.bank',
-                'itemSales' => function ($q) {
-                    $q->where('status_return', 0);
-                },
-                'accessoriesSales' => function ($q) {
-                    $q->whereRaw('COALESCE(return_qty,0) < qty');
-                },
-                'accessoriesSales.accessories'
-            ])
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $report->each(function ($sale) {
-
-            $sale->accessories_list = $sale->accessoriesSales
-                ->pluck('accessories.name')
-                ->filter()
-                ->implode(', ');
-
-            $sale->itemSales = $sale->itemSales
-                ->map(function ($itemSale) {
-                    return $itemSale->name;
-                })
-                ->implode(', ');
-
-            $sale->debt = $sale->debt
-                ? $sale->debt->map(function ($debt) {
-                    $bankOrDescription = $debt->bank
-                        ? $debt->bank->name
-                        : ($debt->description ?: 'Tidak ada informasi');
-
-                    return $debt->date_pay . ' (' . $bankOrDescription . ')';
-                })->implode(', ')
-                : '-';
-        });
-
-        $income     = $report->sum('pay');
-        $diskon     = $report->sum('diskon');
-        $ongkir     = $report->sum('ongkir');
-        $ppn        = $report->sum('ppn');
-        $pph        = $report->sum('pph');
-        $admin_fee  = $report->sum('admin_fee');
-        $fee        = $report->sum('fee');
-        $diterima   = $report->sum('nominal_in');
-
-        $totalCapitalPriceItem = ItemSale::where('status_return',0)
-            ->whereYear('created_at',$currentYear)
-            ->whereMonth('created_at',$currentMonth)
-            ->sum('capital_price');
-
-        $totalCapitalPriceAcces = 0;
-
-        foreach ($report as $sale) {
-
-            foreach ($sale->accessoriesSales as $detail) {
-
-                if (!$detail->accessories) {
-                    continue;
-                }
-
-                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
-
-                $totalCapitalPriceAcces +=
-                    $qtyTersisa * $detail->accessories->capital_price;
-            }
-        }
-
-        $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
-
-        return view('manager.report.index', compact(
-            'report',
-            'income',
-            'admin_fee',
-            'profit',
-            'diskon',
-            'ongkir',
-            'ppn',
-            'pph',
-            'divisi',
-            'fee',
-            'diterima'
-        ));
+        return view('manager.report.index', compact('divisis'));
     }
 
+
+    /**
+     * ============================================================
+     * FILTER LAPORAN
+     * ============================================================
+     */
     public function filter(Request $request)
     {
-        $startDate = $request->input('start_date');
-        $endDate   = $request->input('end_date');
-        $divisiId  = $request->input('divisi_id');
+        try {
 
-        $query = Sale::query();
+            /*
+            |--------------------------------------------------------------------------
+            | TIMEZONE
+            |--------------------------------------------------------------------------
+            */
 
-        if (!$startDate && !$endDate) {
+            $timezone = 'Asia/Jakarta';
 
-            $query->whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month);
 
-        }
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER TANGGAL
+            |--------------------------------------------------------------------------
+            |
+            | Jika tidak ada filter:
+            | otomatis menggunakan bulan berjalan.
+            |
+            */
 
-        if ($startDate && $endDate) {
-            $start = Carbon::parse($startDate)->startOfDay();
-            $end   = Carbon::parse($endDate)->endOfDay();
+            if ($request->filled('start_date')) {
 
-            $query->whereBetween('created_at', [$start, $end]);
-        }
+                $startDate = Carbon::parse(
+                    $request->start_date,
+                    $timezone
+                )->startOfDay();
 
-        if ($divisiId) {
-            $query->where('divisi_id', $divisiId);
-        }
+            } else {
 
-        $report = $query->with([
-            'customer',
-            'debt.bank',
-            'itemSales' => function ($q) {
-                $q->where('status_return', 0);
-            },
-            'accessoriesSales' => function ($q) {
-                $q->whereRaw('COALESCE(return_qty,0) < qty');
-            },
-            'accessoriesSales.accessories'
-        ])
-            ->orderBy('created_at', 'asc')
-            ->get();
+                $startDate = Carbon::now($timezone)
+                    ->startOfMonth();
+            }
 
-        $totalIncome = 0;
-        $totalCapital = 0;
-        $totalDiskon = 0;
-        $totalOngkir = 0;
-        $totalppn = 0;
-        $totalpph = 0;
-        $totalfee = 0;
-        $totalprice = 0;
-        $admin_fee = 0;
-        $diterima = 0;
-        $totalPiutang = 0;
 
-        $totalCapitalPerSale = [];
+            if ($request->filled('end_date')) {
 
-        $report->each(function ($sale) use (
-            &$totalIncome,
-            &$totalCapital,
-            &$totalDiskon,
-            &$totalOngkir,
-            &$admin_fee,
-            &$totalppn,
-            &$totalpph,
-            &$totalCapitalPerSale,
-            &$totalfee,
-            &$totalprice,
-            &$diterima,
-            &$totalPiutang,
-        ) {
+                $endDate = Carbon::parse(
+                    $request->end_date,
+                    $timezone
+                )->endOfDay();
 
-            $totalIncome += $sale->pay;
-            $totalDiskon += $sale->diskon;
-            $totalOngkir += $sale->ongkir;
-            $totalppn += $sale->ppn;
-            $totalpph += $sale->pph;
-            $admin_fee += $sale->admin_fee;
-            $totalfee += $sale->fee;
-            $totalprice += $sale->total_price;
-            $diterima += $sale->nominal_in;
-            $totalPiutang += max(($sale->pay ?? 0) - ($sale->nominal_in ?? 0), 0);
+            } else {
 
-            $accessoryCapital = 0;
+                $endDate = Carbon::now($timezone)
+                    ->endOfMonth();
+            }
 
-            foreach ($sale->accessoriesSales as $detail) {
 
-                if (!$detail->accessories) {
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI
+            |--------------------------------------------------------------------------
+            */
+
+            if ($startDate->gt($endDate)) {
+
+                return response()->json([
+                    'error' =>
+                        'Tanggal mulai tidak boleh lebih besar dari tanggal berakhir.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DIVISI
+            |--------------------------------------------------------------------------
+            */
+
+            $divisiId = $request->input('divisi_id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL PEMBAYARAN PADA PERIODE
+            |--------------------------------------------------------------------------
+            |
+            | PEMBAYARAN tetap berdasarkan date_pay.
+            |
+            | Contoh:
+            |
+            | Invoice Agustus
+            | Bayar September
+            |
+            | Ketika filter September:
+            | transaksi tetap muncul.
+            |
+            */
+
+            $paymentsQuery = Debt::with('bank')
+                ->whereNotNull('date_pay')
+                ->whereBetween('date_pay', [
+                    $startDate,
+                    $endDate
+                ])
+                ->orderBy('date_pay');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER DIVISI PEMBAYARAN
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $divisiId &&
+                $divisiId !== 'all'
+            ) {
+
+                $paymentsQuery->whereHas(
+                    'sale',
+                    function ($query) use ($divisiId) {
+
+                        $query->where(
+                            'divisi_id',
+                            $divisiId
+                        );
+
+                    }
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GET PEMBAYARAN PERIODE
+            |--------------------------------------------------------------------------
+            */
+
+            $paymentsInPeriod = $paymentsQuery->get();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GROUP PEMBAYARAN BERDASARKAN SALE
+            |--------------------------------------------------------------------------
+            */
+
+            $groupedPayments =
+                $paymentsInPeriod->groupBy('sale_id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SALE ID
+            |--------------------------------------------------------------------------
+            */
+
+            $saleIds = $groupedPayments
+                ->keys()
+                ->filter(function ($id) {
+
+                    return !is_null($id);
+
+                })
+                ->values();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | QUERY SALES
+            |--------------------------------------------------------------------------
+            |
+            | Sale diambil berdasarkan transaksi yang memiliki
+            | pembayaran pada periode yang dipilih.
+            |
+            */
+
+            $salesQuery = Sale::with([
+
+                /*
+                |--------------------------------------------------------------------------
+                | CUSTOMER
+                |--------------------------------------------------------------------------
+                */
+
+                'customer',
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DIVISI
+                |--------------------------------------------------------------------------
+                */
+
+                'divisi',
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ITEM SALES
+                |--------------------------------------------------------------------------
+                |
+                | TIDAK menggunakan relation item.
+                | name dan no_seri sudah tersedia di item_sales.
+                |
+                */
+
+                'itemSales' => function ($query) {
+
+                    $query
+                        ->where('status_return', 0);
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACCESSORIES
+                |--------------------------------------------------------------------------
+                */
+
+                'accessories' => function ($query) {
+
+                    $query->withPivot('qty');
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SEMUA PEMBAYARAN SAMPAI END DATE
+                |--------------------------------------------------------------------------
+                |
+                | Digunakan untuk:
+                |
+                | - Total Bayar
+                | - Piutang
+                |
+                */
+
+                'debt' => function ($query) use ($endDate) {
+
+                    $query
+                        ->with('bank')
+                        ->whereNotNull('date_pay')
+                        ->whereDate(
+                            'date_pay',
+                            '<=',
+                            $endDate->toDateString()
+                        )
+                        ->orderBy('date_pay');
+
+                }
+
+            ])
+                ->whereIn(
+                    'id',
+                    $saleIds
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER DIVISI SALE
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $divisiId &&
+                $divisiId !== 'all'
+            ) {
+
+                $salesQuery->where(
+                    'divisi_id',
+                    $divisiId
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GET SALES
+            |--------------------------------------------------------------------------
+            */
+
+            $sales = $salesQuery
+                ->get()
+                ->keyBy('id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL FOOTER
+            |--------------------------------------------------------------------------
+            */
+
+            $totalInvoice = 0;
+
+            $totalPpn = 0;
+
+            $totalPph = 0;
+
+            $totalDiskon = 0;
+
+            $totalOngkir = 0;
+
+            $totalAdmin = 0;
+
+            $totalDiterima = 0;
+
+            $totalPiutang = 0;
+
+            $totalBayar = 0;
+
+            $totalFee = 0;
+
+            $totalLaba = 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL MODAL
+            |--------------------------------------------------------------------------
+            */
+
+            $totalCapital = [];
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REPORT
+            |--------------------------------------------------------------------------
+            */
+
+            $report = [];
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOOP PEMBAYARAN
+            |--------------------------------------------------------------------------
+            */
+
+            foreach (
+                $groupedPayments as $saleId => $periodPayments
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | AMBIL SALE
+                |--------------------------------------------------------------------------
+                */
+
+                $sale = $sales->get($saleId);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | JIKA SALE TIDAK ADA
+                |--------------------------------------------------------------------------
+                */
+
+                if (!$sale) {
                     continue;
                 }
 
-                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
 
-                $accessoryCapital +=
-                    $qtyTersisa * $detail->accessories->capital_price;
+                /*
+                |--------------------------------------------------------------------------
+                | TANGGAL INVOICE
+                |--------------------------------------------------------------------------
+                |
+                | INI YANG MENENTUKAN APAKAH NILAI INVOICE MASUK
+                | KE FOOTER PERIODE.
+                |
+                */
+
+                $saleCreatedAt = $sale->created_at
+                    ? Carbon::parse(
+                        $sale->created_at,
+                        $timezone
+                    )
+                    : null;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CEK APAKAH INVOICE MASUK PERIODE
+                |--------------------------------------------------------------------------
+                |
+                | Contoh:
+                |
+                | Invoice dibuat Agustus
+                | Filter September
+                |
+                | $invoiceInPeriod = false
+                |
+                | Jadi:
+                | total invoice = 0 pada footer September.
+                |
+                */
+
+                $invoiceInPeriod = false;
+
+                if ($saleCreatedAt) {
+
+                    $invoiceInPeriod =
+                        $saleCreatedAt->between(
+                            $startDate,
+                            $endDate
+                        );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DATA INVOICE
+                |--------------------------------------------------------------------------
+                */
+
+                $invoice = (float) (
+                    $sale->total_price ?? 0
+                );
+
+
+                $ppn = (float) (
+                    $sale->ppn ?? 0
+                );
+
+
+                $pph = (float) (
+                    $sale->pph ?? 0
+                );
+
+
+                $diskon = (float) (
+                    $sale->diskon ?? 0
+                );
+
+
+                $ongkir = (float) (
+                    $sale->ongkir ?? 0
+                );
+
+
+                $admin = (float) (
+                    $sale->admin_fee ?? 0
+                );
+
+
+                $fee = (float) (
+                    $sale->fee ?? 0
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DITERIMA PADA PERIODE
+                |--------------------------------------------------------------------------
+                |
+                | INI TETAP berdasarkan date_pay.
+                |
+                | Jadi pembayaran invoice Agustus yang dibayar
+                | September tetap masuk Diterima September.
+                |
+                */
+
+                $diterima = $periodPayments->sum(
+                    function ($payment) {
+
+                        return (float) (
+                            $payment->pay_debts ?? 0
+                        );
+
+                    }
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL BAYAR SAMPAI END DATE
+                |--------------------------------------------------------------------------
+                */
+
+                $paidUntilEndDate = $sale->debt->sum(
+                    function ($payment) {
+
+                        return (float) (
+                            $payment->pay_debts ?? 0
+                        );
+
+                    }
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PIUTANG
+                |--------------------------------------------------------------------------
+                |
+                | Piutang menggunakan nilai invoice pada SALE.
+                |
+                | BUKAN berdasarkan pembayaran periode.
+                |
+                */
+
+                $piutang = max(
+
+                    $invoice
+                    - $paidUntilEndDate
+                    - $diskon
+                    - $fee,
+
+                    0
+
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL BAYAR
+                |--------------------------------------------------------------------------
+                */
+
+                $totalBayarSale =
+                    $paidUntilEndDate;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MODAL
+                |--------------------------------------------------------------------------
+                */
+
+                $capitalPrice = 0;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MODAL ITEM
+                |--------------------------------------------------------------------------
+                |
+                | capital_price langsung dari item_sales.
+                |
+                */
+
+                foreach (
+                    $sale->itemSales as $itemSale
+                ) {
+
+                    $capitalPrice +=
+                        (float) (
+                            $itemSale->capital_price ?? 0
+                        );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MODAL ACCESSORIES
+                |--------------------------------------------------------------------------
+                */
+
+                foreach (
+                    $sale->accessories as $accessory
+                ) {
+
+                    $qty = (float) (
+                        $accessory
+                            ->pivot
+                            ->qty ?? 0
+                    );
+
+
+                    $capital = (float) (
+                        $accessory
+                            ->capital_price ?? 0
+                    );
+
+
+                    $capitalPrice +=
+                        $qty * $capital;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SIMPAN MODAL
+                |--------------------------------------------------------------------------
+                */
+
+                $totalCapital[
+                $sale->id
+                ] = $capitalPrice;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL ITEM
+                |--------------------------------------------------------------------------
+                */
+
+                $totalItem = (int) (
+                    $sale->total_item ?? 0
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PAYMENT RATIO
+                |--------------------------------------------------------------------------
+                */
+
+                $paymentRatio = 0;
+
+
+                if ($invoice > 0) {
+
+                    $paymentRatio =
+                        min(
+                            $diterima / $invoice,
+                            1
+                        );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MODAL PERIODE
+                |--------------------------------------------------------------------------
+                */
+
+                $capitalForPeriod =
+                    $capitalPrice
+                    * $paymentRatio;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FEE PERIODE
+                |--------------------------------------------------------------------------
+                */
+
+                $feeForPeriod =
+                    $fee
+                    * $paymentRatio;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LABA RUGI
+                |--------------------------------------------------------------------------
+                */
+
+                $cutoffFee = Carbon::create(
+                    2026,
+                    8,
+                    1,
+                    0,
+                    0,
+                    0,
+                    $timezone
+                );
+
+
+                if ($endDate->lt($cutoffFee)) {
+
+                    $laba =
+                        $diterima
+                        - $capitalForPeriod;
+
+                } else {
+
+                    $laba =
+                        $diterima
+                        - $capitalForPeriod
+                        - $feeForPeriod;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DETAIL PEMBAYARAN
+                |--------------------------------------------------------------------------
+                */
+
+                $paymentDetails = [];
+
+
+                foreach (
+                    $periodPayments as $payment
+                ) {
+
+                    $bankName = '';
+
+
+                    if ($payment->bank) {
+
+                        $bankName =
+                            $payment->bank->name;
+                    }
+
+
+                    if (!$bankName) {
+
+                        $bankName =
+                            $payment->bank_name ?? '';
+                    }
+
+
+                    $description =
+                        $payment->description ?? '';
+
+
+                    if ($bankName) {
+
+                        $paymentMethod =
+                            $bankName;
+
+                    } elseif ($description) {
+
+                        $paymentMethod =
+                            $description;
+
+                    } else {
+
+                        $paymentMethod =
+                            'Cash';
+                    }
+
+
+                    $paymentDetails[] = [
+
+                        'id' =>
+                            $payment->id,
+
+                        'date_pay' =>
+                            $payment->date_pay,
+
+                        'pay_debts' =>
+                            (float) (
+                                $payment->pay_debts ?? 0
+                            ),
+
+                        'bank_name' =>
+                            $paymentMethod,
+
+                        'description' =>
+                            $description,
+
+                        'penerima' =>
+                            $payment->penerima ?? null,
+
+                    ];
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ITEM SALES
+                |--------------------------------------------------------------------------
+                */
+
+                $itemSales = [];
+
+
+                foreach (
+                    $sale->itemSales as $itemSale
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NAME LANGSUNG DARI ITEM_SALES
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $name =
+                        $itemSale->name ?? '';
+
+
+                    $itemSales[] = [
+
+                        'name' =>
+                            $name,
+
+                        'no_seri' =>
+                            $itemSale->no_seri ?? '',
+
+                        'price' =>
+                            (float) (
+                                $itemSale->price ?? 0
+                            ),
+
+                        'capital_price' =>
+                            (float) (
+                                $itemSale->capital_price ?? 0
+                            ),
+
+                        'status_return' =>
+                            $itemSale->status_return ?? 0,
+
+                    ];
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACCESSORIES
+                |--------------------------------------------------------------------------
+                */
+
+                $accessories = [];
+
+
+                foreach (
+                    $sale->accessories as $accessory
+                ) {
+
+                    $accessories[] = [
+
+                        'name' =>
+                            $accessory->name ?? '',
+
+                        'qty' =>
+                            (float) (
+                                $accessory
+                                    ->pivot
+                                    ->qty ?? 0
+                            ),
+
+                        'price_sale' =>
+                            (float) (
+                                $accessory
+                                    ->pivot
+                                    ->price_sale
+                                ?? $accessory->price
+                                ?? 0
+                            ),
+
+                    ];
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REPORT
+                |--------------------------------------------------------------------------
+                */
+
+                $report[] = [
+
+                    'id' =>
+                        $sale->id,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TANGGAL TRANSAKSI
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'created_at' =>
+                        $sale->created_at,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DIVISI
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'divisi' =>
+                        $sale->divisi
+                            ? $sale->divisi->name
+                            : 'N/A',
+
+
+                    'divisi_id' =>
+                        $sale->divisi_id,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | INVOICE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'invoice' =>
+                        $sale->invoice,
+
+
+                    'inv_manual' =>
+                        $sale->inv_manual,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CUSTOMER
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'customer' =>
+                        $sale->customer,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TOTAL ITEM
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'total_item' =>
+                        $totalItem,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TOTAL INVOICE
+                    |--------------------------------------------------------------------------
+                    |
+                    | Pada ROW tetap menampilkan nilai invoice.
+                    |
+                    | Yang dibedakan adalah FOOTER.
+                    |
+                    */
+
+                    'total_price' =>
+                        $invoice,
+
+
+                    'ppn' =>
+                        $ppn,
+
+
+                    'pph' =>
+                        $pph,
+
+
+                    'diskon' =>
+                        $diskon,
+
+
+                    'ongkir' =>
+                        $ongkir,
+
+
+                    'admin_fee' =>
+                        $admin,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DITERIMA PERIODE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'nominal_in' =>
+                        $diterima,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TOTAL BAYAR
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'pay' =>
+                        $totalBayarSale,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PIUTANG
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'piutang' =>
+                        $piutang,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FEE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'fee' =>
+                        $fee,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LABA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'profit' =>
+                        $laba,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ITEM
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'itemSales' =>
+                        $itemSales,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'accessories' =>
+                        $accessories,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PAYMENT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'debt' =>
+                        $paymentDetails,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | INFORMASI PERIODE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'invoice_in_period' =>
+                        $invoiceInPeriod,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MODAL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'capital_price' =>
+                        $capitalPrice,
+
+
+                    'paid_until_end_date' =>
+                        $paidUntilEndDate,
+
+
+                    'diterima_period' =>
+                        $diterima,
+
+                ];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FOOTER
+                |--------------------------------------------------------------------------
+                |
+                | PENTING:
+                |
+                | Nilai invoice hanya masuk footer apabila
+                | created_at SALE berada pada periode filter.
+                |
+                */
+
+                if ($invoiceInPeriod) {
+
+                    $totalInvoice +=
+                        $invoice;
+
+
+                    $totalPpn +=
+                        $ppn;
+
+
+                    $totalPph +=
+                        $pph;
+
+
+                    $totalDiskon +=
+                        $diskon;
+
+
+                    $totalOngkir +=
+                        $ongkir;
+
+
+                    $totalAdmin +=
+                        $admin;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DITERIMA
+                |--------------------------------------------------------------------------
+                |
+                | Selalu berdasarkan tanggal pembayaran.
+                |
+                */
+
+                $totalDiterima +=
+                    $diterima;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PIUTANG
+                |--------------------------------------------------------------------------
+                */
+
+                $totalPiutang +=
+                    $piutang;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL BAYAR
+                |--------------------------------------------------------------------------
+                */
+
+                $totalBayar +=
+                    $totalBayarSale;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FEE
+                |--------------------------------------------------------------------------
+                */
+
+                $totalFee +=
+                    $feeForPeriod;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LABA
+                |--------------------------------------------------------------------------
+                */
+
+                $totalLaba +=
+                    $laba;
             }
 
-            $itemCapital = $sale->itemSales
-                ->where('status_return', 0)
-                ->sum('capital_price');
 
-            $capitalPerSale = $accessoryCapital + $itemCapital;
+            /*
+            |--------------------------------------------------------------------------
+            | SUMMARY
+            |--------------------------------------------------------------------------
+            */
 
-            $totalCapital += $capitalPerSale;
+            $income =
+                $totalDiterima;
 
-            $totalCapitalPerSale[$sale->id] = $capitalPerSale;
 
-            $sale->accessories_list = $sale->accessoriesSales
-                ->pluck('accessories.name')
-                ->filter()
-                ->implode(', ');
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL PRICE / TOTAL INVOICE
+            |--------------------------------------------------------------------------
+            |
+            | Hanya invoice yang dibuat pada periode.
+            |
+            */
 
-            $sale->itemSales = $sale->itemSales->map(function ($itemSale) {
-                return $itemSale->name . ' - (' . $itemSale->no_seri . ')';
-            });
+            $totalprice =
+                $totalInvoice;
 
-            $sale->debt = $sale->debt
-                ? $sale->debt->map(function ($debt) {
-                    $bankOrDescription = $debt->bank
-                        ? $debt->bank->name
-                        : ($debt->description ?: 'Tidak ada informasi');
 
-                    return $debt->date_pay . ' (' . $bankOrDescription . ')';
-                })->implode(', ')
-                : '-';
-        });
+            /*
+            |--------------------------------------------------------------------------
+            | RESPONSE
+            |--------------------------------------------------------------------------
+            */
 
-        $profit = $totalIncome - $totalCapital - $totalfee;
-        return response()->json([
-            'totalCapital' => $totalCapitalPerSale,
-            'report'       => $report,
-            'admin_fee'    => $admin_fee,
-            'income'       => $totalIncome,
-            'profit'       => $profit,
-            'diskon'       => $totalDiskon,
-            'ongkir'       => $totalOngkir,
-            'ppn'          => $totalppn,
-            'pph'          => $totalpph,
-            'fee'          => $totalfee,
-            'totalprice'   => $totalprice,
-            'diterima'     => $diterima,
-            'piutang'      => $totalPiutang,
+            return response()->json([
 
-            'footer' => [
-                'total_invoice' => $totalprice,
-                'ppn'           => $totalppn,
-                'pph'           => $totalpph,
-                'diskon'        => $totalDiskon,
-                'ongkir'        => $totalOngkir,
-                'admin'         => $admin_fee,
-                'diterima'      => $diterima,
-                'piutang'       => $totalPiutang,
-                'total_bayar'   => $totalIncome,
-                'fee'           => $totalfee,
-                'modal'         => $totalCapital,
-                'laba'          => $profit,
-            ]
-        ]);
+                /*
+                |--------------------------------------------------------------------------
+                | REPORT
+                |--------------------------------------------------------------------------
+                */
+
+                'report' =>
+                    $report,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MODAL
+                |--------------------------------------------------------------------------
+                */
+
+                'totalCapital' =>
+                    $totalCapital,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL INVOICE
+                |--------------------------------------------------------------------------
+                */
+
+                'totalprice' =>
+                    $totalprice,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | INCOME / DITERIMA
+                |--------------------------------------------------------------------------
+                */
+
+                'income' =>
+                    $income,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PPN
+                |--------------------------------------------------------------------------
+                */
+
+                'ppn' =>
+                    $totalPpn,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PPH
+                |--------------------------------------------------------------------------
+                */
+
+                'pph' =>
+                    $totalPph,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DISKON
+                |--------------------------------------------------------------------------
+                */
+
+                'diskon' =>
+                    $totalDiskon,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ONGKIR
+                |--------------------------------------------------------------------------
+                */
+
+                'ongkir' =>
+                    $totalOngkir,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ADMIN
+                |--------------------------------------------------------------------------
+                */
+
+                'admin' =>
+                    $totalAdmin,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FEE
+                |--------------------------------------------------------------------------
+                */
+
+                'fee' =>
+                    $totalFee,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LABA
+                |--------------------------------------------------------------------------
+                */
+
+                'profit' =>
+                    $totalLaba,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FOOTER
+                |--------------------------------------------------------------------------
+                */
+
+                'footer' => [
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HANYA INVOICE PADA PERIODE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'total_invoice' =>
+                        $totalInvoice,
+
+
+                    'ppn' =>
+                        $totalPpn,
+
+
+                    'pph' =>
+                        $totalPph,
+
+
+                    'diskon' =>
+                        $totalDiskon,
+
+
+                    'ongkir' =>
+                        $totalOngkir,
+
+
+                    'admin' =>
+                        $totalAdmin,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PEMBAYARAN PERIODE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'diterima' =>
+                        $totalDiterima,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PIUTANG
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'piutang' =>
+                        $totalPiutang,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TOTAL BAYAR
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'total_bayar' =>
+                        $totalBayar,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FEE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'fee' =>
+                        $totalFee,
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MODAL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'modal' =>
+                        array_sum(
+                            $totalCapital
+                        ),
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LABA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'laba' =>
+                        $totalLaba,
+
+                ],
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | ERROR
+            |--------------------------------------------------------------------------
+            */
+
+            return response()->json([
+
+                'error' =>
+                    true,
+
+                'message' =>
+                    $e->getMessage(),
+
+                'file' =>
+                    $e->getFile(),
+
+                'line' =>
+                    $e->getLine(),
+
+            ], 500);
+        }
     }
 }

@@ -28,5 +28,35 @@
     <link rel="stylesheet" href="{{URL::to('assets/css/select2-bootstrap-5-theme.min.css')}}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Penjualan App</title>
+    <style>
+        <style>
+            /* =========================================================
+               SALE CREATE SIDEBAR HOVER
+            ========================================================= */
+
+        @media (min-width: 769px) {
+
+            .wrapper.sale-create-hover .sidebar-wrapper {
+                width: 70px;
+                transition: width 0.2s ease;
+            }
+
+            .wrapper.sale-create-hover .page-wrapper {
+                margin-left: 70px;
+                transition: margin-left 0.2s ease;
+            }
+
+            /* Saat kursor masuk sidebar */
+            .wrapper.sale-create-hover.sidebar-hover .sidebar-wrapper {
+                width: 250px;
+            }
+
+            .wrapper.sale-create-hover.sidebar-hover .page-wrapper {
+                margin-left: 250px;
+            }
+
+        }
+    </style>
+    </style>
 </head>
 @stack('head')

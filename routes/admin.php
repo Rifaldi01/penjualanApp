@@ -56,7 +56,9 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
     //sale
     Route::resource('/sale', SaleController::class)->names('admin.sale');
     Route::post('/fetch-data', [SaleController::class, 'fetchData'])->name('admin.sale.checkcode');
+    Route::put('/sale/{id}/update-fee', [SaleController::class, 'updateFee'])->name('admin.sale.update.fee');
     //sale end
+
     //report
     Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
     Route::get('/report/filter', [ReportController::class, 'filter'])->name('report.filter');

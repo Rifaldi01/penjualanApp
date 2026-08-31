@@ -357,7 +357,16 @@
                                 </button>
 
                                 @include('admin.sale.surat-jalan')
-
+                                <button type="button"
+                                        class="btn btn-success btn-sm btn-edit-fee lni lni-dollar"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#feeModal"
+                                        data-id="{{ $data->id }}"
+                                        data-invoice="{{ $data->invoice }}"
+                                        data-fee="{{ $data->fee ?? 0 }}"
+                                        data-bs-tool="tooltip"
+                                        data-bs-placement="top" title="Edit Fee">
+                                </button>
                                 <button type="button"
                                         class="btn btn-primary lni lni-empty-file btn-sm"
                                         data-bs-toggle="modal"
@@ -378,6 +387,93 @@
             </div>
         </div>
     </div>
+    <div class="modal fade"
+         id="feeModal"
+         tabindex="-1"
+         aria-labelledby="feeModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header text-white">
+
+                    <h5 class="modal-title" id="feeModalLabel">
+                        <i class="lni lni-pencil"></i>
+                        Edit Fee
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="feeSaleId">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Invoice
+                        </label>
+
+                        <input type="text"
+                               id="feeInvoice"
+                               class="form-control" value="{{$data->invoice}}"
+                               readonly>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Fee
+                        </label>
+
+                        <div class="input-group">
+
+                        <span class="input-group-text">
+                            Rp
+                        </span>
+
+                            <input type="text"
+                                   id="feeValue"
+                                   class="form-control"
+                                   autocomplete="off">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-success"
+                            id="saveFee">
+
+                        <i class="lni lni-save"></i>
+                        Simpan
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
 
 @endsection
 
@@ -391,6 +487,159 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 @push('js')
+    <script>
+        $('#feeModal').on('show.bs.modal', function (event) {
+
+            let button = $(event.relatedTarget);
+
+            let id = button.attr('data-id');
+            let invoice = button.attr('data-invoice');
+            let fee = button.attr('data-fee');
+
+            console.log('ID:', id);
+            console.log('Invoice:', invoice);
+            console.log('Fee:', fee);
+
+            $('#feeSaleId').val(id);
+
+            $('#feeInvoice').val(invoice);
+
+            $('#feeValue').val(
+                new Intl.NumberFormat('id-ID').format(
+                    parseFloat(fee) || 0
+                )
+            );
+
+        });
+        $(document).on('input', '#feeValue', function () {
+
+            let value = $(this).val().replace(/\D/g, '');
+
+            if (value === '') {
+                $(this).val('');
+                return;
+            }
+
+            $(this).val(
+                new Intl.NumberFormat('id-ID').format(value)
+            );
+
+        });
+        $(document).on('click', '#saveFee', function () {
+
+            let button = $(this);
+
+            let id = $('#feeSaleId').val();
+
+            let fee = $('#feeValue')
+                .val()
+                .replace(/\./g, '');
+
+            if (!id) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'ID transaksi tidak ditemukan.'
+                });
+
+                return;
+            }
+
+            if (fee === '') {
+                fee = 0;
+            }
+
+            // Ubah tombol menjadi loading
+            button.prop('disabled', true);
+            button.html(
+                '<i class="lni lni-spinner-arrow"></i> Menyimpan...'
+            );
+
+            $.ajax({
+
+                url: '{{ route("admin.sale.update.fee", ":id") }}'
+                    .replace(':id', id),
+
+                method: 'PUT',
+
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    fee: fee
+                },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        // Tutup modal
+                        $('#feeModal').modal('hide');
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Update tombol/modal jika diperlukan
+                        $('.btn-edit-fee[data-id="' + id + '"]')
+                            .attr('data-fee', response.data.fee);
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+
+                    }
+
+                },
+
+                error: function (xhr) {
+
+                    let message = 'Terjadi kesalahan saat menyimpan fee.';
+
+                    if (xhr.responseJSON) {
+
+                        if (xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        if (xhr.responseJSON.errors &&
+                            xhr.responseJSON.errors.fee) {
+
+                            message = xhr.responseJSON.errors.fee[0];
+
+                        }
+
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: message
+                    });
+
+                },
+
+                complete: function () {
+
+                    // Kembalikan tombol
+                    button.prop('disabled', false);
+
+                    button.html(
+                        '<i class="lni lni-save"></i> Simpan'
+                    );
+
+                }
+
+            });
+
+        });
+    </script>
     <script>
         $(document).ready(function () {
             $(document).on('click', '.delete-sale', function () {

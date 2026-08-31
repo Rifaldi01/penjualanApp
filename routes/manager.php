@@ -33,6 +33,8 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::resource('/sale', SaleController::class)->names('manager.sale');
     Route::put('/bayar/{id}', [SaleController::class, 'bayar'])->name('manager.sale.bayar');
     Route::post('/fetch-data', [SaleController::class, 'fetchData'])->name('manager.sale.checkcode');
+    Route::put('/sale/{id}/update-fee', [SaleController::class, 'updateFee'])->name('manager.sale.update.fee');
+
     //end sale
 
     //item

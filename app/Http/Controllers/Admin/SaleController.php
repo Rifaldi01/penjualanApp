@@ -35,7 +35,6 @@ class SaleController extends Controller
 
         // Semua transaksi aktif (semua tahun)
         $salesActive = Sale::where('divisi_id', Auth::user()->divisi_id)
-
             ->with([
                 'customer.divisi',
                 'user',
@@ -55,7 +54,6 @@ class SaleController extends Controller
 
         // Query transaksi lunas
         $salesQuery = Sale::where('divisi_id', Auth::user()->divisi_id)
-
             ->with([
                 'customer.divisi',
                 'user',
@@ -112,11 +110,26 @@ class SaleController extends Controller
      */
     public function create()
     {
-        $accessories = Accessories::all();
-        $item = Item::all();
-        $customer = Customer::where('divisi_id', Auth::user()->divisi_id)->get();
+        $divisiId = Auth::user()->divisi_id;
+
+        $accessories = Accessories::where('divisi_id', $divisiId)
+            ->where('stok', '>', 0)
+            ->get();
+
+        $items = Item::where('divisi_id', $divisiId)
+            ->where('status', 0)
+            ->get();
+
+        $customer = Customer::where('divisi_id', $divisiId)->get();
+
         $bank = Bank::all();
-        return view('admin.sale.create', compact('accessories', 'item', 'customer', 'bank'));
+
+        return view('admin.sale.create', compact(
+            'accessories',
+            'items',
+            'customer',
+            'bank'
+        ));
     }
 
     /**
@@ -140,25 +153,25 @@ class SaleController extends Controller
         $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT);
         $invFormat = $divisi->inv_format;
 
-// Ambil invoice terakhir dalam tahun yang sama dan divisi yang sama, abaikan bulan
         $lastInvoice = Sale::where('divisi_id', Auth::user()->divisi_id)
             ->whereYear('created_at', $currentYear)
-            ->where('invoice', 'like', "INV/{$invFormat}/%/%/{$currentYear}") // hanya filter tahun
+            ->where('invoice', 'like', "INV/{$invFormat}/%/%/{$currentYear}")
             ->orderByDesc('id')
             ->first();
 
         if ($lastInvoice) {
-            // Ambil nomor urut dari invoice terakhir
-            preg_match('/INV\/' . preg_quote($invFormat, '/') . '\/(\d{4})\/\d{2}\/' . $currentYear . '/', $lastInvoice->invoice, $matches);
+            preg_match(
+                '/INV\/' . preg_quote($invFormat, '/') . '\/(\d{4})\/\d{2}\/' . $currentYear . '/',
+                $lastInvoice->invoice,
+                $matches
+            );
             $lastNumber = isset($matches[1]) ? (int)$matches[1] : 0;
         } else {
             $lastNumber = 0;
         }
 
-// Tambah nomor urut dan buat format invoice baru
         $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         $invoiceNumber = "INV/{$invFormat}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
-
 
         $validated = $request->validate([
             'customer_id' => 'required|integer|exists:customers,id',
@@ -172,33 +185,26 @@ class SaleController extends Controller
         ], [
             'customer_id.required' => 'Pelanggan wajib diisi.',
             'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
-
             'total_item.required' => 'Total item wajib diisi.',
             'total_item.integer' => 'Total item harus berupa angka.',
             'total_item.min' => 'Total item minimal harus 1.',
-
             'total_price.required' => 'Total harga wajib diisi.',
             'total_price.numeric' => 'Total harga harus berupa angka.',
             'total_price.min' => 'Total harga tidak boleh kurang dari 0.',
-
             'ongkir.required' => 'Ongkos kirim wajib diisi.',
             'ongkir.numeric' => 'Ongkos kirim harus berupa angka.',
             'ongkir.min' => 'Ongkos kirim tidak boleh kurang dari 0.',
-
             'diskon.required' => 'Diskon wajib diisi.',
             'diskon.numeric' => 'Diskon harus berupa angka.',
             'diskon.min' => 'Diskon tidak boleh kurang dari 0.',
-
             'bayar.required' => 'Jumlah bayar wajib diisi.',
             'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
             'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
-
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Create sale record
             $sale = Sale::create([
                 'customer_id' => $validated['customer_id'],
                 'total_item' => $validated['total_item'],
@@ -212,7 +218,6 @@ class SaleController extends Controller
                 'deadlines' => $request->deadlines,
                 'created_at' => $request->created_at ?? now(),
                 'no_po' => $request->no_po,
-                'fee' => $request->fee,
                 'inv_manual' => $request->inv_manual,
                 'admin_fee' => $request->admin_fee,
                 'user_id' => Auth::id(),
@@ -220,22 +225,9 @@ class SaleController extends Controller
                 'invoice' => $invoiceNumber
             ]);
 
-//            // Simpan data hutang jika ada nominal_in
-//            $nominalIn = (int) str_replace('.', '', $request->nominal_in);
-//            $bayar = (int) $validated['bayar'];
-//
-//            if ($nominalIn >= 0 && $nominalIn <= $bayar) {
-//                Debt::create([
-//                    'sale_id' => $sale->id,
-//                    'pay_debts' => $nominalIn,
-//                    'bank_id' => $request->bank_id,
-//                    'penerima' => $request->penerima,
-//                    'description' => $request->description,
-//                    'date_pay' => now()
-//                ]);
-//            }
-            // Simpan data hutang hanya jika nominal_in lebih dari 0
-            if ((int) str_replace('.', '', $sale->nominal_in) > 0) {
+            $nominalIn = (int)str_replace('.', '', $sale->nominal_in);
+
+            if ($nominalIn > 0) {
                 Debt::create([
                     'sale_id' => $sale->id,
                     'pay_debts' => $sale->nominal_in,
@@ -246,58 +238,101 @@ class SaleController extends Controller
                 ]);
             }
 
-
-            // Simpan accessories sale dan update stok
-            if ($request->has('accessories')) {
+            // ACCESSORIES
+            if ($request->has('accessories') && is_array($validated['accessories'] ?? null)) {
                 foreach ($validated['accessories'] as $accessory) {
                     $accessoryRecord = Accessories::find($accessory['accessories_id']);
 
-                    if ($accessoryRecord) {
-                        if ($accessory['qty'] > $accessoryRecord->stok) {
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => "Stok kurang untuk aksesori dengan ID {$accessory['accessories_id']}"
-                            ], 400);
-                        }
-
-                        // Update stok
-                        $accessoryRecord->stok -= $accessory['qty'];
-                        $accessoryRecord->save();
-
-                        AccessoriesSale::create([
-                            'sale_id' => $sale->id,
-                            'accessories_id' => $accessory['accessories_id'],
-                            'qty' => $accessory['qty'],
-                            'subtotal' => $accessory['subtotal'],
-                            'acces_out' => $request->created_at ?? now()
-                        ]);
+                    if (!$accessoryRecord) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Accessories dengan ID ' . $accessory['accessories_id'] . ' tidak ditemukan.'
+                        ], 400);
                     }
+
+                    $priceSale = (float)($accessory['price_sale'] ?? 0);
+                    $priceBottom = (float)($accessoryRecord->price_bottom ?? 0);
+
+                    if ($priceSale < $priceBottom) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Harga jual accessories "' . $accessoryRecord->name . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
+                        ], 422);
+                    }
+
+                    $qty = (float)($accessory['qty'] ?? 0);
+
+                    if ($qty <= 0) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Qty accessories "' . $accessoryRecord->name . '" harus lebih dari 0.'
+                        ], 422);
+                    }
+
+                    if ($qty > (float)$accessoryRecord->stok) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Stok ' . $accessoryRecord->name . ' Tidak Mencukupi. Stok Tersedia: ' . $accessoryRecord->stok
+                        ], 400);
+                    }
+
+                    $accessoryRecord->stok -= $qty;
+                    $accessoryRecord->save();
+
+                    AccessoriesSale::create([
+                        'sale_id' => $sale->id,
+                        'accessories_id' => $accessoryRecord->id,
+                        'qty' => $qty,
+                        'price_sale' => $priceSale,
+                        'subtotal' => $accessory['subtotal'] ?? 0,
+                        'acces_out' => $request->created_at ?? now()
+                    ]);
                 }
             }
 
-            // Simpan item sale dan hapus dari tabel items
-            if ($request->has('items')) {
+            // ITEMS / ALAT
+            if ($request->has('items') && is_array($validated['items'] ?? null)) {
                 foreach ($validated['items'] as $item) {
                     $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
                         ->where('no_seri', $item['no_seri'])
                         ->first();
 
-                    if ($itemRecord) {
-                        ItemSale::create([
-                            'sale_id' => $sale->id,
-                            'itemcategory_id' => $item['itemcategory_id'],
-                            'region' => $itemRecord->region,
-                            'name' => $item['name'],
-                            'no_seri' => $item['no_seri'],
-                            'price' => $item['price'],
-                            'divisi_id' => $sale->divisi_id,
-                            'capital_price' => $itemRecord->capital_price,
-                            'date_in' => $itemRecord->created_at
-                        ]);
-
-                        $itemRecord->delete(); // Hapus item dari stok
+                    if (!$itemRecord) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Alat dengan nomor seri "' . $item['no_seri'] . '" tidak ditemukan.'
+                        ], 400);
                     }
+
+                    $priceSale = (float)($item['price'] ?? 0);
+                    $priceBottom = (float)($itemRecord->price_bottom ?? 0);
+
+                    if ($priceSale < $priceBottom) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Harga jual alat "' . ($itemRecord->name ?? $item['name']) . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
+                        ], 422);
+                    }
+
+                    ItemSale::create([
+                        'sale_id' => $sale->id,
+                        'itemcategory_id' => $item['itemcategory_id'],
+                        'region' => $itemRecord->region,
+                        'name' => $item['name'],
+                        'no_seri' => $item['no_seri'],
+                        'price' => $priceSale,
+                        'divisi_id' => $sale->divisi_id,
+                        'capital_price' => $itemRecord->capital_price,
+                        'date_in' => $itemRecord->created_at
+                    ]);
+
+                    $itemRecord->delete();
                 }
             }
 
@@ -308,11 +343,21 @@ class SaleController extends Controller
                 'message' => 'Sale berhasil disimpan.',
                 'invoice' => $invoiceNumber
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
+            Log::error('SALE STORE ERROR', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'request' => $request->all()
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat menyimpan penjualan: ' . $e->getMessage()
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -336,7 +381,7 @@ class SaleController extends Controller
      */
     public function edit($id)
     {
-
+        //
     }
 
     /**
@@ -350,7 +395,7 @@ class SaleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nominal_in' => 'required',
-            'date_pay'   => 'nullable',
+            'date_pay' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -363,17 +408,17 @@ class SaleController extends Controller
 
         try {
 
-            $nominal_in = (int) str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
-            $pay_debts  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts ?? 0);
-            $admin_fee  = (int) str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee ?? 0);
-            $diskon     = (int) str_replace(['Rp', '.', ',', ' '], '', $request->diskon ?? 0);
-            $fee        = (int) str_replace(['Rp', '.', ',', ' '], '', $request->fee ?? 0);
+            $nominal_in = (int)str_replace(['Rp', '.', ',', ' '], '', $request->nominal_in);
+            $pay_debts = (int)str_replace(['Rp', '.', ',', ' '], '', $request->pay_debts ?? 0);
+            $admin_fee = (int)str_replace(['Rp', '.', ',', ' '], '', $request->admin_fee ?? 0);
+            $diskon = (int)str_replace(['Rp', '.', ',', ' '], '', $request->diskon ?? 0);
+            $fee = (int)str_replace(['Rp', '.', ',', ' '], '', $request->fee ?? 0);
 
             $sale = Sale::findOrFail($id);
 
-            $admin_fee_lama = (int) $sale->admin_fee;
-            $diskon_lama    = (int) $sale->diskon;
-            $fee_lama       = (int) $sale->fee;
+            $admin_fee_lama = (int)$sale->admin_fee;
+            $diskon_lama = (int)$sale->diskon;
+            $fee_lama = (int)$sale->fee;
 
             /*
             |--------------------------------------------------------------------------
@@ -381,9 +426,9 @@ class SaleController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $selisih_admin  = $admin_fee - $admin_fee_lama;
+            $selisih_admin = $admin_fee - $admin_fee_lama;
             $selisih_diskon = $diskon - $diskon_lama;
-            $selisih_fee    = $fee - $fee_lama;
+            $selisih_fee = $fee - $fee_lama;
 
             /*
             |--------------------------------------------------------------------------
@@ -402,9 +447,9 @@ class SaleController extends Controller
             */
 
             $sale->nominal_in = $nominal_in;
-            $sale->admin_fee  = $admin_fee;
-            $sale->diskon     = $diskon;
-            $sale->fee        = $fee;
+            $sale->admin_fee = $admin_fee;
+            $sale->diskon = $diskon;
+            $sale->fee = $fee;
 
             $sale->save();
 
@@ -435,11 +480,11 @@ class SaleController extends Controller
                 }
 
                 Debt::create([
-                    'sale_id'     => $sale->id,
-                    'bank_id'     => $request->bank_id,
-                    'pay_debts'   => $pay_debts,
-                    'date_pay'    => $request->date_pay,
-                    'penerima'    => $request->penerima,
+                    'sale_id' => $sale->id,
+                    'bank_id' => $request->bank_id,
+                    'pay_debts' => $pay_debts,
+                    'date_pay' => $request->date_pay,
+                    'penerima' => $request->penerima,
                     'description' => $request->description,
                 ]);
             }
@@ -531,19 +576,19 @@ class SaleController extends Controller
 
             $salesReturn = SalesReturn::create([
 
-                'sale_id'        => $sale->id,
+                'sale_id' => $sale->id,
 
-                'user_id'        => auth()->id(),
+                'user_id' => auth()->id(),
 
                 'return_invoice' => $returnInvoice,
 
-                'type'           => 'full',
+                'type' => 'full',
 
-                'total_return'   => $totalReturn,
+                'total_return' => $totalReturn,
 
-                'description'    => 'Retur full transaksi',
+                'description' => 'Retur full transaksi',
 
-                'created_at'     => now(),
+                'created_at' => now(),
 
             ]);
 
@@ -561,19 +606,19 @@ class SaleController extends Controller
 
                 Item::create([
 
-                    'divisi_id'       => $sale->divisi_id,
+                    'divisi_id' => $sale->divisi_id,
 
                     'itemcategory_id' => $itemSale->itemcategory_id,
 
-                    'name'            => $itemSale->name,
+                    'name' => $itemSale->name,
 
-                    'price'           => $itemSale->price,
+                    'price' => $itemSale->price,
 
-                    'capital_price'   => $itemSale->capital_price,
+                    'capital_price' => $itemSale->capital_price,
 
-                    'no_seri'         => $itemSale->no_seri,
+                    'no_seri' => $itemSale->no_seri,
 
-                    'status'          => 1,
+                    'status' => 1,
 
                 ]);
 
@@ -581,9 +626,9 @@ class SaleController extends Controller
 
                     'sale_return_id' => $salesReturn->id,
 
-                    'item_sale_id'   => $itemSale->id,
+                    'item_sale_id' => $itemSale->id,
 
-                    'created_at'     => $sale->created_at,
+                    'created_at' => $sale->created_at,
 
                 ]);
 
@@ -616,23 +661,23 @@ class SaleController extends Controller
 
                 SalesReturnAccessories::create([
 
-                    'sale_return_id'      => $salesReturn->id,
+                    'sale_return_id' => $salesReturn->id,
 
                     'accessories_sale_id' => $accessorySale->id,
 
-                    'accessories_id'      => $accessorySale->accessories_id,
+                    'accessories_id' => $accessorySale->accessories_id,
 
-                    'qty'                 => $accessorySale->qty,
+                    'qty' => $accessorySale->qty,
 
-                    'subtotal'            => $accessorySale->subtotal,
+                    'subtotal' => $accessorySale->subtotal,
 
-                    'created_at'          => $sale->created_at,
+                    'created_at' => $sale->created_at,
 
                 ]);
 
                 $accessorySale->update([
 
-                    'return_qty'    => $accessorySale->qty,
+                    'return_qty' => $accessorySale->qty,
 
                     'status_return' => 1,
 
@@ -687,7 +732,6 @@ class SaleController extends Controller
     }
 
 
-
     public function fetchData(Request $request)
     {
         $codeSale = $request->get('code');
@@ -712,5 +756,46 @@ class SaleController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Accessories / Item Tidak ditemukan']);
         }
     }
+    public function updateFee(Request $request, $id)
+    {
+        $request->validate([
+            'fee' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+        ]);
 
+        try {
+
+            DB::beginTransaction();
+
+            $sale = Sale::findOrFail($id);
+
+            $sale->fee = $request->fee;
+            $sale->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Fee berhasil diperbarui.',
+                'data' => [
+                    'id' => $sale->id,
+                    'invoice' => $sale->invoice,
+                    'fee' => $sale->fee,
+                ],
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui fee.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

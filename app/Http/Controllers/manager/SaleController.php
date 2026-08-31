@@ -11,7 +11,6 @@ use App\Models\Debt;
 use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemSale;
-use App\Models\ReturSale;
 use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\SalesReturnAccessories;
@@ -21,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -184,10 +184,18 @@ class SaleController extends Controller
      */
     public function create()
     {
-        $accessories = Accessories::all();
+        $accessories = Accessories::where('stok', '>=', 1)
+            ->get();
+
         $item = Item::all();
+
         $customer = Customer::all();
-        $divisi = Divisi::all();
+
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
+
         $bank = Bank::all();
         return view('manager.sale.create', compact('accessories', 'item', 'customer', 'divisi', 'bank'));
     }
@@ -233,7 +241,7 @@ class SaleController extends Controller
             'bayar' => 'required|numeric|min:0',
             'accessories' => 'nullable|array',
             'items' => 'nullable|array',
-            'created_at' => 'required',
+
         ], [
             'customer_id.required' => 'Pelanggan wajib diisi.',
             'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
@@ -260,7 +268,6 @@ class SaleController extends Controller
             'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
             'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
 
-            'creates_at.required' => 'Tanggal transaksi wajib diisi.',
         ]);
 
 
@@ -280,16 +287,16 @@ class SaleController extends Controller
                 'nominal_in' => $request->nominal_in,
                 'deadlines' => $request->deadlines,
                 'no_po' => $request->no_po,
-                'fee' => $request->fee,
                 'admin_fee' => $request->admin_fee,
                 'user_id' => Auth::id(),
                 'divisi_id' => $validated['divisi_id'],
-                'created_at' => $validated['created_at'],
+                'created_at' => $validated['created_at'] ?? now(),
                 'invoice' => $invoiceNumber
             ]);
 
-            // Simpan data hutang hanya jika nominal_in lebih dari 0
-            if ((int) str_replace('.', '', $sale->nominal_in) > 0) {
+            $nominalIn = (int)str_replace('.', '', $sale->nominal_in);
+
+            if ($nominalIn > 0) {
                 Debt::create([
                     'sale_id' => $sale->id,
                     'pay_debts' => $sale->nominal_in,
@@ -300,60 +307,101 @@ class SaleController extends Controller
                 ]);
             }
 
-
-
-            // Simpan Accessories Sale dan update stok
-            if ($request->has('accessories')) {
+            // ACCESSORIES
+            if ($request->has('accessories') && is_array($validated['accessories'] ?? null)) {
                 foreach ($validated['accessories'] as $accessory) {
                     $accessoryRecord = Accessories::find($accessory['accessories_id']);
 
-                    if ($accessoryRecord) {
-                        if ($accessory['qty'] > $accessoryRecord->stok) {
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => "Stok kurang untuk aksesori dengan ID {$accessory['accessories_id']}"
-                            ], 400);
-                        }
-
-                        // Update stok
-                        $accessoryRecord->stok -= $accessory['qty'];
-                        $accessoryRecord->save();
-
-                        // Simpan transaksi Accessories
-                        AccessoriesSale::create([
-                            'sale_id' => $sale->id,
-                            'accessories_id' => $accessory['accessories_id'],
-                            'qty' => $accessory['qty'],
-                            'subtotal' => $accessory['subtotal'],
-                            'acces_out' => now()
-                        ]);
+                    if (!$accessoryRecord) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Accessories dengan ID ' . $accessory['accessories_id'] . ' tidak ditemukan.'
+                        ], 400);
                     }
+
+                    $priceSale = (float)($accessory['price_sale'] ?? 0);
+                    $priceBottom = (float)($accessoryRecord->price_bottom ?? 0);
+
+                    if ($priceSale < $priceBottom) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Harga jual accessories "' . $accessoryRecord->name . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
+                        ], 422);
+                    }
+
+                    $qty = (float)($accessory['qty'] ?? 0);
+
+                    if ($qty <= 0) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Qty accessories "' . $accessoryRecord->name . '" harus lebih dari 0.'
+                        ], 422);
+                    }
+
+                    if ($qty > (float)$accessoryRecord->stok) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Stok ' . $accessoryRecord->name . ' Tidak Mencukupi. Stok Tersedia: ' . $accessoryRecord->stok
+                        ], 400);
+                    }
+
+                    $accessoryRecord->stok -= $qty;
+                    $accessoryRecord->save();
+
+                    AccessoriesSale::create([
+                        'sale_id' => $sale->id,
+                        'accessories_id' => $accessoryRecord->id,
+                        'qty' => $qty,
+                        'price_sale' => $priceSale,
+                        'subtotal' => $accessory['subtotal'] ?? 0,
+                        'acces_out' => $request->created_at ?? now()
+                    ]);
                 }
             }
 
-            // Simpan Item Sale dan hapus dari daftar item
-            if ($request->has('items')) {
+            // ITEMS / ALAT
+            if ($request->has('items') && is_array($validated['items'] ?? null)) {
                 foreach ($validated['items'] as $item) {
                     $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
                         ->where('no_seri', $item['no_seri'])
                         ->first();
 
-                    if ($itemRecord) {
-                        ItemSale::create([
-                            'sale_id' => $sale->id,
-                            'itemcategory_id' => $item['itemcategory_id'],
-                            'name' => $item['name'],
-                            'no_seri' => $item['no_seri'],
-                            'price' => $item['price'],
-                            'divisi_id' => $sale->divisi_id,
-                            'capital_price' => $itemRecord->capital_price,
-                            'date_in' => $itemRecord->created_at
-                        ]);
-
-                        // Hapus item dari daftar item
-                        $itemRecord->delete();
+                    if (!$itemRecord) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Alat dengan nomor seri "' . $item['no_seri'] . '" tidak ditemukan.'
+                        ], 400);
                     }
+
+                    $priceSale = (float)($item['price'] ?? 0);
+                    $priceBottom = (float)($itemRecord->price_bottom ?? 0);
+
+                    if ($priceSale < $priceBottom) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Harga jual alat "' . ($itemRecord->name ?? $item['name']) . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
+                        ], 422);
+                    }
+
+                    ItemSale::create([
+                        'sale_id' => $sale->id,
+                        'itemcategory_id' => $item['itemcategory_id'],
+                        'region' => $itemRecord->region,
+                        'name' => $item['name'],
+                        'no_seri' => $item['no_seri'],
+                        'price' => $priceSale,
+                        'divisi_id' => $sale->divisi_id,
+                        'capital_price' => $itemRecord->capital_price,
+                        'date_in' => $itemRecord->created_at
+                    ]);
+
+                    $itemRecord->delete();
                 }
             }
 
@@ -361,14 +409,24 @@ class SaleController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Sale saved successfully.',
+                'message' => 'Sale berhasil disimpan.',
                 'invoice' => $invoiceNumber
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
+            Log::error('SALE STORE ERROR', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'request' => $request->all()
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while saving the sale: ' . $e->getMessage()
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -1042,17 +1100,108 @@ class SaleController extends Controller
     }
     public function fetchData(Request $request)
     {
-        $codeSale = $request->get('code');
-        $accessory = Accessories::where('code_acces', $codeSale)->first();
-        $item = Item::where('no_seri', $codeSale)->where('status', 0)->first();
+        $codeSale = trim($request->get('code'));
+        $divisiId = $request->get('divisi_id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
+        if (empty($codeSale)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Kode barang wajib diisi.'
+            ], 422);
+        }
+
+        if (empty($divisiId)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Divisi transaksi belum dipilih.'
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CARI ACCESSORIES BERDASARKAN
+        | KODE + DIVISI
+        |--------------------------------------------------------------------------
+        */
+
+        $accessory = Accessories::where('code_acces', $codeSale)
+            ->where('divisi_id', $divisiId)
+            ->first();
 
         if ($accessory) {
-            return response()->json(['status' => 'success', 'type' => 'accessory', 'data' => $accessory]);
-        } elseif ($item) {
-            return response()->json(['status' => 'success', 'type' => 'item', 'data' => $item]);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Code Accessories or No Seri not found!']);
+
+            return response()->json([
+                'status' => 'success',
+                'type'   => 'accessory',
+                'data'   => $accessory
+            ]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CARI ITEM / ALAT BERDASARKAN
+        | NO SERI + DIVISI
+        |--------------------------------------------------------------------------
+        */
+
+        $item = Item::where('no_seri', $codeSale)
+            ->where('divisi_id', $divisiId)
+            ->where('status', 0)
+            ->first();
+
+        if ($item) {
+
+            return response()->json([
+                'status' => 'success',
+                'type'   => 'item',
+                'data'   => $item
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK APAKAH KODE ADA TETAPI MILIK DIVISI LAIN
+        |--------------------------------------------------------------------------
+        */
+
+        $accessoryOtherDivision = Accessories::where(
+            'code_acces',
+            $codeSale
+        )
+            ->where('divisi_id', '!=', $divisiId)
+            ->exists();
+
+        $itemOtherDivision = Item::where(
+            'no_seri',
+            $codeSale
+        )
+            ->where('divisi_id', '!=', $divisiId)
+            ->exists();
+
+        if ($accessoryOtherDivision || $itemOtherDivision) {
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Barang dengan kode "' . $codeSale . '" ada, tetapi bukan milik divisi yang dipilih.'
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | KODE TIDAK DITEMUKAN
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Kode Accessories atau No Seri "' . $codeSale . '" tidak ditemukan.'
+        ], 404);
     }
     public function bayar(Request $request, $id)
     {
@@ -1472,5 +1621,47 @@ class SaleController extends Controller
             'years',
             'divisi'
         ));
+    }
+    public function updateFee(Request $request, $id)
+    {
+        $request->validate([
+            'fee' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+        ]);
+
+        try {
+
+            DB::beginTransaction();
+
+            $sale = Sale::findOrFail($id);
+
+            $sale->fee = $request->fee;
+            $sale->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Fee berhasil diperbarui.',
+                'data' => [
+                    'id' => $sale->id,
+                    'invoice' => $sale->invoice,
+                    'fee' => $sale->fee,
+                ],
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui fee.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

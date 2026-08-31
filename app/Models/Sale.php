@@ -25,8 +25,15 @@ class Sale extends Model
     }
     public function accessories()
     {
-        return $this->belongsToMany(Accessories::class, 'accessories_sales', 'sale_id', 'accessories_id')
-            ->withPivot('qty')->withTrashed();
+        return $this->belongsToMany(
+            Accessories::class,
+            'accessories_sales',
+            'sale_id',
+            'accessories_id'
+        )->withPivot([
+            'qty',
+            'price_sale',
+        ]);
     }
 
     public function itemSales()
