@@ -249,7 +249,7 @@ class ReportController extends Controller
                 $totalPay = $diterima;
 
                 // PIUTANG
-                $piutang = max(0, $totalPrice - $paidUntilEndDate);
+                $piutang = $sale->nominal_in - $sale->pay;
 
                 // INCOME
                 if ($invoiceInPeriod) {
