@@ -130,7 +130,7 @@ class ReportController extends Controller
                 $paidUntilEndDate = $sale->debt->sum(fn ($payment) => (float) ($payment->pay_debts ?? 0));
 
                 // PIUTANG
-                $piutang = max($invoice - $paidUntilEndDate - $diskon - $fee, 0);
+                $piutang = $sale->nominal_in - $sale->pay;
 
                 // TOTAL BAYAR
                 $totalBayarSale = $paidUntilEndDate;
