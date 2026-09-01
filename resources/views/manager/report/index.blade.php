@@ -11,7 +11,6 @@
         </div>
     </div>
 
-
     <div class="card table-timbang">
 
         {{-- =========================================================
@@ -79,9 +78,7 @@
 
                                 @foreach($divisis as $divisi)
 
-                                    <option
-                                        value="{{ $divisi->id }}"
-                                    >
+                                    <option value="{{ $divisi->id }}">
                                         {{ $divisi->name }}
                                     </option>
 
@@ -230,6 +227,11 @@
                             Fee
                         </th>
 
+                        {{-- MODAL --}}
+                        <th class="text-center">
+                            Modal
+                        </th>
+
                         <th class="text-center">
                             Laba-Rugi
                         </th>
@@ -252,6 +254,7 @@
 
                     <tfoot>
 
+                    {{-- TOTAL UTAMA --}}
                     <tr>
 
                         <th
@@ -264,63 +267,93 @@
                         <th
                             class="text-center"
                             id="ttl_inv"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_ppn"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_pph"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_diskon"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_ongkir"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_biaya_admin"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_diterima"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_piutang"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_bayar"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_fee"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
+
+                        <th
+                            class="text-center"
+                            id="ttl_modal"
+                        >
+                            Rp 0
+                        </th>
 
                         <th
                             class="text-center"
                             id="ttl_laba"
-                        ></th>
+                        >
+                            Rp 0
+                        </th>
 
                         <th></th>
 
                     </tr>
 
 
+                    {{-- TOTAL INVOICE --}}
                     <tr>
 
                         <th
@@ -331,7 +364,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="total-bersih"
                         >
@@ -341,6 +374,7 @@
                     </tr>
 
 
+                    {{-- TOTAL BERSIH --}}
                     <tr>
 
                         <th
@@ -351,7 +385,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="total-income"
                         >
@@ -361,6 +395,7 @@
                     </tr>
 
 
+                    {{-- LABA RUGI --}}
                     <tr>
 
                         <th
@@ -371,7 +406,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="profit"
                         >
@@ -381,6 +416,28 @@
                     </tr>
 
 
+                    {{-- MODAL --}}
+                    <tr>
+
+                        <th
+                            colspan="11"
+                            class="text-center"
+                        >
+                            Modal
+                        </th>
+
+                        <th
+                            colspan="11"
+                            class="text-center"
+                            id="modal"
+                        >
+                            Rp 0
+                        </th>
+
+                    </tr>
+
+
+                    {{-- PPN --}}
                     <tr>
 
                         <th
@@ -391,7 +448,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="ppn"
                         >
@@ -401,6 +458,7 @@
                     </tr>
 
 
+                    {{-- PPH --}}
                     <tr>
 
                         <th
@@ -411,7 +469,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="pph"
                         >
@@ -421,6 +479,7 @@
                     </tr>
 
 
+                    {{-- BIAYA ADMIN --}}
                     <tr>
 
                         <th
@@ -431,7 +490,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="biaya_admin"
                         >
@@ -441,6 +500,7 @@
                     </tr>
 
 
+                    {{-- FEE --}}
                     <tr>
 
                         <th
@@ -451,7 +511,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="fee"
                         >
@@ -461,6 +521,7 @@
                     </tr>
 
 
+                    {{-- DISKON --}}
                     <tr>
 
                         <th
@@ -471,7 +532,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="diskon"
                         >
@@ -481,6 +542,7 @@
                     </tr>
 
 
+                    {{-- ONGKIR --}}
                     <tr>
 
                         <th
@@ -491,7 +553,7 @@
                         </th>
 
                         <th
-                            colspan="10"
+                            colspan="11"
                             class="text-center"
                             id="ongkir"
                         >
@@ -587,16 +649,14 @@
                     return dateString;
                 }
 
-                return date
-                    .toLocaleDateString(
-                        'id-ID',
-                        {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                        }
-                    )
-                    .replace('Agt', 'Agt');
+                return date.toLocaleDateString(
+                    'id-ID',
+                    {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }
+                );
             }
 
 
@@ -643,26 +703,11 @@
                 }
 
                 return String(value)
-                    .replace(
-                        /&/g,
-                        '&amp;'
-                    )
-                    .replace(
-                        /</g,
-                        '&lt;'
-                    )
-                    .replace(
-                        />/g,
-                        '&gt;'
-                    )
-                    .replace(
-                        /"/g,
-                        '&quot;'
-                    )
-                    .replace(
-                        /'/g,
-                        '&#039;'
-                    );
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
             }
 
 
@@ -672,47 +717,44 @@
 
             function buildItemList(items)
             {
-                let html =
-                    '<ul>';
+                let html = '<ul>';
 
                 if (
                     Array.isArray(items) &&
                     items.length > 0
                 ) {
 
-                    items.forEach(
-                        function (item)
-                        {
+                    items.forEach(function (item)
+                    {
 
-                            let name =
-                                item.name ?? '';
+                        let name =
+                            item.name ?? '';
 
-                            let noSeri =
-                                item.no_seri ?? '';
+                        let noSeri =
+                            item.no_seri ?? '';
 
-                            html += `
-                        <li>
-                            ${escapeHtml(name)}
-                            ${
-                                noSeri
-                                    ? ' - (' +
-                                    escapeHtml(noSeri) +
-                                    ')'
-                                    : ''
-                            }
-                        </li>
-                    `;
+                        html += `
+                    <li>
+                        ${escapeHtml(name)}
+                        ${
+                            noSeri
+                                ? ' - (' +
+                                escapeHtml(noSeri) +
+                                ')'
+                                : ''
                         }
-                    );
+                    </li>
+                `;
+
+                    });
 
                 } else {
 
-                    html +=
-                        '<li>-</li>';
+                    html += '<li>-</li>';
+
                 }
 
-                html +=
-                    '</ul>';
+                html += '</ul>';
 
                 return html;
             }
@@ -722,38 +764,63 @@
                ACCESSORIES
             ============================================================ */
 
-            function buildAccessoriesList(
-                accessories
-            )
+            function buildAccessoriesList(accessories)
             {
+                let html = '<ul>';
 
-                let html =
-                    '<ul>';
+                if (
+                    Array.isArray(accessories) &&
+                    accessories.length > 0
+                ) {
 
-                if (Array.isArray(accessories) && accessories.length > 0) {
-                    accessories.forEach(function (accessory) {
-                        let name = accessory.name ?? '';
-                        let qty = parseFloat(accessory.qty ?? 0);
-                        let price_sale = new Intl.NumberFormat('id-ID').format(
-                            parseFloat(accessory.price_sale ?? 0)
-                        );
+                    accessories.forEach(function (accessory)
+                    {
+
+                        let name =
+                            accessory.name ?? '';
+
+                        let qty =
+                            parseFloat(
+                                accessory.qty ?? 0
+                            );
 
                         if (isNaN(qty)) {
                             qty = 0;
                         }
 
+                        let price =
+                            parseFloat(
+                                accessory.price_sale ?? 0
+                            );
+
+                        if (isNaN(price)) {
+                            price = 0;
+                        }
+
                         html += `
-                            <li>
-                                ${escapeHtml(name)} <br>
-                                Qty :${qty} <br> Harga :Rp. ${price_sale}
-                                <hr>
-                            </li>
-                        `;
+                    <li>
+
+                        ${escapeHtml(name)}
+
+                        <br>
+
+                        Qty : ${qty}
+
+                        <br>
+
+                        Harga : Rp ${new Intl.NumberFormat('id-ID')
+                            .format(price)}
+
+                        <hr>
+
+                    </li>
+                `;
+
                     });
+
                 }
 
-                html +=
-                    '</ul>';
+                html += '</ul>';
 
                 return html;
             }
@@ -763,148 +830,143 @@
                PAYMENT
             ============================================================ */
 
-            function buildPaymentList(
-                debts
-            )
+            function buildPaymentList(debts)
             {
-
-                let html =
-                    '<div>';
+                let html = '<div>';
 
                 if (
                     Array.isArray(debts) &&
                     debts.length > 0
                 ) {
 
-                    debts.forEach(
-                        function (debt)
-                        {
+                    debts.forEach(function (debt)
+                    {
 
-                            const datePay =
-                                debt.date_pay
-                                    ? formatDate(
-                                        debt.date_pay
-                                    )
-                                    : '-';
-
-
-                            const bankName =
-                                debt.bank?.name
-                                ??
-                                debt.bank_name
-                                ??
-                                '';
+                        const datePay =
+                            debt.date_pay
+                                ? formatDate(
+                                    debt.date_pay
+                                )
+                                : '-';
 
 
-                            const description =
-                                debt.description
-                                ?? '';
+                        const bankName =
+                            debt.bank?.name ??
+                            debt.bank_name ??
+                            '';
 
 
-                            let method =
-                                debt.method
-                                ?? '';
+                        const description =
+                            debt.description ??
+                            '';
 
 
-                            if (
-                                !method &&
-                                bankName
-                            ) {
-                                method =
-                                    bankName;
-                            }
+                        let method =
+                            debt.method ??
+                            '';
 
 
-                            if (
-                                !method &&
-                                !bankName &&
-                                !description
-                            ) {
-                                method =
-                                    'Tunai';
-                            }
+                        if (
+                            !method &&
+                            bankName
+                        ) {
+
+                            method =
+                                bankName;
+
+                        }
 
 
-                            let amount =
-                                parseFloat(
-                                    debt.pay_debts ?? 0
+                        if (
+                            !method &&
+                            !bankName &&
+                            !description
+                        ) {
+
+                            method =
+                                'Tunai';
+
+                        }
+
+
+                        let amount =
+                            parseFloat(
+                                debt.pay_debts ?? 0
+                            );
+
+
+                        if (isNaN(amount)) {
+                            amount = 0;
+                        }
+
+
+                        const penerima =
+                            debt.penerima ?? '';
+
+
+                        let paymentMethod =
+                            '';
+
+
+                        if (bankName) {
+
+                            paymentMethod = `
+                        <strong>Metode:</strong>
+                        ${escapeHtml(bankName)}
+                    `;
+
+                        } else if (description) {
+
+                            paymentMethod = `
+                        <strong>Keterangan:</strong>
+                        ${escapeHtml(description)}
+                    `;
+
+                        } else {
+
+                            paymentMethod =
+                                escapeHtml(
+                                    method ||
+                                    'Tunai'
                                 );
 
-
-                            if (isNaN(amount)) {
-                                amount = 0;
-                            }
-
-
-                            const penerima =
-                                debt.penerima ?? '';
-
-
-                            let paymentMethod =
-                                '';
-
-
-                            if (bankName) {
-
-                                paymentMethod = `
-                            <strong>Metode:</strong>
-                            ${escapeHtml(bankName)}
-                        `;
-
-                            } else if (description) {
-
-                                paymentMethod = `
-                            <strong>Keterangan:</strong>
-                            ${escapeHtml(description)}
-                        `;
-
-                            } else {
-
-                                paymentMethod =
-                                    escapeHtml(
-                                        method ||
-                                        'Tunai'
-                                    );
-                            }
-
-
-                            html += `
-                        <div class="payment-item">
-
-                            <strong>
-                                ${escapeHtml(datePay)}
-                            </strong>
-
-                            <br>
-
-                            ${paymentMethod}
-
-                            <br>
-
-                            ${formatRupiah(amount)}
-
-                            ${
-                                penerima
-                                    ? '<br>Penerima: ' +
-                                    escapeHtml(
-                                        penerima
-                                    )
-                                    : ''
-                            }
-
-                        </div>
-                    `;
                         }
-                    );
+
+
+                        html += `
+                    <div class="payment-item">
+
+                        <strong>
+                            ${escapeHtml(datePay)}
+                        </strong>
+
+                        <br>
+
+                        ${paymentMethod}
+
+                        <br>
+
+                        ${formatRupiah(amount)}
+
+                        ${
+                            penerima
+                                ? '<br>Penerima: ' +
+                                escapeHtml(penerima)
+                                : ''
+                        }
+
+                    </div>
+                `;
+
+                    });
 
                 } else {
 
                     html += '-';
+
                 }
 
-
-                html +=
-                    '</div>';
+                html += '</div>';
 
                 return html;
             }
@@ -929,11 +991,12 @@
 
                     buttons: [
 
-                        /* =================================================
+                        /* =====================================================
                            EXCEL
-                        ================================================= */
+                        ===================================================== */
 
                         {
+
                             extend: 'excel',
 
                             title:
@@ -949,6 +1012,7 @@
 
                                 stripHtml:
                                     false
+
                             },
 
                             filename: function ()
@@ -978,7 +1042,9 @@
                                     '-' +
                                     dd
                                 );
+
                             },
+
 
                             customize: function (xlsx)
                             {
@@ -989,13 +1055,16 @@
                                         'sheet1.xml'
                                         ];
 
+
                                 var styles =
                                     xlsx.xl[
                                         'styles.xml'
                                         ];
 
+
                                 var $sheet =
                                     $(sheet);
+
 
                                 var $styles =
                                     $(styles);
@@ -1009,6 +1078,7 @@
                                     $styles.find(
                                         'cellXfs'
                                     );
+
 
                                 var xfCount =
                                     parseInt(
@@ -1050,6 +1120,7 @@
                                     $styles.find(
                                         'fonts'
                                     );
+
 
                                 var fontCount =
                                     parseInt(
@@ -1132,22 +1203,17 @@
                                         {
 
                                             $(this)
-                                                .prepend(
-                                                    '\n'
-                                                );
+                                                .prepend('\n');
 
                                             $(this)
-                                                .append(
-                                                    '\n'
-                                                );
+                                                .append('\n');
+
                                         }
                                     );
 
 
                                     temp.find('br')
-                                        .replaceWith(
-                                            '\n'
-                                        );
+                                        .replaceWith('\n');
 
 
                                     temp.find('li')
@@ -1156,14 +1222,11 @@
                                             {
 
                                                 $(this)
-                                                    .prepend(
-                                                        '\n'
-                                                    );
+                                                    .prepend('\n');
 
                                                 $(this)
-                                                    .append(
-                                                        '\n'
-                                                    );
+                                                    .append('\n');
+
                                             }
                                         );
 
@@ -1217,6 +1280,7 @@
                                             var cell =
                                                 $(this);
 
+
                                             var inlineText =
                                                 cell.find(
                                                     'is t'
@@ -1226,7 +1290,9 @@
                                             if (
                                                 inlineText.length === 0
                                             ) {
+
                                                 return;
+
                                             }
 
 
@@ -1255,6 +1321,7 @@
                                                 's',
                                                 wrapStyle
                                             );
+
                                         }
                                     );
 
@@ -1283,12 +1350,14 @@
                                         $sheet.find(
                                             'cols'
                                         );
+
                                 }
 
 
                                 cols.empty();
 
 
+                                /* 1 - No */
                                 cols.append(`
                             <col
                                 min="1"
@@ -1299,6 +1368,7 @@
                         `);
 
 
+                                /* 2 - Tanggal */
                                 cols.append(`
                             <col
                                 min="2"
@@ -1309,6 +1379,7 @@
                         `);
 
 
+                                /* 3 - Divisi */
                                 cols.append(`
                             <col
                                 min="3"
@@ -1319,6 +1390,7 @@
                         `);
 
 
+                                /* 4 - Invoice Manual */
                                 cols.append(`
                             <col
                                 min="4"
@@ -1329,6 +1401,7 @@
                         `);
 
 
+                                /* 5 - Invoice */
                                 cols.append(`
                             <col
                                 min="5"
@@ -1339,6 +1412,7 @@
                         `);
 
 
+                                /* 6 - Pelanggan */
                                 cols.append(`
                             <col
                                 min="6"
@@ -1349,6 +1423,7 @@
                         `);
 
 
+                                /* 7 - Alat */
                                 cols.append(`
                             <col
                                 min="7"
@@ -1359,6 +1434,7 @@
                         `);
 
 
+                                /* 8 - Aksesoris */
                                 cols.append(`
                             <col
                                 min="8"
@@ -1369,6 +1445,7 @@
                         `);
 
 
+                                /* 9 - Total Item */
                                 cols.append(`
                             <col
                                 min="9"
@@ -1379,20 +1456,22 @@
                         `);
 
 
+                                /* 10-21 - Numeric */
                                 cols.append(`
                             <col
                                 min="10"
-                                max="20"
+                                max="21"
                                 width="18"
                                 customWidth="1"
                             />
                         `);
 
 
+                                /* 22 - Tanggal Pembayaran */
                                 cols.append(`
                             <col
-                                min="21"
-                                max="21"
+                                min="22"
+                                max="22"
                                 width="17"
                                 customWidth="1"
                             />
@@ -1413,6 +1492,7 @@
 
                                             var row =
                                                 $(this);
+
 
                                             var rowNumber =
                                                 row.attr(
@@ -1435,6 +1515,7 @@
                                                 );
 
                                                 return;
+
                                             }
 
 
@@ -1468,8 +1549,11 @@
 
                                                             maxLines =
                                                                 lines;
+
                                                         }
+
                                                     }
+
                                                 }
                                             );
 
@@ -1489,10 +1573,12 @@
                                                 height
                                             );
 
+
                                             row.attr(
                                                 'customHeight',
                                                 '1'
                                             );
+
                                         }
                                     );
 
@@ -1512,6 +1598,7 @@
                                     return el
                                         ? el.innerText
                                         : '0';
+
                                 }
 
 
@@ -1529,17 +1616,18 @@
                                             var r =
                                                 parseInt(
                                                     $(this)
-                                                        .attr(
-                                                            'r'
-                                                        )
+                                                        .attr('r')
                                                 );
 
 
                                             if (
                                                 r > lastRow
                                             ) {
+
                                                 lastRow = r;
+
                                             }
+
                                         }
                                     );
 
@@ -1643,7 +1731,9 @@
                                         </c>
 
                                     </row>
+
                                 `);
+
                                 }
 
 
@@ -1719,6 +1809,10 @@
                                         ),
 
                                         getFooterText(
+                                            'ttl_modal'
+                                        ),
+
+                                        getFooterText(
                                             'ttl_laba'
                                         ),
 
@@ -1773,6 +1867,7 @@
                                                             n - 1
                                                         ) / 26
                                                     );
+
                                             }
 
 
@@ -1821,6 +1916,7 @@
                                         </c>
 
                                     `;
+
                                         }
                                     );
 
@@ -1842,6 +1938,7 @@
                                     </row>
 
                                 `);
+
                                 }
 
 
@@ -1872,6 +1969,14 @@
                                     'Laba-Rugi',
                                     getFooterText(
                                         'profit'
+                                    )
+                                );
+
+
+                                addFooterRow(
+                                    'Modal',
+                                    getFooterText(
+                                        'modal'
                                     )
                                 );
 
@@ -1922,15 +2027,18 @@
                                         'ongkir'
                                     )
                                 );
+
                             }
+
                         },
 
 
-                        /* =================================================
+                        /* =====================================================
                            PDF
-                        ================================================= */
+                        ===================================================== */
 
                         {
+
                             extend: 'pdf',
 
                             text: 'PDF',
@@ -1941,6 +2049,7 @@
 
                                 columns:
                                     ':visible'
+
                             },
 
                             filename: function ()
@@ -1955,18 +2064,12 @@
                                 const mm =
                                     String(
                                         today.getMonth() + 1
-                                    ).padStart(
-                                        2,
-                                        '0'
-                                    );
+                                    ).padStart(2, '0');
 
                                 const dd =
                                     String(
                                         today.getDate()
-                                    ).padStart(
-                                        2,
-                                        '0'
-                                    );
+                                    ).padStart(2, '0');
 
                                 return (
                                     'laporan transaksi manager ' +
@@ -1976,7 +2079,9 @@
                                     '-' +
                                     dd
                                 );
+
                             },
+
 
                             customize: function (doc)
                             {
@@ -2042,6 +2147,7 @@
                                                     'Diterima',
                                                     'Piutang',
                                                     'Fee',
+                                                    'Modal',
                                                     'Laba-Rugi',
                                                     'Total Bayar'
                                                 ].includes(
@@ -2085,6 +2191,7 @@
                                                 widths.push(
                                                     '*'
                                                 );
+
                                             }
 
                                         }
@@ -2172,12 +2279,14 @@
                                                         'tableCell'
 
                                                 });
+
                                             }
 
 
                                             tableBody.push(
                                                 row
                                             );
+
                                         }
                                     );
 
@@ -2236,12 +2345,14 @@
                                                         'tableCell'
 
                                                 });
+
                                             }
 
 
                                             tableBody.push(
                                                 row
                                             );
+
                                         }
                                     );
 
@@ -2347,9 +2458,9 @@
                         },
 
 
-                        /* =================================================
+                        /* =====================================================
                            PRINT
-                        ================================================= */
+                        ===================================================== */
 
                         {
 
@@ -2577,6 +2688,7 @@
                                 );
 
                                 return;
+
                             }
 
 
@@ -2595,6 +2707,7 @@
                                 response.footer ?? {};
 
 
+                            /* TOTAL BERSIH */
                             $('#total-income')
                                 .text(
                                     formatRupiah(
@@ -2603,6 +2716,7 @@
                                 );
 
 
+                            /* LABA */
                             $('#profit')
                                 .text(
                                     formatRupiah(
@@ -2611,6 +2725,16 @@
                                 );
 
 
+                            /* MODAL */
+                            $('#modal')
+                                .text(
+                                    formatRupiah(
+                                        footer.modal ?? 0
+                                    )
+                                );
+
+
+                            /* DISKON */
                             $('#diskon')
                                 .text(
                                     formatRupiah(
@@ -2619,6 +2743,7 @@
                                 );
 
 
+                            /* ONGKIR */
                             $('#ongkir')
                                 .text(
                                     formatRupiah(
@@ -2627,6 +2752,7 @@
                                 );
 
 
+                            /* PPN */
                             $('#ppn')
                                 .text(
                                     formatRupiah(
@@ -2635,6 +2761,7 @@
                                 );
 
 
+                            /* PPH */
                             $('#pph')
                                 .text(
                                     formatRupiah(
@@ -2643,6 +2770,7 @@
                                 );
 
 
+                            /* BIAYA ADMIN */
                             $('#biaya_admin')
                                 .text(
                                     formatRupiah(
@@ -2651,6 +2779,7 @@
                                 );
 
 
+                            /* FEE */
                             $('#fee')
                                 .text(
                                     formatRupiah(
@@ -2659,6 +2788,7 @@
                                 );
 
 
+                            /* TOTAL INVOICE */
                             $('#total-bersih')
                                 .text(
                                     formatRupiah(
@@ -2747,6 +2877,15 @@
                                 .text(
                                     formatRupiah(
                                         footer.fee ?? 0
+                                    )
+                                );
+
+
+                            /* TOTAL MODAL */
+                            $('#ttl_modal')
+                                .text(
+                                    formatRupiah(
+                                        footer.modal ?? 0
                                     )
                                 );
 
@@ -2854,6 +2993,21 @@
                                             );
 
 
+                                        /* =================================
+                                           MODAL
+                                        ================================= */
+
+                                        let modal =
+                                            parseFloat(
+                                                data.capital_price ?? 0
+                                            );
+
+
+                                        if (isNaN(modal)) {
+                                            modal = 0;
+                                        }
+
+
                                         let laba =
                                             parseFloat(
                                                 data.profit ?? 0
@@ -2862,85 +3016,129 @@
 
                                         table.row.add([
 
+                                            /* 1 */
                                             index + 1,
 
+                                            /* 2 */
                                             formatDate(
                                                 data.created_at ?? ''
                                             ),
 
+                                            /* 3 */
                                             escapeHtml(
                                                 data.divisi ?? 'N/A'
                                             ),
 
+                                            /* 4 */
                                             escapeHtml(
                                                 data.inv_manual ?? ''
                                             ),
 
+                                            /* 5 */
                                             escapeHtml(
                                                 data.invoice ?? 'N/A'
                                             ),
 
+                                            /* 6 */
                                             escapeHtml(
                                                 data.customer?.name ??
                                                 'N/A'
                                             ),
 
+                                            /* 7 */
                                             itemSalesList,
 
+                                            /* 8 */
                                             accessoriesList,
 
+                                            /* 9 */
                                             data.total_item ?? 0,
 
+                                            /* 10 */
                                             formatRupiah(
                                                 totalInvoice
                                             ),
 
+                                            /* 11 */
                                             formatRupiah(
                                                 ppn
                                             ),
 
+                                            /* 12 */
                                             formatRupiah(
                                                 pph
                                             ),
 
+                                            /* 13 */
                                             formatRupiah(
                                                 diskon
                                             ),
 
+                                            /* 14 */
                                             formatRupiah(
                                                 ongkir
                                             ),
 
+                                            /* 15 */
                                             formatRupiah(
                                                 admin
                                             ),
 
+                                            /* 16 */
                                             formatRupiah(
                                                 diterima
                                             ),
 
+                                            /* 17 */
                                             formatRupiah(
                                                 piutang
                                             ),
 
+                                            /* 18 */
                                             formatRupiah(
                                                 totalBayar
                                             ),
 
+                                            /* 19 */
                                             formatRupiah(
                                                 fee
                                             ),
 
+                                            /* 20 */
                                             formatRupiah(
-                                                laba
+                                                modal
                                             ),
 
+                                            (() => {
+                                                const transactionDate = new Date(data.created_at ?? '');
+                                                const august2026 = new Date('2026-08-01T00:00:00');
+
+                                                const pay = parseFloat(data.pay ?? 0);
+                                                const fee = parseFloat(data.fee ?? 0);
+                                                const capital = parseFloat(data.capital_price ?? 0);
+
+
+                                                let profit;
+
+                                                if (transactionDate >= august2026) {
+                                                    // AGUSTUS 2026 KE ATAS
+                                                    profit = pay - fee - capital;
+                                                } else {
+                                                    // JULI 2026 DAN SEBELUMNYA
+                                                    profit = pay - capital;
+                                                }
+
+                                                return formatRupiah(Math.max(profit, 0));
+                                            })(),
+
+                                            /* 22 */
                                             debtList
 
                                         ]);
 
                                     }
                                 );
+
                             }
 
 
@@ -2978,6 +3176,7 @@
 
                                 message =
                                     xhr.responseJSON.message;
+
                             }
 
 
@@ -2990,7 +3189,7 @@
 
                     /* =====================================================
                        COMPLETE
-                    ====================================================== */
+                    ===================================================== */
 
                     complete:
                         function ()
@@ -3056,6 +3255,7 @@
                             );
 
                             return;
+
                         }
 
 

@@ -682,10 +682,10 @@ class ReportController extends Controller
 
                 $cutoffFee = Carbon::create(
                     2026,
-                    8,
-                    1,
-                    0,
-                    0,
+                    7,
+                    31,
+                    23,
+                    59,
                     0,
                     $timezone
                 );
@@ -694,7 +694,7 @@ class ReportController extends Controller
                 if ($endDate->lt($cutoffFee)) {
 
                     $laba =
-                        $diterima
+                        $sale->pay
                         - $capitalForPeriod;
 
                 } else {
