@@ -23,6 +23,7 @@ class CicilanController extends Controller
         $sales = Sale::with(['customer'])
             ->withSum('debt', 'pay_debts')
             ->where('status_return', 0)
+            ->where('divisi_id', auth()->user()->divisi_id)
 
             // FILTER TAHUN
             ->when($tahun, function ($query) use ($tahun) {
@@ -36,33 +37,19 @@ class CicilanController extends Controller
 
             // SEARCH
             ->when($search, function ($query) use ($search) {
-
                 $query->where(function ($q) use ($search) {
 
-                    $q->where(
-                        'invoice',
-                        'like',
-                        '%' . $search . '%'
-                    )
-
-                        ->orWhere(
-                            'inv_manual',
-                            'like',
-                            '%' . $search . '%'
-                        )
-
+                    $q->where('invoice', 'like', '%' . $search . '%')
+                        ->orWhere('inv_manual', 'like', '%' . $search . '%')
                         ->orWhereHas('customer', function ($customer) use ($search) {
-
                             $customer->where(
                                 'name',
                                 'like',
                                 '%' . $search . '%'
                             );
-
                         });
 
                 });
-
             })
 
             ->orderByDesc('created_at')
