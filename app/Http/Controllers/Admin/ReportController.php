@@ -3,436 +3,273 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Sale;
+use App\Models\Divisi;
 use App\Models\ItemSale;
-use App\Models\AccessoriesSale;
+use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    /**
-     * ============================================================
-     * LAPORAN TRANSAKSI
-     * ============================================================
-     */
     public function index()
     {
-        return view('admin.report.index');
+        $currentYear = now()->year;
+        $currentMonth = now()->month;
+        $divisiId = Auth::user()->divisi_id;
+
+        $divisi = Divisi::where('id', $divisiId)
+            ->where('status', 'active')
+            ->get();
+
+        $report = Sale::where('divisi_id', $divisiId)
+            ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->with([
+                'customer',
+                'debt.bank',
+                'itemSales' => function ($q) {
+                    $q->where('status_return', 0);
+                },
+                'accessoriesSales' => function ($q) {
+                    $q->whereRaw('COALESCE(return_qty, 0) < qty');
+                },
+                'accessoriesSales.accessories'
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $report->each(function ($sale) {
+            $sale->accessories_list = $sale->accessoriesSales
+                ->pluck('accessories.name')
+                ->filter()
+                ->implode(', ');
+
+            $sale->itemSales = $sale->itemSales
+                ->map(function ($itemSale) {
+                    return $itemSale->name;
+                })
+                ->implode(', ');
+
+            $sale->debt = $sale->debt
+                ? $sale->debt->map(function ($debt) {
+                    $bankOrDescription = $debt->bank?->name
+                        ?? $debt->description
+                        ?? 'Tidak ada informasi';
+
+                    return $debt->date_pay
+                        . ' (' . $bankOrDescription . ') '
+                        . $debt->pay_debts
+                        . ' ' . $debt->penerima;
+                })->implode(', ')
+                : '-';
+        });
+
+        $income = $report->sum('pay');
+        $diskon = $report->sum('diskon');
+        $ongkir = $report->sum('ongkir');
+        $ppn = $report->sum('ppn');
+        $pph = $report->sum('pph');
+        $admin_fee = $report->sum('admin_fee');
+        $fee = $report->sum('fee');
+        $diterima = $report->sum('nominal_in');
+
+        $totalCapitalPriceItem = ItemSale::where('status_return', 0)
+            ->whereHas('sale', function ($q) use ($divisiId) {
+                $q->where('divisi_id', $divisiId);
+            })
+            ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->sum('capital_price');
+
+        $totalCapitalPriceAcces = 0;
+
+        foreach ($report as $sale) {
+            foreach ($sale->accessoriesSales as $detail) {
+                if (!$detail->accessories) {
+                    continue;
+                }
+
+                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
+
+                $totalCapitalPriceAcces +=
+                    $qtyTersisa * $detail->accessories->capital_price;
+            }
+        }
+
+        $profit = $income - $totalCapitalPriceItem - $totalCapitalPriceAcces;
+
+        return view('admin.report.index', compact(
+            'report',
+            'income',
+            'admin_fee',
+            'profit',
+            'diskon',
+            'ongkir',
+            'ppn',
+            'pph',
+            'divisi',
+            'fee',
+            'diterima'
+        ));
     }
 
-    /**
-     * ============================================================
-     * FILTER / LOAD DATA
-     * ============================================================
-     */
     public function filter(Request $request)
     {
-        try {
-            // TIMEZONE
-            $timezone = 'Asia/Jakarta';
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-            // USER LOGIN
-            $user = Auth::user();
+        // WAJIB menggunakan divisi user yang login
+        $divisiId = Auth::user()->divisi_id;
 
-            if (!$user) return response()->json(['error' => 'User belum login.'], 401);
+        $query = Sale::where('divisi_id', $divisiId);
 
-            // DIVISI ADMIN
-            $divisiId = $user->divisi_id;
-
-            // VALIDASI DIVISI
-            if (!$divisiId) return response()->json(['error' => 'User belum memiliki divisi.'], 422);
-
-            // DEFAULT FILTER TANGGAL
-            if (!$request->filled('start_date') && !$request->filled('end_date')) {
-                $startDate = Carbon::now($timezone)->startOfMonth()->startOfDay();
-                $endDate = Carbon::now($timezone)->endOfMonth()->endOfDay();
-            } else {
-                $startDate = $request->filled('start_date') ? Carbon::parse($request->start_date, $timezone)->startOfDay() : Carbon::now($timezone)->startOfMonth()->startOfDay();
-                $endDate = $request->filled('end_date') ? Carbon::parse($request->end_date, $timezone)->endOfDay() : Carbon::now($timezone)->endOfDay();
-            }
-
-            // VALIDASI TANGGAL
-            if ($startDate->gt($endDate)) {
-                return response()->json(['error' => 'Tanggal mulai tidak boleh lebih besar dari tanggal berakhir.'], 422);
-            }
-
-            // SALE BERDASARKAN INVOICE
-            $invoiceSaleIds = Sale::query()
-                ->where('divisi_id', $divisiId)
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->where(function ($query) {
-                    $query->whereNotNull('invoice')->orWhereNotNull('inv_manual');
-                })
-                ->pluck('id');
-
-            // SALE DENGAN PEMBAYARAN PADA PERIODE
-            $paymentSaleIds = Sale::query()
-                ->where('divisi_id', $divisiId)
-                ->whereHas('debt', function ($query) use ($startDate, $endDate) {
-                    $query->whereNotNull('date_pay')->whereBetween('date_pay', [$startDate, $endDate]);
-                })
-                ->where(function ($query) {
-                    $query->whereNotNull('invoice')->orWhereNotNull('inv_manual');
-                })
-                ->pluck('id');
-
-            // GABUNGKAN SALE
-            $saleIds = $invoiceSaleIds->merge($paymentSaleIds)->unique()->values();
-
-            // JIKA TIDAK ADA DATA
-            if ($saleIds->isEmpty()) {
-                return response()->json([
-                    'report' => [],
-                    'totalCapital' => [],
-                    'totalprice' => 0,
-                    'income' => 0,
-                    'ppn' => 0,
-                    'pph' => 0,
-                    'diskon' => 0,
-                    'ongkir' => 0,
-                    'admin' => 0,
-                    'fee' => 0,
-                    'profit' => 0,
-                    'footer' => [
-                        'total_invoice' => 0,
-                        'ppn' => 0,
-                        'pph' => 0,
-                        'diskon' => 0,
-                        'ongkir' => 0,
-                        'admin' => 0,
-                        'diterima' => 0,
-                        'piutang' => 0,
-                        'total_bayar' => 0,
-                        'fee' => 0,
-                        'modal' => 0,
-                        'laba' => 0,
-                    ],
-                    'start_date' => $startDate->format('Y-m-d'),
-                    'end_date' => $endDate->format('Y-m-d'),
-                    'divisi_id' => $divisiId,
-                    'total_transaction' => 0,
-                ]);
-            }
-
-            // AMBIL SALE
-            $sales = Sale::with(['customer', 'debt.bank'])
-                ->where('divisi_id', $divisiId)
-                ->whereIn('id', $saleIds)
-                ->orderBy('created_at', 'ASC')
-                ->get();
-
-            // TOTAL
-            $totalInvoice = 0;
-            $totalPPN = 0;
-            $totalPPH = 0;
-            $totalDiskon = 0;
-            $totalOngkir = 0;
-            $totalAdmin = 0;
-            $totalDiterima = 0;
-            $totalPiutang = 0;
-            $totalBayar = 0;
-            $totalFee = 0;
-            $totalLaba = 0;
-            $totalIncome = 0;
-            $totalCapitalItem = 0;
-            $totalCapitalAcc = 0;
-            $totalCapital = [];
-            $report = [];
-
-            // LOOP SALE
-            foreach ($sales as $sale) {
-                // CEK INVOICE PERIODE
-                $invoiceInPeriod = false;
-
-                if ($sale->created_at) {
-                    $invoiceDate = Carbon::parse($sale->created_at, $timezone);
-                    $invoiceInPeriod = $invoiceDate->between($startDate, $endDate);
-                }
-
-                // ITEM SALES
-                $itemSales = ItemSale::query()
-                    ->where('sale_id', $sale->id)
-                    ->where('status_return', 0)
-                    ->whereNull('deleted_at')
-                    ->get([
-                        'id',
-                        'sale_id',
-                        'divisi_id',
-                        'itemcategory_id',
-                        'name',
-                        'no_seri',
-                        'price',
-                        'capital_price',
-                        'price_bottom',
-                        'region',
-                        'date_in',
-                        'status_return',
-                        'created_at',
-                    ]);
-
-                // ACCESSORIES SALES
-                $accessoriesSales = AccessoriesSale::with(['accessories'])
-                    ->where('sale_id', $sale->id)
-                    ->whereNull('deleted_at')
-                    ->where(function ($query) {
-                        $query->whereNull('return_qty')->orWhereColumn('return_qty', '<', 'qty');
-                    })
-                    ->get();
-
-                // TOTAL ITEM
-                $totalItem = (int) ($sale->total_item ?? 0);
-
-                // MODAL ITEM
-                $capitalItem = $itemSales->sum(function ($item) {
-                    return (float) ($item->capital_price ?? 0);
-                });
-
-                // MODAL ACCESSORIES
-                $capitalAcc = 0;
-
-                foreach ($accessoriesSales as $accessorySale) {
-                    $qty = (float) ($accessorySale->qty ?? 0);
-                    $returnQty = (float) ($accessorySale->return_qty ?? 0);
-                    $qtyTersisa = max(0, $qty - $returnQty);
-                    $capitalPrice = 0;
-
-                    if ($accessorySale->accessories) {
-                        $capitalPrice = (float) ($accessorySale->accessories->capital_price ?? 0);
-                    }
-
-                    $capitalAcc += $qtyTersisa * $capitalPrice;
-                }
-
-                // TOTAL MODAL
-                $capitalPrice = $capitalItem + $capitalAcc;
-                $totalCapital[$sale->id] = $capitalPrice;
-
-                // NILAI SALE
-                $totalPrice = (float) ($sale->total_price ?? 0);
-                $ppn = (float) ($sale->ppn ?? 0);
-                $pph = (float) ($sale->pph ?? 0);
-                $diskon = (float) ($sale->diskon ?? 0);
-                $ongkir = (float) ($sale->ongkir ?? 0);
-                $adminFee = (float) ($sale->admin_fee ?? 0);
-                $fee = (float) ($sale->fee ?? 0);
-
-                // PEMBAYARAN PERIODE
-                $periodPayments = $sale->debt->filter(function ($payment) use ($startDate, $endDate, $timezone) {
-                    if (!$payment->date_pay) return false;
-
-                    $datePay = Carbon::parse($payment->date_pay, $timezone);
-
-                    return $datePay->between($startDate, $endDate);
-                });
-
-                // DITERIMA
-                $diterima = $periodPayments->sum(function ($payment) {
-                    return (float) ($payment->pay_debts ?? 0);
-                });
-
-                // TOTAL PEMBAYARAN SAMPAI END DATE
-                $paidUntilEndDate = $sale->debt
-                    ->filter(function ($payment) use ($endDate, $timezone) {
-                        if (!$payment->date_pay) return false;
-
-                        $datePay = Carbon::parse($payment->date_pay, $timezone);
-
-                        return $datePay->lte($endDate);
-                    })
-                    ->sum(function ($payment) {
-                        return (float) ($payment->pay_debts ?? 0);
-                    });
-
-                // TOTAL BAYAR
-                $totalPay = $diterima;
-
-                // PIUTANG
-                $piutang = $sale->nominal_in - $sale->pay;
-
-                // INCOME
-                if ($invoiceInPeriod) {
-                    $income = $totalPrice;
-                } else {
-                    $income = 0;
-                }
-
-                // LABA RUGI
-                if ($invoiceInPeriod) {
-                    $feeForPeriod = $fee;
-                    $profit = $totalPrice - $capitalItem - $capitalAcc - $feeForPeriod;
-                } else {
-                    $feeForPeriod = 0;
-                    $profit = 0;
-                }
-
-                // PAYMENT DETAIL
-                $paymentDetails = [];
-
-                foreach ($periodPayments as $payment) {
-                    $bankName = '';
-
-                    if ($payment->bank) $bankName = $payment->bank->name;
-                    if (!$bankName) $bankName = $payment->bank_name ?? '';
-
-                    $description = $payment->description ?? '';
-
-                    if ($bankName) {
-                        $paymentMethod = $bankName;
-                    } elseif ($description) {
-                        $paymentMethod = $description;
-                    } else {
-                        $paymentMethod = 'Cash';
-                    }
-
-                    $paymentDetails[] = [
-                        'id' => $payment->id,
-                        'date_pay' => $payment->date_pay,
-                        'pay_debts' => (float) ($payment->pay_debts ?? 0),
-                        'bank_name' => $paymentMethod,
-                        'description' => $description,
-                        'penerima' => $payment->penerima ?? null,
-                    ];
-                }
-
-                // ITEM DATA
-                $itemSalesData = [];
-
-                foreach ($itemSales as $itemSale) {
-                    $itemSalesData[] = [
-                        'id' => $itemSale->id,
-                        'sale_id' => $itemSale->sale_id,
-                        'name' => $itemSale->name ?? '',
-                        'no_seri' => $itemSale->no_seri ?? '',
-                        'price' => (float) ($itemSale->price ?? 0),
-                        'capital_price' => (float) ($itemSale->capital_price ?? 0),
-                        'price_bottom' => (float) ($itemSale->price_bottom ?? 0),
-                        'region' => $itemSale->region ?? '',
-                        'date_in' => $itemSale->date_in ?? null,
-                        'status_return' => $itemSale->status_return,
-                    ];
-                }
-
-                // ACCESSORIES DATA
-                $accessoriesData = [];
-
-                foreach ($accessoriesSales as $accessorySale) {
-                    $qty = (float) ($accessorySale->qty ?? 0);
-                    $returnQty = (float) ($accessorySale->return_qty ?? 0);
-                    $qtyTersisa = max(0, $qty - $returnQty);
-                    $accessoryName = '';
-                    $accessoryCapitalPrice = 0;
-
-                    if ($accessorySale->accessories) {
-                        $accessoryName = $accessorySale->accessories->name ?? '';
-                        $accessoryCapitalPrice = (float) ($accessorySale->accessories->capital_price ?? 0);
-                    }
-
-                    if (!$accessoryName) $accessoryName = $accessorySale->name ?? '';
-
-                    $accessoriesData[] = [
-                        'id' => $accessorySale->id,
-                        'name' => $accessoryName,
-                        'qty' => $qtyTersisa,
-                        'price_sale' => (float) ($accessorySale->price_sale ?? 0),
-                        'capital_price' => $accessoryCapitalPrice,
-                        'return_qty' => $returnQty,
-                    ];
-                }
-
-                // TOTAL FOOTER
-                if ($invoiceInPeriod) {
-                    $totalInvoice += $totalPrice;
-                    $totalPPN += $ppn;
-                    $totalPPH += $pph;
-                    $totalDiskon += $diskon;
-                    $totalOngkir += $ongkir;
-                    $totalAdmin += $adminFee;
-                    $totalIncome += $income;
-                    $totalCapitalItem += $capitalItem;
-                    $totalCapitalAcc += $capitalAcc;
-                    $totalFee += $feeForPeriod;
-                    $totalLaba += $profit;
-                    $totalPiutang += $piutang;
-                }
-
-                // PEMBAYARAN
-                $totalDiterima += $diterima;
-                $totalBayar += $totalPay;
-
-                // REPORT
-                $report[] = [
-                    'id' => $sale->id,
-                    'divisi_id' => $sale->divisi_id,
-                    'created_at' => $sale->created_at,
-                    'invoice' => $sale->invoice,
-                    'inv_manual' => $sale->inv_manual,
-                    'customer' => $sale->customer,
-                    'itemSales' => $itemSalesData,
-                    'accessories' => $accessoriesData,
-                    'total_item' => $totalItem,
-                    'total_price' => $totalPrice,
-                    'ppn' => $ppn,
-                    'pph' => $pph,
-                    'diskon' => $diskon,
-                    'ongkir' => $ongkir,
-                    'admin_fee' => $adminFee,
-                    'nominal_in' => $diterima,
-                    'pay' => $totalPay,
-                    'piutang' => $piutang,
-                    'fee' => $fee,
-                    'profit' => $profit,
-                    'debt' => $paymentDetails,
-                    'capital_price' => $capitalPrice,
-                    'paid_until_end_date' => $paidUntilEndDate,
-                    'diterima_period' => $diterima,
-                    'invoice_in_period' => $invoiceInPeriod,
-                ];
-            }
-
-            // FOOTER
-            $footer = [
-                'total_invoice' => $totalInvoice,
-                'ppn' => $totalPPN,
-                'pph' => $totalPPH,
-                'diskon' => $totalDiskon,
-                'ongkir' => $totalOngkir,
-                'admin' => $totalAdmin,
-                'diterima' => $totalDiterima,
-                'piutang' => $totalPiutang,
-                'total_bayar' => $totalBayar,
-                'fee' => $totalFee,
-                'modal' => $totalCapitalItem + $totalCapitalAcc,
-                'laba' => $totalLaba,
-            ];
-
-            // RESPONSE
-            return response()->json([
-                'report' => $report,
-                'totalCapital' => $totalCapital,
-                'totalprice' => $totalInvoice,
-                'income' => $totalIncome,
-                'ppn' => $totalPPN,
-                'pph' => $totalPPH,
-                'diskon' => $totalDiskon,
-                'ongkir' => $totalOngkir,
-                'admin' => $totalAdmin,
-                'fee' => $totalFee,
-                'profit' => $totalLaba,
-                'footer' => $footer,
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
-                'divisi_id' => $divisiId,
-                'total_transaction' => count($report),
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'error' => true,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ], 500);
+        if (!$startDate && !$endDate) {
+            $query->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month);
         }
+
+        if ($startDate && $endDate) {
+            $start = Carbon::parse($startDate)->startOfDay();
+            $end = Carbon::parse($endDate)->endOfDay();
+
+            $query->whereBetween('created_at', [$start, $end]);
+        }
+
+        $report = $query
+            ->with([
+                'customer',
+                'debt.bank',
+                'itemSales' => function ($q) {
+                    $q->where('status_return', 0);
+                },
+                'accessoriesSales' => function ($q) {
+                    $q->whereRaw('COALESCE(return_qty, 0) < qty');
+                },
+                'accessoriesSales.accessories'
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $totalIncome = 0;
+        $totalCapital = 0;
+        $totalDiskon = 0;
+        $totalOngkir = 0;
+        $totalppn = 0;
+        $totalpph = 0;
+        $totalfee = 0;
+        $totalprice = 0;
+        $admin_fee = 0;
+        $diterima = 0;
+        $totalPiutang = 0;
+
+        $totalCapitalPerSale = [];
+
+        $report->each(function ($sale) use (
+            &$totalIncome,
+            &$totalCapital,
+            &$totalDiskon,
+            &$totalOngkir,
+            &$admin_fee,
+            &$totalppn,
+            &$totalpph,
+            &$totalCapitalPerSale,
+            &$totalfee,
+            &$totalprice,
+            &$diterima,
+            &$totalPiutang
+        ) {
+            $totalIncome += $sale->pay ?? 0;
+            $totalDiskon += $sale->diskon ?? 0;
+            $totalOngkir += $sale->ongkir ?? 0;
+            $totalppn += $sale->ppn ?? 0;
+            $totalpph += $sale->pph ?? 0;
+            $admin_fee += $sale->admin_fee ?? 0;
+            $totalfee += $sale->fee ?? 0;
+            $totalprice += $sale->total_price ?? 0;
+            $diterima += $sale->nominal_in ?? 0;
+
+            $totalPiutang += max(
+                ($sale->pay ?? 0) - ($sale->nominal_in ?? 0),
+                0
+            );
+
+            $accessoryCapital = 0;
+
+            foreach ($sale->accessoriesSales as $detail) {
+                if (!$detail->accessories) {
+                    continue;
+                }
+
+                $qtyTersisa = $detail->qty - ($detail->return_qty ?? 0);
+
+                $accessoryCapital +=
+                    $qtyTersisa * $detail->accessories->capital_price;
+            }
+
+            $itemCapital = $sale->itemSales
+                ->where('status_return', 0)
+                ->sum('capital_price');
+
+            $capitalPerSale = $accessoryCapital + $itemCapital;
+
+            $totalCapital += $capitalPerSale;
+
+            $totalCapitalPerSale[$sale->id] = $capitalPerSale;
+
+            $sale->accessories_list = $sale->accessoriesSales
+                ->pluck('accessories.name')
+                ->filter()
+                ->implode(', ');
+
+            $sale->itemSales = $sale->itemSales->map(function ($itemSale) {
+                return $itemSale->name . ' - (' . $itemSale->no_seri . ')';
+            });
+
+            $sale->debt = $sale->debt
+                ? $sale->debt->map(function ($debt) {
+                    $bankOrDescription = $debt->bank?->name
+                        ?? $debt->description
+                        ?? 'Tidak ada informasi';
+
+                    return $debt->date_pay
+                        . ' (' . $bankOrDescription . ') '
+                        . $debt->pay_debts
+                        . ' ' . $debt->penerima;
+                })->implode(', ')
+                : '-';
+        });
+
+        $profit = $totalIncome - $totalCapital;
+
+        return response()->json([
+            'totalCapital' => $totalCapitalPerSale,
+            'report' => $report,
+            'admin_fee' => $admin_fee,
+            'income' => $totalIncome,
+            'profit' => $profit,
+            'diskon' => $totalDiskon,
+            'ongkir' => $totalOngkir,
+            'ppn' => $totalppn,
+            'pph' => $totalpph,
+            'fee' => $totalfee,
+            'totalprice' => $totalprice,
+            'diterima' => $diterima,
+
+            'footer' => [
+                'total_invoice' => $totalprice,
+                'ppn' => $totalppn,
+                'pph' => $totalpph,
+                'diskon' => $totalDiskon,
+                'ongkir' => $totalOngkir,
+                'admin' => $admin_fee,
+                'diterima' => $diterima,
+                'piutang' => $totalPiutang,
+                'total_bayar' => $totalIncome,
+                'fee' => $totalfee,
+                'modal' => $totalCapital,
+                'laba' => $profit,
+            ]
+        ]);
     }
 }
