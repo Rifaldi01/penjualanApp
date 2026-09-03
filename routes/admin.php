@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SupllierController;
 use App\Http\Controllers\Admin\PembelianController;
 use App\Http\Controllers\Admin\ReturnController;
+use App\Http\Controllers\Admin\CicilanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,4 +76,15 @@ Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], 
 
     //Retur Sales
     Route::get('/return-sales', [ReturnController::class, 'salesReturn'])->name('admin.return.index');
+    //end Retur sales
+
+    //cicilan
+    Route::get('/cicilan', [CicilanController::class, 'index'])->name('admin.cicilan.index');
+    Route::get('/cicilan/{id}', [CicilanController::class, 'show'])->name('admin.cicilan.show');
+    Route::post('/cicilan/{id}/payment', [CicilanController::class, 'payment'])->name('admin.cicilan.payment');
+    Route::delete('/cicilan/payment/{id}', [CicilanController::class, 'destroyPayment'])->name('admin.cicilan.payment.destroy');
+    Route::put('/cicilan/{id}/update-sales', [CicilanController::class, 'updateSales'])->name('admin.cicilan.updateSales');
+    Route::get('/cicilan/export-excel', [CicilanController::class, 'exportExcel'])
+        ->name('admin.cicilan.exportExcel');
+    //end cicilan
 });

@@ -67,6 +67,13 @@
                 </li>
             </ul>
         </li>
+        <li>
+            <a href="{{route('manager.cicilan.index')}}">
+                <div class="parent-icon"><i class='bx bx-wallet'></i>
+                </div>
+                <div class="menu-title">Cicilan Pelanggan</div>
+            </a>
+        </li>
         <li class="menu-label">Items</li>
         <li>
             <a href="javascript:;" class="has-arrow">

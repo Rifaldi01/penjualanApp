@@ -67,6 +67,13 @@
                 </li>
             </ul>
         </li>
+        <li>
+            <a href="{{route('admin.cicilan.index')}}">
+                <div class="parent-icon"><i class='bx bx-wallet'></i>
+                </div>
+                <div class="menu-title">Cicilan Pelanggan</div>
+            </a>
+        </li>
         <li class="menu-label">Alat</li>
         <li>
             <a href="{{route('admin.item.index')}}">
@@ -83,28 +90,6 @@
                 </div>
                 <div class="menu-title">Aksesoris</div>
             </a>
-        </li>
-
-        <li>
-            <a href="javascript:;" class="has-arrow">
-                <div class="parent-icon"><i class='bx bx-edit'></i>
-                </div>
-                <div class="menu-title">Edit Harga</div>
-            </a>
-            <ul>
-                <li>
-                    <a href="{{route('admin.item.editItem')}}">
-                        <i class='bx bx-box'></i>
-                        Alat
-                    </a>
-                </li>
-                <li>
-                    <a href="{{route('admin.acces.editAcces')}}">
-                        <i class='bx bx-collection'></i>
-                        Aksesoris
-                    </a>
-                </li>
-            </ul>
         </li>
         <li>
             <a href="{{route('admin.item.sale')}}">

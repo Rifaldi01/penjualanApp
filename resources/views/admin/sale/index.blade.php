@@ -69,174 +69,174 @@
                                         data-bs-placement="top" title="Print Invoice">
                                 </button>
                                 @include('admin.sale.invoice')
-                                <button class="btn btn-warning lni lni-dollar btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#examplemodal{{$data->id}}" data-bs-tool="tooltip"
-                                        data-bs-placement="top" title="Bayar">
-                                </button>
-                                <div class="modal fade" id="examplemodal{{$data->id}}" tabindex="-1"
-                                     aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Pembayaran</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                            </div>
-                                            <h5 class="modal-title ms-2 mt-2">Total Bayar : {{formatRupiah($data->pay)}}</h5>
-                                            <h5 class="modal-title ms-2 mt-2">Sisa Bayar : {{formatRupiah($data->pay - $data->nominal_in)}}</h5>
-                                            <form action="{{route('admin.sale.update', $data->id)}}" method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <div class="modal-body">
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                class="text-danger">*</i> Uang Masuk</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="hidden" id="nominal_in_value_{{$data->id}}"
-                                                                       value="{{ $data->nominal_in }}">
-                                                                <input type="text" class="form-control"
-                                                                       id="nominal_in_{{$data->id}}" name="nominal_in"
-                                                                       value="{{ formatRupiah($data->nominal_in) }}"
-                                                                       readonly>
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-dollar'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                class="text-danger">*</i> Pay Debts</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control"
-                                                                       name="pay_debts" id="pay_debts_{{$data->id}}"
-                                                                       onkeyup="formatRupiah2(this)">
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-money'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label">
-                                                            Biaya Admin
-                                                        </label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control"
-                                                                       name="admin_fee" id="admin_fee{{$data->id}}"
-                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->admin_fee) }}">
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-money'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label">
-                                                            Diskon
-                                                        </label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control"
-                                                                       name="diskon" id="diskon{{$data->id}}"
-                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->diskon) }}">
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-money'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label">
-                                                            Fee
-                                                        </label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control"
-                                                                       name="fee" id="fee{{$data->id}}"
-                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->fee) }}">
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-money'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                class="text-danger">*</i> Date</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control datepicker"
-                                                                       name="date_pay" id="input42">
-                                                                <span
-                                                                    class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-calendar'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3" id="bankField_{{$data->id}}">
-                                                        <label for="input42"
-                                                               class="col-sm-3 col-form-label">Bank</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="input-group mb-3">
-                                                                <div class="input-group-text"><i
-                                                                        class="bx bx-credit-card"></i></div>
-                                                                <select class="form-select" id="single-select-field"
-                                                                        name="bank_id"
-                                                                        data-placeholder="-- Nama Bank --">
-                                                                    <option></option>
-                                                                    @foreach($bank as $banks)
-                                                                        <option
-                                                                            value="{{$banks->id}}">{{$banks->name}}
-                                                                            ({{$banks->code}})
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3" id="penerimaField_{{$data->id}}">
-                                                        <label for="input42" class="col-sm-3 col-form-label">Penerima</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="text" class="form-control"
-                                                                       name="penerima" id="penerima_{{$data->id}}">
-                                                                <span class="position-absolute top-50 translate-middle-y"><i
-                                                                        class='bx bx-user'></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <label for="input42" class="col-sm-3 col-form-label"><i
-                                                                class="text-danger"></i> </label>
-                                                        <div class="col-sm-9">
-                                                            <div class="position-relative input-icon">
-                                                                <input type="checkbox" class="form-check"
-                                                                       id="lainya_{{$data->id}}">
-                                                                <span class="position-absolute top-50 translate-middle-y ms-1"> Lainya</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row mb-3" id="descriptionField">
-                                                        <label for="input42"
-                                                               class="col-sm-3 col-form-label"></label>
-                                                        <div class="col-sm-9">
-                                                                <textarea id="description_{{$data->id}}" type="text"
-                                                                          class="form-control" name="description"
-                                                                          placeholder="Isi Lainya pembayaran melalui apa?"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button class="btn btn-primary" id="bayarbutton">Save</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+{{--                                <button class="btn btn-warning lni lni-dollar btn-sm" data-bs-toggle="modal"--}}
+{{--                                        data-bs-target="#examplemodal{{$data->id}}" data-bs-tool="tooltip"--}}
+{{--                                        data-bs-placement="top" title="Bayar">--}}
+{{--                                </button>--}}
+{{--                                <div class="modal fade" id="examplemodal{{$data->id}}" tabindex="-1"--}}
+{{--                                     aria-hidden="true">--}}
+{{--                                    <div class="modal-dialog">--}}
+{{--                                        <div class="modal-content">--}}
+{{--                                            <div class="modal-header">--}}
+{{--                                                <h5 class="modal-title">Pembayaran</h5>--}}
+{{--                                                <button type="button" class="btn-close" data-bs-dismiss="modal"--}}
+{{--                                                        aria-label="Close"></button>--}}
+{{--                                            </div>--}}
+{{--                                            <h5 class="modal-title ms-2 mt-2">Total Bayar : {{formatRupiah($data->pay)}}</h5>--}}
+{{--                                            <h5 class="modal-title ms-2 mt-2">Sisa Bayar : {{formatRupiah($data->pay - $data->nominal_in)}}</h5>--}}
+{{--                                            <form action="{{route('admin.sale.update', $data->id)}}" method="POST">--}}
+{{--                                                @csrf--}}
+{{--                                                @method('PUT')--}}
+{{--                                                <div class="modal-body">--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label"><i--}}
+{{--                                                                class="text-danger">*</i> Uang Masuk</label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="hidden" id="nominal_in_value_{{$data->id}}"--}}
+{{--                                                                       value="{{ $data->nominal_in }}">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       id="nominal_in_{{$data->id}}" name="nominal_in"--}}
+{{--                                                                       value="{{ formatRupiah($data->nominal_in) }}"--}}
+{{--                                                                       readonly>--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-dollar'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label"><i--}}
+{{--                                                                class="text-danger">*</i> Pay Debts</label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       name="pay_debts" id="pay_debts_{{$data->id}}"--}}
+{{--                                                                       onkeyup="formatRupiah2(this)">--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-money'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label">--}}
+{{--                                                            Biaya Admin--}}
+{{--                                                        </label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       name="admin_fee" id="admin_fee{{$data->id}}"--}}
+{{--                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->admin_fee) }}">--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-money'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label">--}}
+{{--                                                            Diskon--}}
+{{--                                                        </label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       name="diskon" id="diskon{{$data->id}}"--}}
+{{--                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->diskon) }}">--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-money'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label">--}}
+{{--                                                            Fee--}}
+{{--                                                        </label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       name="fee" id="fee{{$data->id}}"--}}
+{{--                                                                       onkeyup="formatRupiah2(this)" value="{{ rupiah($data->fee) }}">--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-money'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label"><i--}}
+{{--                                                                class="text-danger">*</i> Date</label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control datepicker"--}}
+{{--                                                                       name="date_pay" id="input42">--}}
+{{--                                                                <span--}}
+{{--                                                                    class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-calendar'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3" id="bankField_{{$data->id}}">--}}
+{{--                                                        <label for="input42"--}}
+{{--                                                               class="col-sm-3 col-form-label">Bank</label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="input-group mb-3">--}}
+{{--                                                                <div class="input-group-text"><i--}}
+{{--                                                                        class="bx bx-credit-card"></i></div>--}}
+{{--                                                                <select class="form-select" id="single-select-field"--}}
+{{--                                                                        name="bank_id"--}}
+{{--                                                                        data-placeholder="-- Nama Bank --">--}}
+{{--                                                                    <option></option>--}}
+{{--                                                                    @foreach($bank as $banks)--}}
+{{--                                                                        <option--}}
+{{--                                                                            value="{{$banks->id}}">{{$banks->name}}--}}
+{{--                                                                            ({{$banks->code}})--}}
+{{--                                                                        </option>--}}
+{{--                                                                    @endforeach--}}
+{{--                                                                </select>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3" id="penerimaField_{{$data->id}}">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label">Penerima</label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="text" class="form-control"--}}
+{{--                                                                       name="penerima" id="penerima_{{$data->id}}">--}}
+{{--                                                                <span class="position-absolute top-50 translate-middle-y"><i--}}
+{{--                                                                        class='bx bx-user'></i></span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3">--}}
+{{--                                                        <label for="input42" class="col-sm-3 col-form-label"><i--}}
+{{--                                                                class="text-danger"></i> </label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                            <div class="position-relative input-icon">--}}
+{{--                                                                <input type="checkbox" class="form-check"--}}
+{{--                                                                       id="lainya_{{$data->id}}">--}}
+{{--                                                                <span class="position-absolute top-50 translate-middle-y ms-1"> Lainya</span>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="row mb-3" id="descriptionField">--}}
+{{--                                                        <label for="input42"--}}
+{{--                                                               class="col-sm-3 col-form-label"></label>--}}
+{{--                                                        <div class="col-sm-9">--}}
+{{--                                                                <textarea id="description_{{$data->id}}" type="text"--}}
+{{--                                                                          class="form-control" name="description"--}}
+{{--                                                                          placeholder="Isi Lainya pembayaran melalui apa?"></textarea>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                                <div class="modal-footer">--}}
+{{--                                                    <button class="btn btn-primary" id="bayarbutton">Save</button>--}}
+{{--                                                </div>--}}
+{{--                                            </form>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
                                 <button type="button" class="btn btn-danger btn-sm lni lni-close delete-sale"
                                         data-id="{{ $data->id }}"
                                         data-bs-tool="tooltip"
@@ -357,16 +357,16 @@
                                 </button>
 
                                 @include('admin.sale.surat-jalan')
-                                <button type="button"
-                                        class="btn btn-success btn-sm btn-edit-fee lni lni-dollar"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#feeModal"
-                                        data-id="{{ $data->id }}"
-                                        data-invoice="{{ $data->invoice }}"
-                                        data-fee="{{ $data->fee ?? 0 }}"
-                                        data-bs-tool="tooltip"
-                                        data-bs-placement="top" title="Edit Fee">
-                                </button>
+{{--                                <button type="button"--}}
+{{--                                        class="btn btn-success btn-sm btn-edit-fee lni lni-dollar"--}}
+{{--                                        data-bs-toggle="modal"--}}
+{{--                                        data-bs-target="#feeModal"--}}
+{{--                                        data-id="{{ $data->id }}"--}}
+{{--                                        data-invoice="{{ $data->invoice }}"--}}
+{{--                                        data-fee="{{ $data->fee ?? 0 }}"--}}
+{{--                                        data-bs-tool="tooltip"--}}
+{{--                                        data-bs-placement="top" title="Edit Fee">--}}
+{{--                                </button>--}}
                                 <button type="button"
                                         class="btn btn-primary lni lni-empty-file btn-sm"
                                         data-bs-toggle="modal"

@@ -14,6 +14,9 @@ use App\Http\Controllers\manager\SupllierController;
 use App\Http\Controllers\manager\PermintaanController;
 use App\Http\Controllers\manager\ReturController;
 use App\Http\Controllers\manager\AccessoriesBalanceController;
+use App\Http\Controllers\Manager\CicilanController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -123,5 +126,24 @@ Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager
     Route::get('/user-status', [DashboardController::class, 'userStatus'])
         ->name('manager.user.status');
     //end
+
+    //cicilan
+    // cicilan manager
+    Route::get('/cicilan', [CicilanController::class, 'index'])
+        ->name('manager.cicilan.index');
+
+    Route::get('/cicilan/{id}', [CicilanController::class, 'show'])
+        ->name('manager.cicilan.show');
+
+    Route::post('/cicilan/{id}/payment', [CicilanController::class, 'payment'])
+        ->name('manager.cicilan.payment');
+
+    Route::delete('/cicilan/payment/{id}', [CicilanController::class, 'destroyPayment'])
+        ->name('manager.cicilan.payment.destroy');
+    Route::put(
+        '/cicilan/{id}/update-sales',
+        [CicilanController::class, 'updateSales']
+    )->name('manager.cicilan.updateSales');
+    //end cicilan
 
 });
