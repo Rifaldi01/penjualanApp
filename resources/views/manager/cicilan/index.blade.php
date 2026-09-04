@@ -497,7 +497,7 @@
                             <td
                                 data-order="{{ $sale->created_at?->timestamp ?? 0 }}">
 
-                                {{ $sale->created_at?->format('d-m-Y') ?? '-' }}
+                                {{tanggal($sale->created_at)}}
 
                             </td>
 

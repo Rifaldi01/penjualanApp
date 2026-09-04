@@ -38,6 +38,11 @@ class CicilanController extends Controller
             ->withSum('debt', 'pay_debts')
             ->where('status_return', 0)
 
+            // Hanya divisi yang ACTIVE
+            ->whereHas('divisi', function ($query) {
+                $query->where('status', 'active');
+            })
+
             // Filter tahun
             ->when($tahun, function ($query) use ($tahun) {
                 $query->whereYear('created_at', $tahun);
@@ -58,7 +63,11 @@ class CicilanController extends Controller
 
                 $query->where(function ($q) use ($search) {
 
-                    $q->where('invoice', 'like', '%' . $search . '%')
+                    $q->where(
+                        'invoice',
+                        'like',
+                        '%' . $search . '%'
+                    )
 
                         ->orWhere(
                             'inv_manual',
