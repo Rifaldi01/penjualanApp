@@ -14,7 +14,7 @@ use App\Http\Controllers\manager\SupllierController;
 use App\Http\Controllers\manager\PermintaanController;
 use App\Http\Controllers\manager\ReturController;
 use App\Http\Controllers\manager\AccessoriesBalanceController;
-use App\Http\Controllers\Manager\CicilanController;
+use App\Http\Controllers\manager\CicilanController;
 
 
 /*
