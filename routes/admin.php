@@ -33,6 +33,8 @@ Route::get('/', function () {
 Route::group(['middleware' => ['auth:web', 'role:admin'], 'prefix' => 'admin'], function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/dashboard/chart', [DashboardController::class, 'chart'])
+        ->name('admin.dashboard.chart');
 
     //customer
     Route::resource('/customer', CustomerController::class)->names('admin.customer');

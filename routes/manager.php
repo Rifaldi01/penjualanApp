@@ -31,6 +31,8 @@ use App\Http\Controllers\manager\CicilanController;
 Route::group(['middleware' => ['auth:web', 'role:manager'], 'prefix' => 'manager'], function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('manager.index');
+    Route::get('/dashboard/chart', [DashboardController::class, 'chart'])
+        ->name('manager.dashboard.chart');
 
     //sale
     Route::resource('/sale', SaleController::class)->names('manager.sale');
