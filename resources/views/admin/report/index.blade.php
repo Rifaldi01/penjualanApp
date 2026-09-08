@@ -328,7 +328,92 @@
                 const options = {day: 'numeric', month: 'short', year: 'numeric'};
                 return date.toLocaleDateString('id-ID', options).replace('Des', 'Des'); // Pastikan singkatan sesuai
             }
+            function cleanExcelHtml(value) {
 
+                if (
+                    value === null ||
+                    value === undefined
+                ) {
+                    return '';
+                }
+
+                let text = String(value);
+
+
+                /*
+                 * <br> menjadi Enter
+                 */
+                text = text.replace(
+                    /<br\s*\/?>/gi,
+                    '\n'
+                );
+
+
+                /*
+                 * </li> menjadi Enter
+                 */
+                text = text.replace(
+                    /<\/li>/gi,
+                    '\n'
+                );
+
+
+                /*
+                 * Hapus semua tag HTML
+                 */
+                text = text.replace(
+                    /<[^>]*>/g,
+                    ''
+                );
+
+
+                /*
+                 * Decode HTML entity
+                 */
+                let textarea =
+                    document.createElement('textarea');
+
+                textarea.innerHTML =
+                    text;
+
+                text =
+                    textarea.value;
+
+
+                /*
+                 * Normalisasi Enter
+                 */
+                text = text
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\r/g, '\n');
+
+
+                /*
+                 * Bersihkan spasi tanpa menghilangkan Enter
+                 */
+                text = text
+                    .split('\n')
+                    .map(function (line) {
+
+                        return line
+                            .replace(/[ \t]+/g, ' ')
+                            .trim();
+
+                    })
+                    .join('\n');
+
+
+                /*
+                 * Maksimal 2 Enter berturut-turut
+                 */
+                text = text.replace(
+                    /\n{3,}/g,
+                    '\n\n'
+                );
+
+
+                return text.trim();
+            }
             var table = $('#filter-table').DataTable({
                 lengthChange: false,
                 paginate: false,
@@ -337,148 +422,697 @@
                         extend: 'excel',
                         title: 'Laporan Transaksi',
                         text: 'Excel',
+
                         exportOptions: {
                             stripHtml: false
                         },
+
                         filename: function () {
                             const today = new Date();
+
                             const yyyy = today.getFullYear();
                             const mm = String(today.getMonth() + 1).padStart(2, '0');
                             const dd = String(today.getDate()).padStart(2, '0');
+
                             return 'laporan transaksi ' + yyyy + '-' + mm + '-' + dd;
                         },
+
                         customize: function (xlsx) {
+
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var $sheet = $(sheet);
+
                             var styles = xlsx.xl['styles.xml'];
                             var $styles = $(styles);
 
-                            // jumlah font yang ada
-                            var fontCount = parseInt($styles.find('fonts').attr('count'));
 
-// Tambah font merah bold
-                            $styles.find('fonts').append(`
-<font>
-    <b/>
-    <sz val="11"/>
-    <color rgb="FFFF0000"/>
-    <name val="Calibri"/>
-</font>
-`);
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 1. TAMBAH STYLE WRAP TEXT
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
 
-                            $styles.find('fonts').attr('count', fontCount + 1);
+                            var cellXfs = $styles.find('cellXfs');
+                            var xfCount = parseInt(cellXfs.attr('count'));
 
-// jumlah cellXfs
-                            var xfCount = parseInt($styles.find('cellXfs').attr('count'));
+                            cellXfs.append(`
+            <xf xfId="0"
+                applyAlignment="1">
+                <alignment
+                    vertical="top"
+                    wrapText="1"/>
+            </xf>
+        `);
 
-                            $styles.find('cellXfs').append(`
-<xf xfId="0"
-    fontId="${fontCount}"
-    fillId="0"
-    borderId="0"
-    applyFont="1"/>
-`);
+                            cellXfs.attr('count', xfCount + 1);
 
-                            $styles.find('cellXfs').attr('count', xfCount + 1);
+                            var wrapStyle = xfCount;
 
-                            var redStyle = xfCount;
 
-                            // Hapus tag HTML <ul> dan <li> dari setiap cell
-                            $('row c is t', sheet).each(function () {
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 2. TAMBAH FONT MERAH + BOLD
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            var fonts = $styles.find('fonts');
+
+                            var fontCount = parseInt(fonts.attr('count'));
+
+                            fonts.append(`
+            <font>
+                <b/>
+                <sz val="11"/>
+                <color rgb="FFFF0000"/>
+                <name val="Calibri"/>
+                <family val="2"/>
+            </font>
+        `);
+
+                            fonts.attr('count', fontCount + 1);
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 3. STYLE MERAH + WRAP TEXT
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            var redXfCount = parseInt(cellXfs.attr('count'));
+
+                            cellXfs.append(`
+            <xf
+                xfId="0"
+                fontId="${fontCount}"
+                applyFont="1"
+                applyAlignment="1">
+
+                <alignment
+                    vertical="top"
+                    wrapText="1"/>
+            </xf>
+        `);
+
+                            cellXfs.attr('count', redXfCount + 1);
+
+                            var redStyle = redXfCount;
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 4. BERSIHKAN HTML
+                            | ================================================================
+                            |
+                            | <br>        -> ENTER
+                            | <strong>    -> hilangkan tag
+                            | <b>         -> hilangkan tag
+                            | <ul>        -> hilangkan
+                            | <li>        -> ENTER
+                            | <a>         -> hilangkan tag
+                            |
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $('row c', sheet).each(function () {
+
                                 var cell = $(this);
-                                var text = cell.text();
 
-                                // Hapus tag HTML <ul> dan <li>
+                                var textNode = cell.find('is t');
+
+                                if (!textNode.length) {
+                                    return;
+                                }
+
+                                var text = textNode.text();
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | NORMALISASI HTML BREAK
+                                |--------------------------------------------------------------------------
+                                */
+
                                 text = text
-                                    .replace(/<a[^>]*>/g, '')     // hapus tag pembuka <a>
-                                    .replace(/<\/a>/g, '')        // hapus tag penutup </a>
-                                    .replace(/<\/?ul>/g, '')      // hapus <ul>
-                                    .replace(/<\/?li>/g, '')      // hapus <li>
-                                    .replace(/\n/g, '')           // hapus enter
+                                    .replace(/<br\s*\/?>/gi, '\n')
+                                    .replace(/<\/li>\s*<li>/gi, '\n')
+                                    .replace(/<li[^>]*>/gi, '')
+                                    .replace(/<\/li>/gi, '')
+                                    .replace(/<\/?ul[^>]*>/gi, '')
+                                    .replace(/<\/?ol[^>]*>/gi, '')
+                                    .replace(/<strong[^>]*>/gi, '')
+                                    .replace(/<\/strong>/gi, '')
+                                    .replace(/<b[^>]*>/gi, '')
+                                    .replace(/<\/b>/gi, '')
+                                    .replace(/<span[^>]*>/gi, '')
+                                    .replace(/<\/span>/gi, '')
+                                    .replace(/<p[^>]*>/gi, '')
+                                    .replace(/<\/p>/gi, '\n')
+                                    .replace(/<a[^>]*>/gi, '')
+                                    .replace(/<\/a>/gi, '')
+                                    .replace(/&nbsp;/gi, ' ');
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | HAPUS TAG HTML LAIN
+                                |--------------------------------------------------------------------------
+                                */
+
+                                text = text.replace(/<[^>]+>/g, '');
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | NORMALISASI ENTER
+                                |--------------------------------------------------------------------------
+                                |
+                                | Tujuannya:
+                                |
+                                | GPS Hitam
+                                | Qty : 1
+                                | Harga : Rp 3.000
+                                |
+                                | BUKAN:
+                                |
+                                | GPS Hitam
+                                |
+                                | Qty : 1
+                                |
+                                | Harga : Rp 3.000
+                                |
+                                |--------------------------------------------------------------------------
+                                */
+
+                                text = text
+                                    .replace(/\r\n/g, '\n')
+                                    .replace(/\r/g, '\n')
+                                    .replace(/[ \t]+\n/g, '\n')
+                                    .replace(/\n[ \t]+/g, '\n')
+                                    .replace(/\n{2,}/g, '\n')
                                     .trim();
 
-                                cell.text(text);
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | GANTI TEXT CELL
+                                |--------------------------------------------------------------------------
+                                */
+
+                                textNode.text(text);
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | APPLY WRAP TEXT
+                                |--------------------------------------------------------------------------
+                                */
+
+                                cell.attr('s', wrapStyle);
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | SET TYPE INLINE STRING
+                                |--------------------------------------------------------------------------
+                                */
+
+                                cell.attr('t', 'inlineStr');
+
                             });
 
-                            // Tambahkan footer income manual
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 5. FUNGSI FOOTER
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
                             function getFooterText(id) {
-                                return document.getElementById(id).innerText || '0';
+
+                                var element = document.getElementById(id);
+
+                                if (!element) {
+                                    return '0';
+                                }
+
+                                var value = element.innerText || element.textContent || '0';
+
+                                /*
+                                 * Bersihkan HTML jika masih ada
+                                 */
+
+                                value = value
+                                    .replace(/<br\s*\/?>/gi, '\n')
+                                    .replace(/<[^>]+>/g, '')
+                                    .replace(/\n{2,}/g, '\n')
+                                    .trim();
+
+                                return value || '0';
                             }
 
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 6. ESCAPE XML
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            function escapeXml(value) {
+
+                                return String(value)
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;')
+                                    .replace(/'/g, '&apos;');
+                            }
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 7. FOOTER TOTAL
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            var lastRow = $sheet.find('sheetData row').last();
+
+                            var rowStart =
+                                parseInt(lastRow.attr('r') || 1) + 1;
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TOTAL PER KOLOM
+                            |--------------------------------------------------------------------------
+                            */
+
+                            var totalRow = `
+            <row r="${rowStart}">
+
+                <c s="${redStyle}" t="inlineStr" r="A${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="B${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="C${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="D${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="E${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="F${rowStart}">
+                    <is><t></t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="G${rowStart}">
+                    <is><t>TOTAL</t></is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="H${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_inv'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="I${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_ppn'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="J${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_pph'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="K${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_diskon'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="L${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_ongkir'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="M${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_biaya_admin'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="N${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_diterima'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="O${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_piutang'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="P${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_bayar'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="Q${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_fee'))}</t>
+                    </is>
+                </c>
+
+                <c s="${redStyle}" t="inlineStr" r="R${rowStart}">
+                    <is>
+                        <t>${escapeXml(getFooterText('ttl_laba'))}</t>
+                    </is>
+                </c>
+
+            </row>
+        `;
+
+                            $sheet.find('sheetData').append(totalRow);
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 8. FOOTER RINGKASAN
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            rowStart++;
+
+
                             function addFooterRow(label, value, rowNumber) {
-                                var row =
-                                    `<row r="${rowNumber}">
-                                        <c t="inlineStr" r="A${rowNumber}">
-                                            <is><t>${label}</t></is>
-                                        </c>
-                                        <c t="inlineStr" r="B${rowNumber}">
-                                            <is><t>${value}</t></is>
-                                        </c>
-                                    </row>`;
+
+                                label = escapeXml(label);
+                                value = escapeXml(value);
+
+                                var row = `
+                <row r="${rowNumber}">
+
+                    <c
+                        s="${redStyle}"
+                        t="inlineStr"
+                        r="A${rowNumber}">
+
+                        <is>
+                            <t>${label}</t>
+                        </is>
+
+                    </c>
+
+                    <c
+                        s="${redStyle}"
+                        t="inlineStr"
+                        r="B${rowNumber}">
+
+                        <is>
+                            <t>${value}</t>
+                        </is>
+
+                    </c>
+
+                </row>
+            `;
+
                                 $sheet.find('sheetData').append(row);
                             }
 
-                            var row =
-                                `<row r="${rowStart}">
-    <c s="${redStyle}" t="inlineStr" r="A${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="B${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="C${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="D${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="E${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="F${rowStart}"><is><t></t></is></c>
-    <c s="${redStyle}" t="inlineStr" r="G${rowStart}"><is><t>TOTAL</t></is></c>
 
-    <c s="${redStyle}" t="inlineStr" r="H${rowStart}">
-        <is><t>${getFooterText('ttl_inv')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="I${rowStart}">
-        <is><t>${getFooterText('ttl_ppn')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="J${rowStart}">
-        <is><t>${getFooterText('ttl_pph')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="K${rowStart}">
-        <is><t>${getFooterText('ttl_diskon')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="L${rowStart}">
-        <is><t>${getFooterText('ttl_ongkir')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="M${rowStart}">
-        <is><t>${getFooterText('ttl_biaya_admin')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="N${rowStart}">
-        <is><t>${getFooterText('ttl_diterima')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="O${rowStart}">
-        <is><t>${getFooterText('ttl_piutang')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="P${rowStart}">
-        <is><t>${getFooterText('ttl_bayar')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="Q${rowStart}">
-        <is><t>${getFooterText('ttl_fee')}</t></is>
-    </c>
-    <c s="${redStyle}" t="inlineStr" r="R${rowStart}">
-       <is><t>${getFooterText('ttl_laba')}</t></is>
-    </c>
-</row>`;
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TOTAL INVOICE
+                            |--------------------------------------------------------------------------
+                            */
 
-                            $sheet.find('sheetData').append(row);
-                            rowStart++;
-                            var rowStart = $sheet.find('sheetData row').length + 1;
-                            addFooterRow('Total Invoice', getFooterText('total-bersih'), rowStart++);
-                            addFooterRow('Total Bersih', getFooterText('total-income'), rowStart++);
-                            addFooterRow('Laba-Rugi', getFooterText('profit'), rowStart++);
-                            addFooterRow('PPN', getFooterText('ppn'), rowStart++);
-                            addFooterRow('PPH', getFooterText('pph'), rowStart++);
-                            addFooterRow('Biaya Admin', getFooterText('admin'), rowStart++);
-                            addFooterRow('Fee', getFooterText('fee'), rowStart++);
-                            addFooterRow('Diskon', getFooterText('diskon'), rowStart++);
-                            addFooterRow('Ongkir', getFooterText('ongkir'), rowStart++);
-                            addFooterRow('Diterima', getFooterText('diterima'), rowStart++);
-                            addFooterRow('Piutang', getFooterText('piutang'), rowStart++);
+                            addFooterRow(
+                                'Total Invoice',
+                                getFooterText('total-bersih'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TOTAL BERSIH
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Total Bersih',
+                                getFooterText('total-income'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | LABA RUGI
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Laba-Rugi',
+                                getFooterText('profit'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | PPN
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'PPN',
+                                getFooterText('ppn'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | PPH
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'PPH',
+                                getFooterText('pph'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | BIAYA ADMIN
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Biaya Admin',
+                                getFooterText('admin'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | FEE
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Fee',
+                                getFooterText('fee'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | DISKON
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Diskon',
+                                getFooterText('diskon'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ONGKIR
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Ongkir',
+                                getFooterText('ongkir'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | DITERIMA
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Diterima',
+                                getFooterText('diterima'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | PIUTANG
+                            |--------------------------------------------------------------------------
+                            */
+
+                            addFooterRow(
+                                'Piutang',
+                                getFooterText('piutang'),
+                                rowStart++
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 9. SET SEMUA CELL ACCESSORIES / TANGGAL PEMBAYARAN WRAP
+                            | ================================================================
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $('row c', sheet).each(function () {
+
+                                var cell = $(this);
+
+                                /*
+                                 * Kalau cell sudah memiliki style,
+                                 * jangan menghilangkan style merah footer.
+                                 */
+
+                                var currentStyle = cell.attr('s');
+
+                                if (
+                                    currentStyle === undefined ||
+                                    currentStyle === null ||
+                                    currentStyle === ''
+                                ) {
+
+                                    cell.attr('s', wrapStyle);
+
+                                }
+
+                            });
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 10. SETTING ROW HEIGHT
+                            | ================================================================
+                            |
+                            | Tidak dibuat terlalu tinggi.
+                            | Excel akan tetap menampilkan satu ENTER per baris.
+                            |
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $('row', sheet).each(function () {
+
+                                var row = $(this);
+
+                                /*
+                                 * Jangan paksa height besar.
+                                 * Excel akan menyesuaikan berdasarkan wrap text.
+                                 */
+
+                                row.attr('customHeight', '0');
+
+                            });
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ================================================================
+                            | 11. SET WIDTH KOLOM
+                            | ================================================================
+                            */
+
+                            var cols = $sheet.find('cols');
+
+                            if (cols.length) {
+
+                                cols.find('col').each(function () {
+
+                                    var col = $(this);
+
+                                    var min = parseInt(
+                                        col.attr('min') || 0
+                                    );
+
+                                    var max = parseInt(
+                                        col.attr('max') || 0
+                                    );
+
+
+                                    /*
+                                     * Kolom Accessories
+                                     *
+                                     * Sesuaikan nomor kolom jika Accessories
+                                     * berada pada kolom berbeda.
+                                     */
+
+                                    if (min === 5 || max === 5) {
+
+                                        col.attr('width', '35');
+
+                                    }
+
+                                });
+
+                            }
+
                         }
-
                     }, {
                         extend: 'pdf',
                         text: 'PDF',
