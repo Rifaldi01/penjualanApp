@@ -450,44 +450,126 @@ class SaleController extends Controller
      */
     public function edit($id)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | AJAX
+        |--------------------------------------------------------------------------
+        */
         if (request()->ajax()) {
 
             $sale = Sale::with([
+
                 'itemSales' => function ($query) {
                     $query->where('status_return', 0);
                 },
+
                 'itemSales.itemCategory',
+
                 'accessoriesSales' => function ($query) {
                     $query->where('status_return', 0);
                 },
+
                 'accessoriesSales.accessories',
-                'debt.bank'
+
+                'debt.bank',
+
             ])->findOrFail($id);
 
             return response()->json($sale);
         }
 
-        $customers = Customer::all();
 
+        /*
+        |--------------------------------------------------------------------------
+        | CUSTOMER
+        |--------------------------------------------------------------------------
+        */
+        $customers = Customer::orderBy('name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALE
+        |--------------------------------------------------------------------------
+        */
         $sale = Sale::with([
+
             'itemSales' => function ($query) {
                 $query->where('status_return', 0);
             },
+
             'itemSales.itemCategory',
+
             'accessoriesSales' => function ($query) {
                 $query->where('status_return', 0);
             },
+
             'accessoriesSales.accessories',
+
             'divisi',
-            'debt.bank'
+
+            'debt.bank',
+
         ])->findOrFail($id);
 
-        $divisi = Divisi::all();
-        $bank   = Bank::all();
 
+        /*
+        |--------------------------------------------------------------------------
+        | DIVISI
+        |--------------------------------------------------------------------------
+        */
+        $divisi = Divisi::where('status', 'active')
+            ->where('name', '!=', 'Rental')
+            ->orderBy('name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BANK
+        |--------------------------------------------------------------------------
+        */
+        $bank = Bank::orderBy('name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRODUK SESUAI DIVISI TRANSAKSI
+        |--------------------------------------------------------------------------
+        |
+        | Product picker hanya mengambil produk yang memiliki divisi_id
+        | sama dengan divisi pada tabel sales.
+        |
+        */
+        $accessories = Accessories::where('divisi_id', $sale->divisi_id)
+            ->where('stok', '>=', 1)
+            ->orderBy('name')
+            ->get();
+
+
+        $item = Item::where('divisi_id', $sale->divisi_id)
+            ->where('status', '!=', 2)
+            ->orderBy('name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
         return view(
             'manager.sale.edit',
-            compact('sale', 'customers', 'divisi', 'bank')
+            compact(
+                'sale',
+                'customers',
+                'divisi',
+                'bank',
+                'accessories',
+                'item'
+            )
         );
     }
 
@@ -504,7 +586,14 @@ class SaleController extends Controller
 
         try {
 
+            /*
+            |--------------------------------------------------------------------------
+            | SALE
+            |--------------------------------------------------------------------------
+            */
+
             $sale = Sale::with('divisi')->findOrFail($id);
+
 
             /*
             |--------------------------------------------------------------------------
@@ -515,54 +604,76 @@ class SaleController extends Controller
             $sale->update([
 
                 'customer_id' => $request->customer_id,
-                'divisi_id'   => $request->divisi_id,
 
-                'total_item'  => $request->total_item,
-                'total_price' => $request->total_price,
+                'divisi_id' => $request->divisi_id,
 
-                'diskon'      => $request->diskon ?? 0,
-                'ongkir'      => $request->ongkir ?? 0,
+                'total_item' => (int) $request->total_item,
 
-                'ppn'         => $request->ppn ?? 0,
-                'pph'         => $request->pph ?? 0,
+                'total_price' => (float) $request->total_price,
 
-                'admin_fee'   => $request->admin_fee ?? 0,
+                'diskon' => (float) ($request->diskon ?? 0),
 
-                'pay'         => $request->bayar,
-                'nominal_in'  => $request->nominal_in,
+                'ongkir' => (float) ($request->ongkir ?? 0),
 
-                'deadlines'   => $request->deadlines,
-                'no_po'       => $request->no_po,
+                'ppn' => (float) ($request->ppn ?? 0),
 
-                'fee'         => $request->fee ?? 0,
+                'pph' => (float) ($request->pph ?? 0),
 
-                'created_at'  => $request->created_at,
+                'admin_fee' => (float) ($request->admin_fee ?? 0),
+
+                'pay' => (float) ($request->bayar ?? 0),
+
+                'nominal_in' => (float) ($request->nominal_in ?? 0),
+
+                'deadlines' => $request->deadlines,
+
+                'no_po' => $request->no_po,
+
+                'fee' => (float) ($request->fee ?? 0),
+
+                'created_at' => $request->created_at,
+
             ]);
+
 
             /*
             |--------------------------------------------------------------------------
-            | TANGGAL INVOICE ACUAN
+            | TANGGAL INVOICE
             |--------------------------------------------------------------------------
             */
 
             $tanggalInvoice = $sale->fresh()->created_at;
 
+
             /*
             |--------------------------------------------------------------------------
-            | SYNC TANGGAL DETAIL LAMA
+            | SYNC TANGGAL ACCESSORIES LAMA
             |--------------------------------------------------------------------------
             */
 
             AccessoriesSale::where('sale_id', $sale->id)
                 ->update([
-                    'acces_out'  => $tanggalInvoice,
+
+                    'acces_out' => $tanggalInvoice,
+
                     'created_at' => $tanggalInvoice,
+
                 ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SYNC TANGGAL ITEM SALE LAMA
+            |--------------------------------------------------------------------------
+            */
 
             ItemSale::where('sale_id', $sale->id)
                 ->update([
+
                     'created_at' => $tanggalInvoice,
+
                 ]);
+
 
             /*
             |--------------------------------------------------------------------------
@@ -572,43 +683,74 @@ class SaleController extends Controller
 
             if ((float) $request->nominal_in == 0) {
 
-                // Hapus debt jika ada
+                /*
+                |--------------------------------------------------------------------------
+                | HAPUS DEBT
+                |--------------------------------------------------------------------------
+                */
+
                 $sale->debt()->delete();
 
             } else {
 
                 if ($sale->debt()->exists()) {
 
-                    // Update debt
+                    /*
+                    |--------------------------------------------------------------------------
+                    | UPDATE DEBT
+                    |--------------------------------------------------------------------------
+                    */
+
                     $sale->debt()->update([
-                        'bank_id'     => $request->bank_id,
-                        'penerima'    => $request->penerima,
+
+                        'bank_id' => $request->bank_id,
+                        'penerima' => $request->penerima,
                         'description' => $request->description,
-                        'pay_debts'   => $request->nominal_in,
+                        'pay_debts' => (float) $request->nominal_in,
+                        'date_pay' => $request->date_pay,
+
                     ]);
 
                 } else {
 
-                    // Buat debt baru
+                    /*
+                    |--------------------------------------------------------------------------
+                    | BUAT DEBT
+                    |--------------------------------------------------------------------------
+                    */
+
                     $sale->debt()->create([
-                        'sale_id'    => $sale->id,
-                        'bank_id'     => $request->bank_id,
-                        'penerima'    => $request->penerima,
+
+                        'sale_id' => $sale->id,
+
+                        'bank_id' => $request->bank_id,
+
+                        'penerima' => $request->penerima,
+
                         'description' => $request->description,
-                        'pay_debts'   => $request->nominal_in,
-                        'date_pay'     => Carbon::now(),
+
+                        'pay_debts' => (float) $request->nominal_in,
+
+                        'date_pay' => Carbon::now(),
+
                     ]);
 
                 }
             }
+
+
             /*
             |--------------------------------------------------------------------------
-            | GENERATE RETURN INVOICE
+            | RETURN INVOICE
             |--------------------------------------------------------------------------
             */
 
             $divisiName = strtoupper(
-                preg_replace('/\s+/', '', $sale->divisi->name)
+                preg_replace(
+                    '/\s+/',
+                    '',
+                    $sale->divisi->name
+                )
             );
 
             $lastReturn = SalesReturn::latest()->first();
@@ -617,10 +759,19 @@ class SaleController extends Controller
                 ? $lastReturn->id + 1
                 : 1;
 
-            $returnInvoice = 'RTR-' .
-                $divisiName . '-' .
-                date('Ymd') . '-' .
-                str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $returnInvoice =
+                'RTR-' .
+                $divisiName .
+                '-' .
+                date('Ymd') .
+                '-' .
+                str_pad(
+                    $nextNumber,
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                );
+
 
             /*
             |--------------------------------------------------------------------------
@@ -631,121 +782,316 @@ class SaleController extends Controller
             if ($request->accessories) {
 
                 foreach ($request->accessories as $row) {
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES DIHAPUS / RETURN
+                    |--------------------------------------------------------------------------
+                    */
+
                     if ($row['status'] == 'deleted') {
 
-                        $detail = AccessoriesSale::find($row['sale_detail_id']);
+                        $detail = AccessoriesSale::find(
+                            $row['sale_detail_id']
+                        );
 
                         if (!$detail) {
                             continue;
                         }
 
-                        $accessory = Accessories::find($detail->accessories_id);
 
-                        $returnQty = $detail->qty;
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CEGAH RETURN ULANG
+                        |--------------------------------------------------------------------------
+                        */
 
-                        $salesReturn = SalesReturn::firstOrCreate(
+                        if ((int) $detail->status_return === 1) {
+                            continue;
+                        }
 
-                            [
-                                'return_invoice' => str_replace('INV','RTR',$sale->invoice)
-                            ],
 
-                            [
-                                'sale_id'=>$sale->id,
-                                'user_id'=>Auth::id(),
-                                'created_at'=>now(),
-                                'description'=>'Retur Barang',
-                                'total_return'=>0
-                            ]
-
+                        $accessory = Accessories::find(
+                            $detail->accessories_id
                         );
-
-                        SalesReturnAccessories::create([
-
-                            'sale_return_id'=>$salesReturn->id,
-
-                            'accessories_sale_id'=>$detail->id,
-
-                            'accessories_id'=>$detail->accessories_id,
-
-                            'qty'=>$returnQty,
-
-                            'subtotal'=>$returnQty * $accessory->price
-
-                        ]);
-
-                        $salesReturn->increment(
-
-                            'total_return',
-
-                            $returnQty * $accessory->price
-
-                        );
-
-                        $accessory->increment('stok',$returnQty);
-
-                        $detail->update([
-
-                            'return_qty'=>$detail->qty,
-
-                            'status_return'=>1
-
-                        ]);
-
-                        continue;
-
-                    }
-                    if ($row['status'] == 'new') {
-
-                        $accessory = Accessories::find($row['accessories_id']);
 
                         if (!$accessory) {
                             continue;
                         }
 
-                        if ($accessory->stok < $row['qty']) {
 
-                            DB::rollBack();
+                        $returnQty = (int) $detail->qty;
 
-                            return response()->json([
-                                'status'  => 'error',
-                                'message' => 'Stok accessories '.$accessory->name.' tidak mencukupi.'
-                            ]);
-                        }
 
-                        AccessoriesSale::create([
+                        /*
+                        |--------------------------------------------------------------------------
+                        | SALES RETURN
+                        |--------------------------------------------------------------------------
+                        */
 
-                            'sale_id'        => $sale->id,
-                            'accessories_id' => $accessory->id,
-                            'qty'            => $row['qty'],
-                            'subtotal'       => $accessory->price * $row['qty'],
-                            'acces_out'      => $tanggalInvoice,
+                        $salesReturn = SalesReturn::firstOrCreate(
 
-                            'return_qty'     => 0,
-                            'status_return'  => 0,
+                            [
+                                'return_invoice' =>
+                                    str_replace(
+                                        'INV',
+                                        'RTR',
+                                        $sale->invoice
+                                    ),
+                            ],
 
-                            'created_at'     => $tanggalInvoice,
-                            'updated_at'     => now(),
+                            [
+                                'sale_id' => $sale->id,
+
+                                'user_id' => Auth::id(),
+
+                                'created_at' => now(),
+
+                                'description' => 'Retur Barang',
+
+                                'total_return' => 0,
+                            ]
+
+                        );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | DETAIL RETURN ACCESSORIES
+                        |--------------------------------------------------------------------------
+                        */
+
+                        SalesReturnAccessories::create([
+
+                            'sale_return_id' =>
+                                $salesReturn->id,
+
+                            'accessories_sale_id' =>
+                                $detail->id,
+
+                            'accessories_id' =>
+                                $detail->accessories_id,
+
+                            'qty' =>
+                                $returnQty,
+
+                            'subtotal' =>
+                                $returnQty *
+                                $detail->price_sale,
 
                         ]);
 
-                        $accessory->decrement('stok', $row['qty']);
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | TOTAL RETURN
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $salesReturn->increment(
+
+                            'total_return',
+
+                            $returnQty *
+                            $detail->price_sale
+
+                        );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KEMBALIKAN STOK
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $accessory->increment(
+                            'stok',
+                            $returnQty
+                        );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE DETAIL
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $detail->update([
+
+                            'return_qty' =>
+                                $returnQty,
+
+                            'status_return' =>
+                                1,
+
+                        ]);
+
 
                         continue;
                     }
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES BARU
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($row['status'] == 'new') {
+
+                        $accessory = Accessories::find(
+                            $row['accessories_id']
+                        );
+
+                        if (!$accessory) {
+                            continue;
+                        }
+
+
+                        $qty = (int) $row['qty'];
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | VALIDASI STOK
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if ($accessory->stok < $qty) {
+
+                            DB::rollBack();
+
+                            return response()->json([
+
+                                'status' => 'error',
+
+                                'message' =>
+                                    'Stok accessories ' .
+                                    $accessory->name .
+                                    ' tidak mencukupi.',
+
+                            ]);
+
+                        }
+
+
+                        $priceSale =
+                            (float) ($row['price_sale'] ?? 0);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CREATE ACCESSORIES SALE
+                        |--------------------------------------------------------------------------
+                        */
+
+                        AccessoriesSale::create([
+
+                            'sale_id' =>
+                                $sale->id,
+
+                            'accessories_id' =>
+                                $accessory->id,
+
+                            'qty' =>
+                                $qty,
+
+                            'subtotal' =>
+                                $priceSale * $qty,
+
+                            'price_sale' =>
+                                $priceSale,
+
+                            'acces_out' =>
+                                $tanggalInvoice,
+
+                            'return_qty' =>
+                                0,
+
+                            'status_return' =>
+                                0,
+
+                            'created_at' =>
+                                $tanggalInvoice,
+
+                            'updated_at' =>
+                                now(),
+
+                        ]);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KURANGI STOK
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $accessory->decrement(
+                            'stok',
+                            $qty
+                        );
+
+
+                        continue;
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACCESSORIES LAMA
+                    |--------------------------------------------------------------------------
+                    */
+
                     if ($row['status'] == 'old') {
 
-                        $detail = AccessoriesSale::find($row['sale_detail_id']);
+                        $detail = AccessoriesSale::find(
+                            $row['sale_detail_id']
+                        );
 
                         if (!$detail) {
                             continue;
                         }
 
-                        $accessory = Accessories::find($detail->accessories_id);
 
-                        $selisih = $row['qty'] - $detail->qty;
+                        $accessory = Accessories::find(
+                            $detail->accessories_id
+                        );
 
-                        // Qty bertambah
+                        if (!$accessory) {
+                            continue;
+                        }
+
+
+                        $priceSale =
+                            isset($row['price_sale'])
+                                ? (float) $row['price_sale']
+                                : (float) $detail->price_sale;
+
+
+                        $newQty =
+                            (int) $row['qty'];
+
+                        $oldQty =
+                            (int) $detail->qty;
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | SELISIH QTY
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $selisih =
+                            $newQty - $oldQty;
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | QTY BERTAMBAH
+                        |--------------------------------------------------------------------------
+                        */
+
                         if ($selisih > 0) {
 
                             if ($accessory->stok < $selisih) {
@@ -753,18 +1099,37 @@ class SaleController extends Controller
                                 DB::rollBack();
 
                                 return response()->json([
+
                                     'status' => 'error',
-                                    'message' => 'Stok accessories tidak cukup'
+
+                                    'message' =>
+                                        'Stok accessories ' .
+                                        $accessory->name .
+                                        ' tidak cukup.',
+
                                 ]);
+
                             }
 
-                            $accessory->decrement('stok', $selisih);
+
+                            $accessory->decrement(
+                                'stok',
+                                $selisih
+                            );
                         }
 
-                        // Qty berkurang
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | QTY BERKURANG
+                        |--------------------------------------------------------------------------
+                        */
+
                         if ($selisih < 0) {
 
-                            $returnQty = abs($selisih);
+                            $returnQty =
+                                abs($selisih);
+
 
                             /*
                             |--------------------------------------------------------------------------
@@ -772,53 +1137,147 @@ class SaleController extends Controller
                             |--------------------------------------------------------------------------
                             */
 
-                            $salesReturn = SalesReturn::firstOrCreate(
-                                [
-                                    'return_invoice' => str_replace('INV', 'RTR', $sale->invoice)
-                                ],
-                                [
-                                    'sale_id'      => $sale->id,
-                                    'user_id'      => Auth::id(),
-                                    'created_at'   => now(),
-                                    'description'  => 'Retur Barang',
-                                    'total_return' => 0,
-                                ]
-                            );
+                            $salesReturn =
+                                SalesReturn::firstOrCreate(
+
+                                    [
+                                        'return_invoice' =>
+                                            str_replace(
+                                                'INV',
+                                                'RTR',
+                                                $sale->invoice
+                                            ),
+                                    ],
+
+                                    [
+                                        'sale_id' =>
+                                            $sale->id,
+
+                                        'user_id' =>
+                                            Auth::id(),
+
+                                        'created_at' =>
+                                            now(),
+
+                                        'description' =>
+                                            'Retur Barang',
+
+                                        'total_return' =>
+                                            0,
+                                    ]
+
+                                );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | RETURN ACCESSORIES
+                            |--------------------------------------------------------------------------
+                            */
 
                             SalesReturnAccessories::create([
-                                'sale_return_id'      => $salesReturn->id,
-                                'accessories_sale_id' => $detail->id,
-                                'accessories_id'      => $detail->accessories_id,
-                                'qty'                 => $returnQty,
-                                'subtotal'            => $accessory->price * $returnQty,
+
+                                'sale_return_id' =>
+                                    $salesReturn->id,
+
+                                'accessories_sale_id' =>
+                                    $detail->id,
+
+                                'accessories_id' =>
+                                    $detail->accessories_id,
+
+                                'qty' =>
+                                    $returnQty,
+
+                                'subtotal' =>
+                                    $priceSale *
+                                    $returnQty,
+
                             ]);
 
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TOTAL RETURN
+                            |--------------------------------------------------------------------------
+                            */
+
                             $salesReturn->increment(
+
                                 'total_return',
-                                $accessory->price * $returnQty
+
+                                $priceSale *
+                                $returnQty
+
                             );
 
-                            $detail->return_qty += $returnQty;
 
-                            if ($detail->return_qty >= $detail->qty) {
+                            /*
+                            |--------------------------------------------------------------------------
+                            | RETURN QTY
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $detail->return_qty =
+                                (int) $detail->return_qty +
+                                $returnQty;
+
+
+                            if (
+                                $detail->return_qty >=
+                                $detail->qty
+                            ) {
+
                                 $detail->status_return = 1;
+
                             }
+
 
                             $detail->save();
 
-                            // Kembalikan stok
-                            $accessory->increment('stok', $returnQty);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | KEMBALIKAN STOK
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $accessory->increment(
+                                'stok',
+                                $returnQty
+                            );
                         }
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE ACCESSORIES SALE
+                        |--------------------------------------------------------------------------
+                        */
+
                         $detail->update([
-                            'qty'        => $row['qty'],
-                            'subtotal'   => $accessory->price * $row['qty'],
-                            'acces_out'  => $tanggalInvoice,
-                            'created_at' => $tanggalInvoice,
+
+                            'qty' =>
+                                $newQty,
+
+                            'price_sale' =>
+                                $priceSale,
+
+                            'subtotal' =>
+                                $priceSale *
+                                $newQty,
+
+                            'acces_out' =>
+                                $tanggalInvoice,
+
+                            'created_at' =>
+                                $tanggalInvoice,
+
                         ]);
                     }
                 }
             }
+
 
             /*
             |--------------------------------------------------------------------------
@@ -829,6 +1288,7 @@ class SaleController extends Controller
             if ($request->items) {
 
                 foreach ($request->items as $row) {
+
 
                     /*
                     |--------------------------------------------------------------------------
@@ -843,99 +1303,232 @@ class SaleController extends Controller
                             $row['no_seri']
                         )->first();
 
+
                         if (!$item) {
                             continue;
                         }
 
-                        if ($item->status == 2) {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ITEM SUDAH TERJUAL
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if ((int) $item->status === 2) {
 
                             DB::rollBack();
 
                             return response()->json([
-                                'status'  => 'error',
-                                'message' => 'Item sudah terjual'
+
+                                'status' => 'error',
+
+                                'message' =>
+                                    'Item ' .
+                                    $item->no_seri .
+                                    ' sudah terjual.',
+
                             ]);
+
                         }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PRICE
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $price =
+                            (float) (
+                                $row['price_sale'] ??
+                                $row['price'] ??
+                                0
+                            );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CREATE ITEM SALE
+                        |--------------------------------------------------------------------------
+                        |
+                        | date_in WAJIB DIISI
+                        |
+                        */
 
                         ItemSale::create([
 
-                            'sale_id'         => $sale->id,
+                            'sale_id' =>
+                                $sale->id,
 
-                            'itemcategory_id' => $row['itemcategory_id'],
+                            'itemcategory_id' =>
+                                $row['itemcategory_id'],
 
-                            'name'            => $row['name'],
+                            'name' =>
+                                $row['name'],
 
-                            'price'           => $row['price'],
+                            'price' =>
+                                $price,
 
-                            'no_seri'         => $row['no_seri'],
+                            'no_seri' =>
+                                $row['no_seri'],
 
-                            'status_return'   => 0,
+                            /*
+                            |--------------------------------------------------------------------------
+                            | INI PERBAIKAN ERROR 1364
+                            |--------------------------------------------------------------------------
+                            */
 
-                            'created_at'      => $tanggalInvoice,
+                            'date_in' =>
+                                $item->created_at,
 
-                            'updated_at'      => now(),
+                            'status_return' =>
+                                0,
+
+                            'created_at' =>
+                                $tanggalInvoice,
+
+                            'updated_at' =>
+                                now(),
 
                         ]);
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE STATUS ITEM
+                        |--------------------------------------------------------------------------
+                        */
+
                         $item->update([
-                            'status' => 2
+
+                            'status' => 2,
+
                         ]);
                     }
 
+
                     /*
                     |--------------------------------------------------------------------------
-                    | ITEM LAMA
+                    | ITEM DIHAPUS / RETURN
                     |--------------------------------------------------------------------------
                     */
+
                     if ($row['status'] == 'deleted') {
 
-                        $detail = ItemSale::find($row['sale_detail_id']);
+                        $detail = ItemSale::find(
+                            $row['sale_detail_id']
+                        );
 
-                        if(!$detail){
+                        if (!$detail) {
                             continue;
                         }
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CEGAH RETURN ULANG
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if ((int) $detail->status_return === 1) {
+                            continue;
+                        }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KEMBALIKAN ITEM KE MASTER
+                        |--------------------------------------------------------------------------
+                        */
+
                         Item::create([
 
-                            'divisi_id'=>$sale->divisi_id,
+                            'divisi_id' =>
+                                $sale->divisi_id,
 
-                            'itemcategory_id'=>$detail->itemcategory_id,
+                            'itemcategory_id' =>
+                                $detail->itemcategory_id,
 
-                            'name'=>$detail->name,
+                            'name' =>
+                                $detail->name,
 
-                            'price'=>$detail->price,
+                            'price' =>
+                                $detail->price,
 
-                            'capital_price'=>$detail->capital_price,
+                            'capital_price' =>
+                                $detail->capital_price,
 
-                            'no_seri'=>$detail->no_seri,
+                            'no_seri' =>
+                                $detail->no_seri,
 
-                            'status'=>1
+                            'status' =>
+                                1,
 
                         ]);
 
-                        $salesReturn = SalesReturn::firstOrCreate(
 
-                            [
-                                'return_invoice'=>str_replace('INV','RTR',$sale->invoice)
-                            ],
+                        /*
+                        |--------------------------------------------------------------------------
+                        | SALES RETURN
+                        |--------------------------------------------------------------------------
+                        */
 
-                            [
-                                'sale_id'=>$sale->id,
-                                'user_id'=>Auth::id(),
-                                'created_at'=>now(),
-                                'description'=>'Retur Barang',
-                                'total_return'=>0
-                            ]
+                        $salesReturn =
+                            SalesReturn::firstOrCreate(
 
-                        );
+                                [
+                                    'return_invoice' =>
+                                        str_replace(
+                                            'INV',
+                                            'RTR',
+                                            $sale->invoice
+                                        ),
+                                ],
+
+                                [
+                                    'sale_id' =>
+                                        $sale->id,
+
+                                    'user_id' =>
+                                        Auth::id(),
+
+                                    'created_at' =>
+                                        now(),
+
+                                    'description' =>
+                                        'Retur Barang',
+
+                                    'total_return' =>
+                                        0,
+
+                                ]
+
+                            );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | RETURN ITEM
+                        |--------------------------------------------------------------------------
+                        */
 
                         SalesReturnItem::create([
 
-                            'sale_return_id'=>$salesReturn->id,
+                            'sale_return_id' =>
+                                $salesReturn->id,
 
-                            'item_sale_id'=>$detail->id
+                            'item_sale_id' =>
+                                $detail->id,
 
                         ]);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | TOTAL RETURN
+                        |--------------------------------------------------------------------------
+                        */
 
                         $salesReturn->increment(
 
@@ -945,15 +1538,30 @@ class SaleController extends Controller
 
                         );
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE ITEM SALE
+                        |--------------------------------------------------------------------------
+                        */
+
                         $detail->update([
 
-                            'status_return'=>1
+                            'status_return' =>
+                                1,
 
                         ]);
 
-                        continue;
 
+                        continue;
                     }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ITEM LAMA
+                    |--------------------------------------------------------------------------
+                    */
 
                     if ($row['status'] == 'old') {
 
@@ -965,41 +1573,85 @@ class SaleController extends Controller
                             continue;
                         }
 
+
+                        $price =
+                            (float) (
+                                $row['price_sale'] ??
+                                $row['price'] ??
+                                0
+                            );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE HARGA
+                        |--------------------------------------------------------------------------
+                        |
+                        | date_in TIDAK DIUBAH
+                        |
+                        */
+
                         $detail->update([
 
-                            'price' => $row['price'],
+                            'price' =>
+                                $price,
 
-                            'created_at' => $tanggalInvoice,
+                            'created_at' =>
+                                $tanggalInvoice,
 
                         ]);
                     }
                 }
             }
 
+
             /*
             |--------------------------------------------------------------------------
-            | SYNC ULANG SETELAH SEMUA PROSES
+            | SYNC FINAL
             |--------------------------------------------------------------------------
             */
 
-            AccessoriesSale::where('sale_id', $sale->id)
-                ->update([
-                    'acces_out'  => $tanggalInvoice,
-                    'created_at' => $tanggalInvoice,
-                ]);
+            AccessoriesSale::where(
+                'sale_id',
+                $sale->id
+            )->update([
 
-            ItemSale::where('sale_id', $sale->id)
-                ->update([
-                    'created_at' => $tanggalInvoice,
-                ]);
+                'acces_out' =>
+                    $tanggalInvoice,
+
+                'created_at' =>
+                    $tanggalInvoice,
+
+            ]);
+
+
+            ItemSale::where(
+                'sale_id',
+                $sale->id
+            )->update([
+
+                'created_at' =>
+                    $tanggalInvoice,
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMMIT
+            |--------------------------------------------------------------------------
+            */
 
             DB::commit();
 
+
             return response()->json([
 
-                'status'  => 'success',
+                'status' =>
+                    'success',
 
-                'message' => 'Transaction berhasil diupdate'
+                'message' =>
+                    'Transaction berhasil diupdate',
 
             ]);
 
@@ -1007,13 +1659,16 @@ class SaleController extends Controller
 
             DB::rollBack();
 
+
             return response()->json([
 
-                'status'  => 'error',
+                'status' =>
+                    'error',
 
-                'message' => $e->getMessage()
+                'message' =>
+                    $e->getMessage(),
 
-            ]);
+            ], 500);
         }
     }
 
