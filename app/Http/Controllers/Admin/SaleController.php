@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class SaleController extends Controller
 {
@@ -140,71 +141,133 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
-        $divisi = Divisi::find(Auth::user()->divisi_id);
+        $lockKey = 'sale-store-user-' . Auth::id();
 
-        if (!$divisi) {
+        $lock = Cache::lock($lockKey, 30);
+
+        if (! $lock->get()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Divisi tidak ditemukan untuk pengguna yang sedang login.'
-            ], 400);
+                'message' => 'Transaksi sedang diproses. Jangan klik tombol simpan kembali.'
+            ], 409);
         }
-
-        $currentYear = date('Y');
-        $currentMonthNumber = str_pad(date('n'), 2, '0', STR_PAD_LEFT);
-        $invFormat = $divisi->inv_format;
-
-        $lastInvoice = Sale::where('divisi_id', Auth::user()->divisi_id)
-            ->whereYear('created_at', $currentYear)
-            ->where('invoice', 'like', "INV/{$invFormat}/%/%/{$currentYear}")
-            ->orderByDesc('id')
-            ->first();
-
-        if ($lastInvoice) {
-            preg_match(
-                '/INV\/' . preg_quote($invFormat, '/') . '\/(\d{4})\/\d{2}\/' . $currentYear . '/',
-                $lastInvoice->invoice,
-                $matches
-            );
-            $lastNumber = isset($matches[1]) ? (int)$matches[1] : 0;
-        } else {
-            $lastNumber = 0;
-        }
-
-        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        $invoiceNumber = "INV/{$invFormat}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
-
-        $validated = $request->validate([
-            'customer_id' => 'required|integer|exists:customers,id',
-            'total_item' => 'required|integer|min:1',
-            'total_price' => 'required|numeric|min:0',
-            'ongkir' => 'required|numeric|min:0',
-            'diskon' => 'required|numeric|min:0',
-            'bayar' => 'required|numeric|min:0',
-            'accessories' => 'nullable|array',
-            'items' => 'nullable|array'
-        ], [
-            'customer_id.required' => 'Pelanggan wajib diisi.',
-            'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
-            'total_item.required' => 'Total item wajib diisi.',
-            'total_item.integer' => 'Total item harus berupa angka.',
-            'total_item.min' => 'Total item minimal harus 1.',
-            'total_price.required' => 'Total harga wajib diisi.',
-            'total_price.numeric' => 'Total harga harus berupa angka.',
-            'total_price.min' => 'Total harga tidak boleh kurang dari 0.',
-            'ongkir.required' => 'Ongkos kirim wajib diisi.',
-            'ongkir.numeric' => 'Ongkos kirim harus berupa angka.',
-            'ongkir.min' => 'Ongkos kirim tidak boleh kurang dari 0.',
-            'diskon.required' => 'Diskon wajib diisi.',
-            'diskon.numeric' => 'Diskon harus berupa angka.',
-            'diskon.min' => 'Diskon tidak boleh kurang dari 0.',
-            'bayar.required' => 'Jumlah bayar wajib diisi.',
-            'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
-            'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
-        ]);
-
-        DB::beginTransaction();
 
         try {
+
+            // =====================================================
+            // VALIDASI
+            // =====================================================
+
+            $validated = $request->validate([
+                'customer_id' => 'required|integer|exists:customers,id',
+                'total_item' => 'required|integer|min:1',
+                'total_price' => 'required|numeric|min:0',
+                'ongkir' => 'required|numeric|min:0',
+                'diskon' => 'required|numeric|min:0',
+                'bayar' => 'required|numeric|min:0',
+                'accessories' => 'nullable|array',
+                'items' => 'nullable|array'
+            ], [
+                'customer_id.required' => 'Pelanggan wajib diisi.',
+                'customer_id.exists' => 'Pelanggan yang dipilih tidak valid.',
+                'total_item.required' => 'Total item wajib diisi.',
+                'total_item.integer' => 'Total item harus berupa angka.',
+                'total_item.min' => 'Total item minimal harus 1.',
+                'total_price.required' => 'Total harga wajib diisi.',
+                'total_price.numeric' => 'Total harga harus berupa angka.',
+                'total_price.min' => 'Total harga tidak boleh kurang dari 0.',
+                'ongkir.required' => 'Ongkos kirim wajib diisi.',
+                'ongkir.numeric' => 'Ongkos kirim harus berupa angka.',
+                'ongkir.min' => 'Ongkos kirim tidak boleh kurang dari 0.',
+                'diskon.required' => 'Diskon wajib diisi.',
+                'diskon.numeric' => 'Diskon harus berupa angka.',
+                'diskon.min' => 'Diskon tidak boleh kurang dari 0.',
+                'bayar.required' => 'Jumlah bayar wajib diisi.',
+                'bayar.numeric' => 'Jumlah bayar harus berupa angka.',
+                'bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
+            ]);
+
+            // =====================================================
+            // DIVISI
+            // =====================================================
+
+            $divisi = Divisi::find(Auth::user()->divisi_id);
+
+            if (!$divisi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Divisi tidak ditemukan untuk pengguna yang sedang login.'
+                ], 400);
+            }
+
+            // =====================================================
+            // TRANSACTION
+            // =====================================================
+
+            DB::beginTransaction();
+
+            // =====================================================
+            // GENERATE INVOICE
+            // =====================================================
+
+            $currentYear = date('Y');
+
+            $currentMonthNumber = str_pad(
+                date('n'),
+                2,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            $invFormat = $divisi->inv_format;
+
+            $lastInvoice = Sale::where(
+                'divisi_id',
+                Auth::user()->divisi_id
+            )
+                ->whereYear('created_at', $currentYear)
+                ->where(
+                    'invoice',
+                    'like',
+                    "INV/{$invFormat}/%/%/{$currentYear}"
+                )
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($lastInvoice) {
+
+                preg_match(
+                    '/INV\/' .
+                    preg_quote($invFormat, '/') .
+                    '\/(\d{4})\/\d{2}\/' .
+                    $currentYear . '/',
+                    $lastInvoice->invoice,
+                    $matches
+                );
+
+                $lastNumber = isset($matches[1])
+                    ? (int) $matches[1]
+                    : 0;
+
+            } else {
+                $lastNumber = 0;
+            }
+
+            $nextNumber = str_pad(
+                $lastNumber + 1,
+                4,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            $invoiceNumber =
+                "INV/{$invFormat}/{$nextNumber}/{$currentMonthNumber}/{$currentYear}";
+
+            // =====================================================
+            // CREATE SALE
+            // =====================================================
+
             $sale = Sale::create([
                 'customer_id' => $validated['customer_id'],
                 'total_item' => $validated['total_item'],
@@ -212,22 +275,36 @@ class SaleController extends Controller
                 'ongkir' => $validated['ongkir'],
                 'diskon' => $validated['diskon'],
                 'pay' => $validated['bayar'],
-                'ppn' => $request->ppn,
-                'pph' => $request->pph,
-                'nominal_in' => $request->nominal_in,
+
+                'ppn' => $request->ppn ?? 0,
+                'pph' => $request->pph ?? 0,
+                'nominal_in' => $request->nominal_in ?? 0,
+
                 'deadlines' => $request->deadlines,
                 'created_at' => $request->created_at ?? now(),
+
                 'no_po' => $request->no_po,
                 'inv_manual' => $request->inv_manual,
-                'admin_fee' => $request->admin_fee,
+                'admin_fee' => $request->admin_fee ?? 0,
+
                 'user_id' => Auth::id(),
                 'divisi_id' => Auth::user()->divisi_id,
+
                 'invoice' => $invoiceNumber
             ]);
 
-            $nominalIn = (int)str_replace('.', '', $sale->nominal_in);
+            // =====================================================
+            // DEBT
+            // =====================================================
+
+            $nominalIn = (int) str_replace(
+                '.',
+                '',
+                $sale->nominal_in
+            );
 
             if ($nominalIn > 0) {
+
                 Debt::create([
                     'sale_id' => $sale->id,
                     'pay_debts' => $sale->nominal_in,
@@ -238,46 +315,77 @@ class SaleController extends Controller
                 ]);
             }
 
+            // =====================================================
             // ACCESSORIES
-            if ($request->has('accessories') && is_array($validated['accessories'] ?? null)) {
+            // =====================================================
+
+            if (
+                $request->has('accessories') &&
+                is_array($validated['accessories'] ?? null)
+            ) {
+
                 foreach ($validated['accessories'] as $accessory) {
-                    $accessoryRecord = Accessories::find($accessory['accessories_id']);
+
+                    $accessoryRecord = Accessories::where(
+                        'id',
+                        $accessory['accessories_id']
+                    )
+                        ->lockForUpdate()
+                        ->first();
 
                     if (!$accessoryRecord) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Accessories dengan ID ' . $accessory['accessories_id'] . ' tidak ditemukan.'
-                        ], 400);
+
+                        throw new \Exception(
+                            'Accessories dengan ID ' .
+                            $accessory['accessories_id'] .
+                            ' tidak ditemukan.'
+                        );
                     }
 
-                    $priceSale = (float)($accessory['price_sale'] ?? 0);
-                    $priceBottom = (float)($accessoryRecord->price_bottom ?? 0);
+                    $priceSale = (float) (
+                        $accessory['price_sale'] ?? 0
+                    );
+
+                    $priceBottom = (float) (
+                        $accessoryRecord->price_bottom ?? 0
+                    );
 
                     if ($priceSale < $priceBottom) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Harga jual accessories "' . $accessoryRecord->name . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
-                        ], 422);
+
+                        throw new \Exception(
+                            'Harga jual accessories "' .
+                            $accessoryRecord->name .
+                            '" tidak boleh lebih kecil dari harga minimum Rp ' .
+                            number_format(
+                                $priceBottom,
+                                0,
+                                ',',
+                                '.'
+                            )
+                        );
                     }
 
-                    $qty = (float)($accessory['qty'] ?? 0);
+                    $qty = (float) (
+                        $accessory['qty'] ?? 0
+                    );
 
                     if ($qty <= 0) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Qty accessories "' . $accessoryRecord->name . '" harus lebih dari 0.'
-                        ], 422);
+
+                        throw new \Exception(
+                            'Qty accessories "' .
+                            $accessoryRecord->name .
+                            '" harus lebih dari 0.'
+                        );
                     }
 
-                    if ($qty > (float)$accessoryRecord->stok) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Stok ' . $accessoryRecord->name . ' Tidak Mencukupi. Stok Tersedia: ' . $accessoryRecord->stok
-                        ], 400);
+                    if ($qty > (float) $accessoryRecord->stok) {
+
+                        throw new \Exception(
+                            'Stok ' .
+                            $accessoryRecord->name .
+                            ' Tidak Mencukupi. Stok Tersedia: ' .
+                            $accessoryRecord->stok
+                        );
                     }
 
                     $accessoryRecord->stok -= $qty;
@@ -294,30 +402,58 @@ class SaleController extends Controller
                 }
             }
 
+            // =====================================================
             // ITEMS / ALAT
-            if ($request->has('items') && is_array($validated['items'] ?? null)) {
+            // =====================================================
+
+            if (
+                $request->has('items') &&
+                is_array($validated['items'] ?? null)
+            ) {
+
                 foreach ($validated['items'] as $item) {
-                    $itemRecord = Item::where('itemcategory_id', $item['itemcategory_id'])
-                        ->where('no_seri', $item['no_seri'])
+
+                    $itemRecord = Item::where(
+                        'itemcategory_id',
+                        $item['itemcategory_id']
+                    )
+                        ->where(
+                            'no_seri',
+                            $item['no_seri']
+                        )
+                        ->lockForUpdate()
                         ->first();
 
                     if (!$itemRecord) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Alat dengan nomor seri "' . $item['no_seri'] . '" tidak ditemukan.'
-                        ], 400);
+
+                        throw new \Exception(
+                            'Alat dengan nomor seri "' .
+                            $item['no_seri'] .
+                            '" tidak ditemukan.'
+                        );
                     }
 
-                    $priceSale = (float)($item['price'] ?? 0);
-                    $priceBottom = (float)($itemRecord->price_bottom ?? 0);
+                    $priceSale = (float) (
+                        $item['price'] ?? 0
+                    );
+
+                    $priceBottom = (float) (
+                        $itemRecord->price_bottom ?? 0
+                    );
 
                     if ($priceSale < $priceBottom) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'Harga jual alat "' . ($itemRecord->name ?? $item['name']) . '" tidak boleh lebih kecil dari harga minimum Rp ' . number_format($priceBottom, 0, ',', '.')
-                        ], 422);
+
+                        throw new \Exception(
+                            'Harga jual alat "' .
+                            ($itemRecord->name ?? $item['name']) .
+                            '" tidak boleh lebih kecil dari harga minimum Rp ' .
+                            number_format(
+                                $priceBottom,
+                                0,
+                                ',',
+                                '.'
+                            )
+                        );
                     }
 
                     ItemSale::create([
@@ -336,6 +472,10 @@ class SaleController extends Controller
                 }
             }
 
+            // =====================================================
+            // COMMIT
+            // =====================================================
+
             DB::commit();
 
             return response()->json([
@@ -344,24 +484,28 @@ class SaleController extends Controller
                 'invoice' => $invoiceNumber
             ]);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
 
             Log::error('SALE STORE ERROR', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'request' => $request->all()
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage(),
-                'line' => $e->getLine()
+                'message' => $e->getMessage()
             ], 500);
+
+        } finally {
+
+            $lock->release();
         }
     }
-
     /**
      * Display the specified resource.
      *

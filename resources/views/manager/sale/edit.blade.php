@@ -556,7 +556,6 @@
 
                                     <i class="bx bx-search"></i>
 
-                                    Cari
 
                                 </button>
 
