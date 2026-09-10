@@ -1,18 +1,6 @@
 @extends('layouts.master')
+@section('title', 'LAPORAN TRANSAKSI')
 @section('content')
-    <div class="card">
-        <div class="card-body">
-            <div class="col">
-                <div class="row">
-                    <div class="col-sm">
-                        <h4 class="mb-0 text-uppercase">Transaction Report</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <hr/>
     <div class="card table-timbang">
         <div class="card-head">
             <div class="row">
