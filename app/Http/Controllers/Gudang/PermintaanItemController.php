@@ -8,6 +8,7 @@ use App\Models\Divisi;
 use App\Models\Item;
 use App\Models\ItemIn;
 use App\Models\PermintaanItem;
+use App\Services\SidebarNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -119,7 +120,8 @@ class PermintaanItemController extends Controller
                 'item_in_id' => $item_in_id, // Menyimpan ID item yang diminta
             ]);
         }
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         // Redirect kembali dengan pesan sukses
         return redirect()->route('gudang.permintaanitem.index')->with('success', 'Permintaan berhasil dibuat!');
     }
@@ -275,7 +277,8 @@ class PermintaanItemController extends Controller
 
         // Update status permintaan menjadi 'diterima'
         $permintaan->update(['status' => 'diterima']);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         // Redirect ke halaman permintaan dengan pesan sukses
         return redirect()->route('gudang.permintaanitem.index')->with('success', 'Permintaan berhasil diterima.');
     }
@@ -289,7 +292,8 @@ class PermintaanItemController extends Controller
         }
 
         $permintaan->update(['status' => 'disetujui']);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return redirect()->route('gudang.permintaanitem.konfirmasi')->with('success', 'Permintaan disetujui.');
     }
     public function retur(Request $request)
@@ -321,7 +325,8 @@ class PermintaanItemController extends Controller
         $permintaan->update([
             'status' => 'retur pending'
         ]);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return back()->with('success','Permintaan retur dikirim.');
     }
     public function returApprove($id)
@@ -360,7 +365,8 @@ class PermintaanItemController extends Controller
 
         // Update status permintaan menjadi 'diterima'
         $permintaan->update(['status' => 'retur']);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         // Redirect ke halaman permintaan dengan pesan sukses
         return back()->with('success', 'Retur diterima.');
     }

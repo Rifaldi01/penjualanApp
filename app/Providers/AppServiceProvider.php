@@ -75,8 +75,9 @@ class AppServiceProvider extends ServiceProvider
             $notiff = 0;
 
             if (Auth::check()) { // Pastikan pengguna sudah login
-                $notiff = Permintaan::where('status', 'disetujui')
-                    ->where('divisi_id_tujuan', Auth::user()->divisi_id)
+                $notiff = Permintaan::where('status', 'pending')
+                    ->orWhere('status', 'retur pending')
+                    ->where('divisi_id_asal', Auth::user()->divisi_id)
                     ->count();
             }
 
@@ -109,7 +110,8 @@ class AppServiceProvider extends ServiceProvider
             $notiffitem = 0;
 
             if (Auth::check()) { // Pastikan pengguna sudah login
-                $notiffitem = PermintaanItem::where('status', 'disetujui')
+                $notiffitem = PermintaanItem::where('status', 'pending')
+                    ->orWhere('status', 'retur pending')
                     ->where('divisi_id_asal', Auth::user()->divisi_id)
                     ->count();
             }

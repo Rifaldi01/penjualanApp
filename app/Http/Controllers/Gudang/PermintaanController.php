@@ -13,6 +13,7 @@ use App\Models\DetailAccessories;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\SidebarNotificationService;
 
 
 class PermintaanController extends Controller
@@ -141,7 +142,8 @@ class PermintaanController extends Controller
                 'qty' => (string) $jumlahDiminta,
             ]);
         }
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return redirect()->route('gudang.permintaan.index')->with('success', 'Permintaan berhasil dibuat!');
     }
 
@@ -301,7 +303,8 @@ class PermintaanController extends Controller
             // Update status permintaan
             $permintaan->update(['status' => 'diterima']);
         });
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return redirect()
             ->route('gudang.permintaan.index')
             ->with('success', 'Permintaan berhasil diterima.');
@@ -317,7 +320,8 @@ class PermintaanController extends Controller
         }
 
         $permintaan->update(['status' => 'disetujui']);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return redirect()->route('gudang.permintaan.konfirmasi')->with('success', 'Permintaan disetujui.');
     }
     public function konfirmasi(Request $request)
@@ -403,7 +407,8 @@ class PermintaanController extends Controller
         $permintaan->update([
             'status' => 'retur pending'
         ]);
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return back()->with('success','Permintaan retur dikirim.');
     }
     public function returApprove($id)
@@ -476,7 +481,8 @@ class PermintaanController extends Controller
                 'status' => 'retur'
             ]);
         });
-
+        SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
+        SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
         return back()->with('success', 'Retur diterima.');
     }
 }

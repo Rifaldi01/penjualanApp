@@ -22,7 +22,9 @@
             <li class="menu-label">Permintaan Barang</li>
             <li>
                 @if(isset($notiff) && $notiff > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
+                    <span
+                        class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span
+                            class="visually-hidden">unread messages</span></span>
                 @else
                 @endif
                 <a href="javascript:;" class="has-arrow">
@@ -56,7 +58,9 @@
             </li>
             <li>
                 @if(isset($notiffitem) && $notiffitem > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
+                    <span
+                        class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span
+                            class="visually-hidden">unread messages</span></span>
                 @else
                 @endif
                 <a href="javascript:;" class="has-arrow">
@@ -229,26 +233,25 @@
                     </div>
                 </a>
             </li>
-{{--            <li>--}}
-{{--                <a href="{{route('gudang.item.report')}}">--}}
-{{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
-{{--                    </div>--}}
-{{--                    <div class="menu-title">Report Item</div>--}}
-{{--                </a>--}}
-{{--            </li>--}}
-{{--            <li>--}}
-{{--                <a href="{{route('gudang.acces.report')}}">--}}
-{{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
-{{--                    </div>--}}
-{{--                    <div class="menu-title">Report Accessories</div>--}}
-{{--                </a>--}}
-{{--            </li>--}}
+            {{--            <li>--}}
+            {{--                <a href="{{route('gudang.item.report')}}">--}}
+            {{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
+            {{--                    </div>--}}
+            {{--                    <div class="menu-title">Report Item</div>--}}
+            {{--                </a>--}}
+            {{--            </li>--}}
+            {{--            <li>--}}
+            {{--                <a href="{{route('gudang.acces.report')}}">--}}
+            {{--                    <div class="parent-icon"><i class='bx bx-file'></i>--}}
+            {{--                    </div>--}}
+            {{--                    <div class="menu-title">Report Accessories</div>--}}
+            {{--                </a>--}}
+            {{--            </li>--}}
             <li class="menu-label">Permintaan Barang</li>
             <li>
-                @if(isset($notiff) && $notiff > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
-                @else
-                @endif
+                <span id="badge-notiff"
+                      class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"
+                      style="{{ $notiff > 0 ? '' : 'display:none' }}"><span id="badge-notiff-count">{{ $notiff }}</span></span>
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon">
                         <i class='bx bx-collection'></i>
@@ -260,39 +263,40 @@
                         <a href="{{route('gudang.permintaan.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
                             Minta Aksesoris
-                            @if($minta > 0)
-                                <span class="badge bg-danger">{{$minta}}</span>
-                            @else
-                            @endif
+                            <span id="badge-minta"
+                                  class=" badge bg-danger" style="{{ $minta ? '' : 'display:none' }}">
+                    <span id="badge-minta-count">{{ $minta }}</span>
+                </span>
                         </a>
                     </li>
                     <li>
+
                         <a href="{{route('gudang.permintaan.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
                             Permintaan Aksesoris
-                            @if($notif > 0)
-                                <span class="badge bg-danger">{{$notif}}</span>
-                            @else
-                            @endif
+                            <span id="badge-notif"
+                                  class=" badge bg-danger" style="{{ $notif ? '' : 'display:none' }}">
+                    <span id="badge-notif-count">{{ $notif }}</span>
+                </span>
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.permintaan.retur')}}">
                             <i class='bx bx-repost'></i>
                             Retur Aksesoris
-                            @if($notifretur > 0)
-                                <span class="badge bg-danger">{{$notifretur}}</span>
-                            @else
-                            @endif
+                            <span id="badge-notifretur"
+                                  class=" badge bg-danger" style="{{ $notifretur ? '' : 'display:none' }}">
+                    <span id="badge-notifretur-count">{{ $notifretur }}</span>
+                            </span>
                         </a>
                     </li>
                 </ul>
             </li>
             <li>
-                @if(isset($notiffitem) && $notiffitem > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"><span class="visually-hidden">unread messages</span></span>
-                @else
-                @endif
+                <span id="badge-notiffitem"
+                      class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"
+                      style="{{ $notiffitem > 0 ? '' : 'display:none' }}"><span
+                        id="badge-notiffitem-count">{{ $notiffitem }}</span></span>
                 <a href="javascript:;" class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-box'></i>
                     </div>
@@ -303,30 +307,30 @@
                         <a href="{{route('gudang.permintaanitem.index')}}">
                             <i class='bx bx-arrow-to-bottom'></i>
                             Minta Alat
-                            @if($mintaitem > 0)
-                                <span class="badge bg-danger">{{$mintaitem}}</span>
-                            @else
-                            @endif
+                            <span id="badge-mintaitem"
+                                  class=" badge bg-danger" style="{{ $mintaitem ? '' : 'display:none' }}">
+                    <span id="badge-mintaitem-count">{{ $mintaitem }}</span>
+                            </span>
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.permintaanitem.konfirmasi')}}">
                             <i class='bx bx-arrow-to-top'></i>
                             Permintaan Alat
-                            @if($notifitem > 0)
-                                <span class="badge bg-danger">{{$notifitem}}</span>
-                            @else
-                            @endif
+                            <span id="badge-notifitem"
+                                  class=" badge bg-danger" style="{{ $notifitem ? '' : 'display:none' }}">
+                    <span id="badge-notifitem-count">{{ $notifitem }}</span>
+                            </span>
                         </a>
                     </li>
                     <li>
                         <a href="{{route('gudang.permintaanitem.retur')}}">
                             <i class='bx bx-repost'></i>
                             Retur Item
-                            @if($notifreturitem > 0)
-                                <span class="badge bg-danger">{{$notifreturitem}}</span>
-                            @else
-                            @endif
+                            <span id="badge-notifreturitem"
+                                  class=" badge bg-danger" style="{{ $notifreturitem ? '' : 'display:none' }}">
+                    <span id="badge-notifreturitem-count">{{ $notifreturitem }}</span>
+                            </span>
                         </a>
                     </li>
                 </ul>

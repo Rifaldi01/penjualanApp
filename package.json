@@ -17,6 +17,8 @@
         "vue": "^3.2.37"
     },
     "dependencies": {
-        "number-to-words": "^1.2.4"
+        "laravel-echo": "^2.4.0",
+        "number-to-words": "^1.2.4",
+        "pusher-js": "^8.6.0"
     }
 }
