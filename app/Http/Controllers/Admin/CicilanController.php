@@ -229,66 +229,124 @@ class CicilanController extends Controller
 
     public function payment(Request $request, $id)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI NOMINAL PEMBAYARAN
+        |--------------------------------------------------------------------------
+        */
+
         $payDebts = preg_replace(
             '/[^\d]/',
             '',
-            $request->pay_debts
+            (string) $request->pay_debts
         );
 
         $request->merge([
             'pay_debts' => $payDebts,
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
         $request->validate([
+
             'pay_debts' => [
                 'required',
                 'numeric',
-                'min:1'
+                'min:1',
             ],
 
             'date_pay' => [
                 'required',
-                'date'
+                'date',
             ],
 
             'bank_id' => [
                 'nullable',
-                'exists:banks,id'
+                'exists:banks,id',
             ],
 
             'description' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
 
             'penerima' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
+
         ]);
+
 
         DB::beginTransaction();
 
         try {
 
+            /*
+            |--------------------------------------------------------------------------
+            | LOCK SALE
+            |--------------------------------------------------------------------------
+            */
+
             $sale = Sale::lockForUpdate()
                 ->where('status_return', 0)
                 ->findOrFail($id);
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL INVOICE
+            |--------------------------------------------------------------------------
+            */
+
             $totalInvoice = (float) (
                 $sale->pay ?? 0
             );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL CICILAN YANG SUDAH DIBAYAR
+            |--------------------------------------------------------------------------
+            */
 
             $totalBayar = (float) Debt::where(
                 'sale_id',
                 $sale->id
             )->sum('pay_debts');
 
-            $sisaPiutang = $totalInvoice - $totalBayar;
+
+            /*
+            |--------------------------------------------------------------------------
+            | SISA PIUTANG
+            |--------------------------------------------------------------------------
+            */
+
+            $sisaPiutang =
+                $totalInvoice - $totalBayar;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMINAL PEMBAYARAN SEKARANG
+            |--------------------------------------------------------------------------
+            */
 
             $nominalBayar = (float) $request->pay_debts;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI LUNAS
+            |--------------------------------------------------------------------------
+            */
 
             if ($sisaPiutang <= 0) {
 
@@ -297,10 +355,17 @@ class CicilanController extends Controller
                 return back()
                     ->withErrors([
                         'pay_debts' =>
-                            'Transaksi ini sudah lunas.'
+                            'Transaksi ini sudah lunas.',
                     ])
                     ->withInput();
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI PEMBAYARAN MELEBIHI PIUTANG
+            |--------------------------------------------------------------------------
+            */
 
             if ($nominalBayar > $sisaPiutang) {
 
@@ -315,21 +380,72 @@ class CicilanController extends Controller
                                 0,
                                 ',',
                                 '.'
-                            )
+                            ),
                     ])
                     ->withInput();
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIMPAN CICILAN BARU
+            |--------------------------------------------------------------------------
+            */
+
             Debt::create([
+
                 'sale_id' => $sale->id,
+
                 'bank_id' => $request->bank_id,
+
                 'pay_debts' => $nominalBayar,
+
                 'penerima' => $request->penerima,
+
                 'date_pay' => $request->date_pay,
+
                 'description' => $request->description,
+
             ]);
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | HITUNG ULANG TOTAL NOMINAL IN
+            |--------------------------------------------------------------------------
+            |
+            | nominal_in pada sales merupakan total seluruh pembayaran
+            | yang sudah tercatat di tabel debts.
+            |
+            */
+
+            $totalNominalIn = (float) Debt::where(
+                'sale_id',
+                $sale->id
+            )->sum('pay_debts');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE SALES.NOMINAL_IN
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->update([
+
+                'nominal_in' => $totalNominalIn,
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMMIT
+            |--------------------------------------------------------------------------
+            */
+
             DB::commit();
+
 
             return redirect()
                 ->route(
@@ -340,13 +456,14 @@ class CicilanController extends Controller
                     'Pembayaran cicilan berhasil disimpan.'
                 );
 
+
         } catch (\Throwable $e) {
 
             DB::rollBack();
 
             return back()
                 ->withErrors([
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ])
                 ->withInput();
         }
@@ -359,22 +476,95 @@ class CicilanController extends Controller
 
         try {
 
+            /*
+            |--------------------------------------------------------------------------
+            | CARI DATA DEBT
+            |--------------------------------------------------------------------------
+            */
+
             $debt = Debt::findOrFail($id);
 
             $saleId = $debt->sale_id;
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOCK SALE
+            |--------------------------------------------------------------------------
+            |
+            | Mengunci transaksi agar nominal_in tidak berubah secara
+            | bersamaan ketika ada proses pembayaran lain.
+            |
+            */
+
+            $sale = Sale::lockForUpdate()
+                ->findOrFail($saleId);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOCK DEBT YANG AKAN DIHAPUS
+            |--------------------------------------------------------------------------
+            */
+
+            $debt = Debt::where('id', $id)
+                ->where('sale_id', $sale->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS CICILAN
+            |--------------------------------------------------------------------------
+            */
+
             $debt->delete();
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | HITUNG ULANG TOTAL PEMBAYARAN
+            |--------------------------------------------------------------------------
+            */
+
+            $totalNominalIn = (float) Debt::where(
+                'sale_id',
+                $sale->id
+            )->sum('pay_debts');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE SALES.NOMINAL_IN
+            |--------------------------------------------------------------------------
+            */
+
+            $sale->update([
+
+                'nominal_in' => $totalNominalIn,
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMMIT
+            |--------------------------------------------------------------------------
+            */
+
             DB::commit();
+
 
             return redirect()
                 ->route(
                     'admin.cicilan.show',
-                    $saleId
+                    $sale->id
                 )
                 ->withSuccess(
-                    'Pembayaran berhasil dihapus.'
+                    'Pembayaran berhasil dihapus dan nominal pembayaran telah diperbarui.'
                 );
+
 
         } catch (\Throwable $e) {
 
@@ -382,7 +572,7 @@ class CicilanController extends Controller
 
             return back()
                 ->withErrors([
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
         }
     }
