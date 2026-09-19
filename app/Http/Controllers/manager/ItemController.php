@@ -131,14 +131,29 @@ class ItemController extends Controller
     }
     private function save(Request $request, $id = null)
     {
+        // ======================
+        // BERSIHKAN FORMAT RUPIAH
+        // Contoh:
+        // 5.000       -> 5000
+        // 10.000.000  -> 10000000
+        // ======================
+        $request->merge([
+            'price' => $this->parseRupiah($request->price),
+            'capital_price' => $this->parseRupiah($request->capital_price),
+            'price_bottom' => $this->parseRupiah($request->price_bottom),
+        ]);
+
         $validate = $request->validate([
             'name' => 'required',
             'itemcategory_id' => 'required',
+
             'no_seri' => $id
                 ? 'required|unique:items,no_seri,' . $id
                 : 'required|unique:items,no_seri',
+
             'price' => 'nullable|numeric|min:0',
             'capital_price' => 'nullable|numeric|min:0',
+            'price_bottom' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -156,26 +171,32 @@ class ItemController extends Controller
                     'region'          => $request->region,
                     'no_seri'         => $request->no_seri,
                     'created_at'      => $request->created_at,
+
+                    // Sudah berupa angka
                     'price'           => $request->price ?? 0,
                     'capital_price'   => $request->capital_price ?? 0,
                     'price_bottom'    => $request->price_bottom ?? 0,
+
                     'divisi_id'       => $request->divisi_id,
                 ]
             );
 
             // ======================
-            // ITEM_INS (AUTO CREATE / UPDATE)
+            // ITEM_INS
             // ======================
             ItemIn::updateOrCreate(
-                ['no_seri' => $item->no_seri], // 🔥 kunci utama
+                ['no_seri' => $item->no_seri],
                 [
                     'itemcategory_id' => $item->itemcategory_id,
                     'divisi_id'       => $item->divisi_id,
                     'name'            => $item->name,
                     'region'          => $item->region,
+
+                    // Sudah berupa angka
                     'price'           => $item->price,
                     'capital_price'   => $item->capital_price,
                     'price_bottom'    => $item->price_bottom,
+
                     'created_at'      => $item->created_at,
                     'kode_msk'        => $request->kode_msk,
                 ]
@@ -186,7 +207,10 @@ class ItemController extends Controller
             // ======================
             if ($request->kode_msk) {
 
-                $exists = Pembelian::where('invoice', $request->kode_msk)->exists();
+                $exists = Pembelian::where(
+                    'invoice',
+                    $request->kode_msk
+                )->exists();
 
                 if (!$exists) {
                     Pembelian::create([
@@ -207,8 +231,36 @@ class ItemController extends Controller
 
             DB::rollBack();
 
-            return back()->withErrors($e->getMessage());
+            return back()
+                ->withErrors($e->getMessage())
+                ->withInput();
         }
+    }
+
+
+    /**
+     * Konversi format Rupiah menjadi angka database.
+     *
+     * Contoh:
+     * 5.000        => 5000
+     * 50.000       => 50000
+     * 1.500.000    => 1500000
+     * 0            => 0
+     * kosong       => 0
+     */
+    private function parseRupiah($value)
+    {
+        if ($value === null || $value === '') {
+            return 0;
+        }
+
+        // Hapus titik pemisah ribuan
+        $value = str_replace('.', '', $value);
+
+        // Jika ada koma sebagai desimal, ubah menjadi titik
+        $value = str_replace(',', '.', $value);
+
+        return is_numeric($value) ? $value : 0;
     }
 
 
