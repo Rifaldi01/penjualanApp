@@ -496,7 +496,6 @@
 
 </script>
 
-
 <!-- =========================================================
      PUSHER
 ========================================================= -->
@@ -504,8 +503,8 @@
 
 <script>
 
-    Pusher.logToConsole = true;
-
+    // Matikan log internal Pusher di Console
+    Pusher.logToConsole = false;
 
     var pusher = new Pusher(
         '5af8b56c9ba705ddfb37',
@@ -514,128 +513,50 @@
         }
     );
 
-
-    // Subscribe sesuai divisi user login
     var channel = pusher.subscribe(
         'sidebar.{{ Auth::user()->divisi_id }}'
     );
 
+    channel.bind('sidebar.updated', function (data) {
 
-    // Berhasil subscribe
-    channel.bind(
-        'pusher:subscription_succeeded',
-        function () {
+        updateBadge('badge-notif', data.notif);
+        updateBadge('badge-minta', data.minta);
+        updateBadge('badge-notiff', data.notiff);
+        updateBadge('badge-notifretur', data.notifretur);
+        updateBadge('badge-notifitem', data.notifitem);
+        updateBadge('badge-mintaitem', data.mintaitem);
+        updateBadge('badge-notiffitem', data.notiffitem);
+        updateBadge('badge-notifreturitem', data.notifreturitem);
 
-            console.log(
-                'Pusher sidebar berhasil terhubung'
-            );
-
-        }
-    );
-
-
-    // Event dari Laravel
-    channel.bind(
-        'sidebar.updated',
-        function (data) {
-
-            console.log('EVENT MASUK');
-
-            console.log(data);
-
-
-            updateBadge(
-                'badge-notif',
-                data.notif
-            );
-
-
-            updateBadge(
-                'badge-minta',
-                data.minta
-            );
-
-
-            updateBadge(
-                'badge-notiff',
-                data.notiff
-            );
-
-
-            updateBadge(
-                'badge-notifretur',
-                data.notifretur
-            );
-
-
-            updateBadge(
-                'badge-notifitem',
-                data.notifitem
-            );
-
-
-            updateBadge(
-                'badge-mintaitem',
-                data.mintaitem
-            );
-
-
-            updateBadge(
-                'badge-notiffitem',
-                data.notiffitem
-            );
-
-
-            updateBadge(
-                'badge-notifreturitem',
-                data.notifreturitem
-            );
-
-        }
-    );
-
+    });
 
     function updateBadge(id, total) {
 
-        const badge =
-            document.getElementById(id);
-
+        const badge = document.getElementById(id);
 
         if (!badge) {
-
             return;
-
         }
 
-
-        const count =
-            document.getElementById(
-                id + '-count'
-            );
-
+        const count = document.getElementById(
+            id + '-count'
+        );
 
         total = parseInt(total) || 0;
-
 
         if (total > 0) {
 
             if (count) {
-
                 count.textContent = total;
-
             }
 
-
-            badge.style.display =
-                'inline-block';
+            badge.style.display = 'inline-block';
 
         } else {
 
-            badge.style.display =
-                'none';
+            badge.style.display = 'none';
 
         }
-
     }
 
 </script>
