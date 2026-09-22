@@ -156,22 +156,58 @@ class ItemController extends Controller
 
         $divisiId = Auth::user()->divisi_id;
 
+        $duplicateSerials = [];
+        $savedCount = 0;
+
         foreach ($request->name as $index => $name) {
 
             $id = $request->id[$index] ?? null;
+            $noSeri = trim($request->no_seri[$index] ?? '');
+            $kodeMsk = $request->kode_msk[$index] ?? null;
 
+            /*
+            |--------------------------------------------------------------------------
+            | Cek no_seri
+            |--------------------------------------------------------------------------
+            | Jika sedang edit data yang sama, jangan dianggap duplicate.
+            */
+            $query = Item::where('no_seri', $noSeri);
+
+            if ($id) {
+                $query->where('id', '!=', $id);
+            }
+
+            $existingItem = $query->first();
+
+            if ($existingItem) {
+                $duplicateSerials[] = $noSeri;
+
+                // Lewati baris ini, lanjutkan ke alat berikutnya
+                continue;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan / Update Item
+            |--------------------------------------------------------------------------
+            */
             $item = Item::updateOrCreate(
-                ['id' => $id], // 🔥 ini kunci utama
+                ['id' => $id],
                 [
                     'itemcategory_id' => $request->itemcategory_id[$index],
                     'name' => $name,
-                    'no_seri' => $request->no_seri[$index],
-                    'region' => $request->region[$index],
-                    'created_at' => $request->created_at[$index],
+                    'no_seri' => $noSeri,
+                    'region' => $request->region[$index] ?? null,
+                    'created_at' => $request->created_at[$index] ?? now(),
                     'divisi_id' => $divisiId,
                 ]
             );
 
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan ItemIn
+            |--------------------------------------------------------------------------
+            */
             ItemIn::updateOrCreate(
                 ['no_seri' => $item->no_seri],
                 [
@@ -180,26 +216,63 @@ class ItemController extends Controller
                     'name' => $item->name,
                     'region' => $item->region,
                     'created_at' => $item->created_at,
-                    'kode_msk' => $request->kode_msk[$index],
+                    'kode_msk' => $kodeMsk,
                 ]
             );
 
-            $invoice = $request->kode_msk[$index];
-
-            if ($invoice) {
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan Pembelian
+            |--------------------------------------------------------------------------
+            */
+            if ($kodeMsk) {
                 Pembelian::firstOrCreate(
                     [
-                        'invoice' => $invoice,
-                        'divisi_id' => $divisiId
+                        'invoice' => $kodeMsk,
+                        'divisi_id' => $divisiId,
                     ],
                     [
-                        'status' => '1'
+                        'status' => '1',
                     ]
                 );
             }
+
+            $savedCount++;
         }
 
-        Alert::success('Success', 'Data berhasil disimpan');
+        /*
+        |--------------------------------------------------------------------------
+        | Alert
+        |--------------------------------------------------------------------------
+        */
+
+        if (count($duplicateSerials) > 0) {
+
+            $duplicateList = implode(', ', $duplicateSerials);
+
+            if ($savedCount > 0) {
+
+                Alert::warning(
+                    'Sebagian Data Disimpan',
+                    $savedCount . ' alat berhasil disimpan. No. Seri berikut sudah tersedia: ' . $duplicateList
+                );
+
+            } else {
+
+                Alert::error(
+                    'Data Tidak Disimpan',
+                    'No. Seri berikut sudah tersedia: ' . $duplicateList
+                );
+            }
+
+        } else {
+
+            Alert::success(
+                'Success',
+                $savedCount . ' data alat berhasil disimpan'
+            );
+        }
+
         return redirect()->route('gudang.item.index');
     }
 
