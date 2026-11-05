@@ -235,79 +235,118 @@ class PermintaanController extends Controller
 
     public function approve($id)
     {
-        $permintaan = Permintaan::with(['detailAccessories', 'divisiAsal', 'divisiTujuan'])
-            ->findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                // Kunci permintaan agar dua request approve bersamaan tidak memproses transfer dua kali.
+                $permintaan = Permintaan::with('detailAccessories')
+                    ->lockForUpdate()
+                    ->findOrFail($id);
 
-        if (Auth::user()->divisi_id != $permintaan->divisi_id_tujuan) {
-            return redirect()->back()->withErrors('Anda tidak berhak menyetujui permintaan ini.');
-        }
+                if ((int) Auth::user()->divisi_id !== (int) $permintaan->divisi_id_tujuan) {
+                    throw new \RuntimeException('Anda tidak berhak menyetujui permintaan ini.');
+                }
 
-        // 1. VALIDASI STOK TERLEBIH DAHULU
-        foreach ($permintaan->detailAccessories as $detail) {
-            $accessoriesAsal = Accessories::where('id', $detail->accessories_id)
-                ->where('divisi_id', $permintaan->divisi_id_asal)
-                ->first();
+                // Proses hanya permintaan yang belum pernah dipindahkan.
+                if (!in_array($permintaan->status, ['pending', 'disetujui'], true)) {
+                    throw new \RuntimeException('Permintaan ini sudah diproses atau statusnya tidak valid.');
+                }
 
-            if (!$accessoriesAsal || $accessoriesAsal->stok < $detail->qty) {
-                return redirect()->back()->withErrors(
-                    'Stok tidak mencukupi untuk accessories: ' . ($accessoriesAsal->name ?? '-')
-                );
-            }
-        }
+                if ($permintaan->detailAccessories->isEmpty()) {
+                    throw new \RuntimeException('Detail accessories pada permintaan ini kosong.');
+                }
 
-        // 2. JALANKAN PROSES DALAM TRANSACTION
-        DB::transaction(function () use ($permintaan) {
+                // Gabungkan baris yang menunjuk accessories_id sama. Validasi dan mutasi stok
+                // harus memakai total qty, bukan memeriksa setiap baris secara terpisah.
+                $detailsByAccessory = $permintaan->detailAccessories
+                    ->groupBy('accessories_id');
 
-            $kode_msk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
+                $kodeMsk = 'PMT-' . str_pad($permintaan->id, 5, '0', STR_PAD_LEFT);
 
-            foreach ($permintaan->detailAccessories as $detail) {
+                foreach ($detailsByAccessory as $accessoriesId => $details) {
+                    $totalQty = (int) $details->sum('qty');
+                    if ($totalQty < 1) {
+                        throw new \RuntimeException('Qty accessories tidak valid.');
+                    }
 
-                $accessoriesAsal = Accessories::where('id', $detail->accessories_id)
-                    ->where('divisi_id', $permintaan->divisi_id_asal)
-                    ->first();
+                    // Lock record stok asal dan pastikan benar-benar milik divisi pengirim.
+                    $accessoriesAsal = Accessories::whereKey($accessoriesId)
+                        ->where('divisi_id', $permintaan->divisi_id_asal)
+                        ->lockForUpdate()
+                        ->first();
 
-                // Kurangi stok divisi asal
-                $accessoriesAsal->decrement('stok', $detail->qty);
+                    if (!$accessoriesAsal) {
+                        throw new \RuntimeException(
+                            'Accessories ID ' . $accessoriesId . ' tidak ditemukan pada divisi asal.'
+                        );
+                    }
 
-                // Cari / buat accessories di divisi tujuan
-                $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
-                    ->where('divisi_id', $permintaan->divisi_id_tujuan)
-                    ->first();
+                    if ((int) $accessoriesAsal->stok < $totalQty) {
+                        throw new \RuntimeException(
+                            'Stok ' . $accessoriesAsal->name . ' di divisi asal tidak mencukupi. '
+                            . 'Tersedia: ' . $accessoriesAsal->stok . ', diminta: ' . $totalQty . '.'
+                        );
+                    }
 
-                if ($accessoriesTujuan) {
-                    $accessoriesTujuan->increment('stok', $detail->qty);
-                } else {
-                    $accessoriesTujuan = Accessories::create([
-                        'divisi_id'     => $permintaan->divisi_id_tujuan,
-                        'name'          => $accessoriesAsal->name,
-                        'price'         => $accessoriesAsal->price,
-                        'capital_price' => $accessoriesAsal->capital_price,
-                        'code_acces'    => $accessoriesAsal->code_acces,
-                        'stok'          => $detail->qty,
+                    // Kurangi stok asal secara atomik. Kondisi stok mencegah stok menjadi minus.
+                    $affected = Accessories::whereKey($accessoriesAsal->id)
+                        ->where('divisi_id', $permintaan->divisi_id_asal)
+                        ->where('stok', '>=', $totalQty)
+                        ->decrement('stok', $totalQty);
+
+                    if ($affected !== 1) {
+                        throw new \RuntimeException(
+                            'Gagal mengurangi stok ' . $accessoriesAsal->name . ' pada divisi asal.'
+                        );
+                    }
+
+                    // Identitas barang antar-divisi menggunakan code_acces, bukan nama barang.
+                    $accessoriesTujuan = Accessories::where('code_acces', $accessoriesAsal->code_acces)
+                        ->where('divisi_id', $permintaan->divisi_id_tujuan)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($accessoriesTujuan) {
+                        $accessoriesTujuan->increment('stok', $totalQty);
+                        $accessoriesTujuan->refresh();
+                    } else {
+                        $accessoriesTujuan = Accessories::create([
+                            'divisi_id'     => $permintaan->divisi_id_tujuan,
+                            'name'          => $accessoriesAsal->name,
+                            'price'         => $accessoriesAsal->price,
+                            'capital_price' => $accessoriesAsal->capital_price,
+                            'code_acces'    => $accessoriesAsal->code_acces,
+                            'stok'          => $totalQty,
+                        ]);
+                    }
+
+                    // Satu catatan barang masuk per kode accessories untuk memudahkan audit.
+                    AccessoriesIn::create([
+                        'accessories_id' => $accessoriesTujuan->id,
+                        'price'          => $accessoriesTujuan->price,
+                        'capital_price'  => $accessoriesTujuan->capital_price,
+                        'ppn'            => 0,
+                        'qty'            => $totalQty,
+                        'kode_msk'       => $kodeMsk,
+                        'date_in'        => now(),
+                        'status'         => 'request',
                     ]);
                 }
 
-                // Catat accessories masuk
-                AccessoriesIn::create([
-                    'accessories_id' => $accessoriesTujuan->id,
-                    'price'          => $accessoriesTujuan->price,
-                    'capital_price'  => $accessoriesTujuan->capital_price,
-                    'ppn'            => 0,
-                    'qty'            => $detail->qty,
-                    'kode_msk'       => $kode_msk,
-                    'date_in'        => now(),
-                    'status'         => 'request',
-                ]);
-            }
+                // Status berubah hanya setelah seluruh stok asal dan tujuan berhasil diproses.
+                $permintaan->update(['status' => 'diterima']);
+            }, 3);
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()->back()->withErrors($e->getMessage());
+        }
 
-            // Update status permintaan
-            $permintaan->update(['status' => 'diterima']);
-        });
+        $permintaan = Permintaan::findOrFail($id);
         SidebarNotificationService::broadcast($permintaan->divisi_id_asal);
         SidebarNotificationService::broadcast($permintaan->divisi_id_tujuan);
+
         return redirect()
             ->route('gudang.permintaan.index')
-            ->with('success', 'Permintaan berhasil diterima.');
+            ->with('success', 'Permintaan berhasil diterima dan stok kedua divisi telah diperbarui.');
     }
 
     public function receive($id)
