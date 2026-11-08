@@ -331,6 +331,7 @@ class SaleController extends Controller
                         'id',
                         $accessory['accessories_id']
                     )
+                        ->where('divisi_id', Auth::user()->divisi_id)
                         ->lockForUpdate()
                         ->first();
 
@@ -389,8 +390,17 @@ class SaleController extends Controller
                         );
                     }
 
-                    $accessoryRecord->stok -= $qty;
-                    $accessoryRecord->save();
+                    $affected = Accessories::where('id', $accessoryRecord->id)
+                        ->where('divisi_id', Auth::user()->divisi_id)
+                        ->where('stok', '>=', $qty)
+                        ->decrement('stok', $qty);
+
+                    if (!$affected) {
+                        throw new \Exception(
+                            'Stok accessories ' . $accessoryRecord->name .
+                            ' berubah atau tidak mencukupi. Silakan muat ulang halaman.'
+                        );
+                    }
 
                     AccessoriesSale::create([
                         'sale_id' => $sale->id,

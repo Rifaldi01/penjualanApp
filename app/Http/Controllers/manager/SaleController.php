@@ -310,7 +310,10 @@ class SaleController extends Controller
             // ACCESSORIES
             if ($request->has('accessories') && is_array($validated['accessories'] ?? null)) {
                 foreach ($validated['accessories'] as $accessory) {
-                    $accessoryRecord = Accessories::find($accessory['accessories_id']);
+                    $accessoryRecord = Accessories::where('id', $accessory['accessories_id'])
+                        ->where('divisi_id', $validated['divisi_id'])
+                        ->lockForUpdate()
+                        ->first();
 
                     if (!$accessoryRecord) {
                         DB::rollBack();
@@ -349,8 +352,20 @@ class SaleController extends Controller
                         ], 400);
                     }
 
-                    $accessoryRecord->stok -= $qty;
-                    $accessoryRecord->save();
+                    // Kurangi stok secara atomik. Kondisi stok >= qty mencegah
+                    // stok minus akibat transaksi bersamaan atau data stok usang.
+                    $affected = Accessories::where('id', $accessoryRecord->id)
+                        ->where('divisi_id', $validated['divisi_id'])
+                        ->where('stok', '>=', $qty)
+                        ->decrement('stok', $qty);
+
+                    if (!$affected) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Stok ' . $accessoryRecord->name . ' berubah atau tidak mencukupi. Muat ulang halaman lalu coba kembali.'
+                        ], 409);
+                    }
 
                     AccessoriesSale::create([
                         'sale_id' => $sale->id,
@@ -792,9 +807,10 @@ class SaleController extends Controller
 
                     if ($row['status'] == 'deleted') {
 
-                        $detail = AccessoriesSale::find(
-                            $row['sale_detail_id']
-                        );
+                        $detail = AccessoriesSale::where('id', $row['sale_detail_id'])
+                            ->where('sale_id', $sale->id)
+                            ->lockForUpdate()
+                            ->first();
 
                         if (!$detail) {
                             continue;
@@ -812,9 +828,9 @@ class SaleController extends Controller
                         }
 
 
-                        $accessory = Accessories::find(
-                            $detail->accessories_id
-                        );
+                        $accessory = Accessories::where('id', $detail->accessories_id)
+                            ->lockForUpdate()
+                            ->first();
 
                         if (!$accessory) {
                             continue;
@@ -940,9 +956,10 @@ class SaleController extends Controller
 
                     if ($row['status'] == 'new') {
 
-                        $accessory = Accessories::find(
-                            $row['accessories_id']
-                        );
+                        $accessory = Accessories::where('id', $row['accessories_id'])
+                            ->where('divisi_id', $sale->divisi_id)
+                            ->lockForUpdate()
+                            ->first();
 
                         if (!$accessory) {
                             continue;
@@ -1027,10 +1044,17 @@ class SaleController extends Controller
                         |--------------------------------------------------------------------------
                         */
 
-                        $accessory->decrement(
-                            'stok',
-                            $qty
-                        );
+                        $affected = Accessories::where('id', $accessory->id)
+                            ->where('divisi_id', $sale->divisi_id)
+                            ->where('stok', '>=', $qty)
+                            ->decrement('stok', $qty);
+
+                        if (!$affected) {
+                            throw new \RuntimeException(
+                                'Stok accessories ' . $accessory->name .
+                                ' berubah atau tidak mencukupi. Transaksi dibatalkan.'
+                            );
+                        }
 
 
                         continue;
@@ -1045,18 +1069,19 @@ class SaleController extends Controller
 
                     if ($row['status'] == 'old') {
 
-                        $detail = AccessoriesSale::find(
-                            $row['sale_detail_id']
-                        );
+                        $detail = AccessoriesSale::where('id', $row['sale_detail_id'])
+                            ->where('sale_id', $sale->id)
+                            ->lockForUpdate()
+                            ->first();
 
                         if (!$detail) {
                             continue;
                         }
 
 
-                        $accessory = Accessories::find(
-                            $detail->accessories_id
-                        );
+                        $accessory = Accessories::where('id', $detail->accessories_id)
+                            ->lockForUpdate()
+                            ->first();
 
                         if (!$accessory) {
                             continue;
@@ -1112,10 +1137,16 @@ class SaleController extends Controller
                             }
 
 
-                            $accessory->decrement(
-                                'stok',
-                                $selisih
-                            );
+                            $affected = Accessories::where('id', $accessory->id)
+                                ->where('stok', '>=', $selisih)
+                                ->decrement('stok', $selisih);
+
+                            if (!$affected) {
+                                throw new \RuntimeException(
+                                    'Stok accessories ' . $accessory->name .
+                                    ' berubah atau tidak mencukupi. Transaksi dibatalkan.'
+                                );
+                            }
                         }
 
 
