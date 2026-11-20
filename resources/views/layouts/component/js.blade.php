@@ -622,7 +622,7 @@
 <!-- =========================================================
      PAGE SPECIFIC JS
 ========================================================= -->
-<script><script>
+<script>
         document.addEventListener('DOMContentLoaded', function () {
 
         const modalElement = document.getElementById('hostingWarningModal');
@@ -648,6 +648,6 @@
     }
 
     });
-</script>
+</>
 
 @stack('js')
