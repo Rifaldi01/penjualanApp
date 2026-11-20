@@ -622,5 +622,29 @@
 <!-- =========================================================
      PAGE SPECIFIC JS
 ========================================================= -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const modalElement = document.getElementById('hostingWarningModal');
+
+        if (!modalElement) {
+            return;
+        }
+
+        // Cek apakah popup sudah ditampilkan pada sesi login ini.
+        const popupShown = sessionStorage.getItem('hostingWarningShown');
+
+        if (!popupShown) {
+
+            const hostingModal = new bootstrap.Modal(modalElement);
+
+            hostingModal.show();
+
+            // Tandai bahwa popup sudah pernah ditampilkan.
+            sessionStorage.setItem('hostingWarningShown', 'true');
+        }
+
+    });
+</script>
 
 @stack('js')
