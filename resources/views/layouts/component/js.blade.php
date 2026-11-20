@@ -622,27 +622,30 @@
 <!-- =========================================================
      PAGE SPECIFIC JS
 ========================================================= -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+<script><script>
+        document.addEventListener('DOMContentLoaded', function () {
 
         const modalElement = document.getElementById('hostingWarningModal');
 
         if (!modalElement) {
-            return;
-        }
+        return;
+    }
+
+        // Gunakan Session ID Laravel sebagai identitas login.
+        const loginSessionKey = @json('hostingWarningShown_' . session()->getId());
 
         // Cek apakah popup sudah ditampilkan pada sesi login ini.
-        const popupShown = sessionStorage.getItem('hostingWarningShown');
+        const popupShown = sessionStorage.getItem(loginSessionKey);
 
         if (!popupShown) {
 
-            const hostingModal = new bootstrap.Modal(modalElement);
+        const hostingModal = new bootstrap.Modal(modalElement);
 
-            hostingModal.show();
+        hostingModal.show();
 
-            // Tandai bahwa popup sudah pernah ditampilkan.
-            sessionStorage.setItem('hostingWarningShown', 'true');
-        }
+        // Tandai popup sudah ditampilkan pada sesi login ini.
+        sessionStorage.setItem(loginSessionKey, 'true');
+    }
 
     });
 </script>
