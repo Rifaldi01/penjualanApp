@@ -104,66 +104,65 @@
 @endpush
 @push('js')
     <script>
-        // Checkbox untuk memilih semua accessories
+        // Checkbox untuk memilih semua item
         document.getElementById('select_all').addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('.select_item');
-            checkboxes.forEach(cb => cb.checked = this.checked);
+            document.querySelectorAll('.select_item').forEach(cb => cb.checked = this.checked);
         });
+
         $(document).ready(function () {
-            $('#exampleI').DataTable({
+            const exampleI = $('#exampleI').DataTable({
                 lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
-                pageLength: 10, // Default halaman pertama
+                pageLength: 10,
                 dom: 'lBfrtip',
+                order: [],                       // pertahankan urutan dari server
+                columnDefs: [
+                    // Kolom checkbox & No tidak ikut sort/search
+                    {targets: [0, 1], orderable: false, searchable: false}
+                ],
                 buttons: [
                     {
                         extend: 'excelHtml5',
                         text: '<i class="bx bx-file"></i> Download Excel',
                         className: 'btn btn-success btn-sm shadow',
                         exportOptions: {
-                            // export hanya kolom yang terlihat (hide/visible ikut terfilter juga)
                             columns: ':visible:not(:first-child):not(:last-child)',
                             modifier: {
-                                search: 'applied',   // ikut filter pencarian
-                                order: 'applied',    // ikut urutan sort
-                                page: 'current'         // ambil semua hasil filter (bukan hanya halaman aktif)
+                                search: 'applied',
+                                order: 'applied',
+                                page: 'current'
                             }
                         }
                     }
                 ],
-                // Untuk tampilan responsif
+                footerCallback: function () {
+                    const api = this.api();
 
-                footerCallback: function (row, data, start, end, display) {
-                    var api = this.api();
-
-                    var intVal = function (i) {
+                    const intVal = function (i) {
                         return typeof i === 'string'
                             ? i.replace(/[^0-9]/g, '') * 1
-                            : typeof i === 'number'
-                                ? i
-                                : 0;
+                            : typeof i === 'number' ? i : 0;
                     };
 
-                    var totalQty = api
-                        .column(8, { search: 'applied' })
+                    const totalQty = api
+                        .column(8, {search: 'applied'})
                         .data()
-                        .reduce(function (a, b) {
-                            return a + intVal(b);
-                        }, 0);
+                        .reduce((a, b) => a + intVal(b), 0);
 
                     $(api.column(8).footer()).html(totalQty);
                 }
             });
 
-            exampleI.buttons().container()
-                .appendTo('#konfir_wrapper .col-md-6:eq(0)');
-
-            exampleI.on('order.dt search.dt', function () {
-                let i = 1;
-                exampleI.cells(null, 0, { search: 'applied', order: 'applied' })
-                    .every(function () {
-                        this.data(i++);
+            // Nomor urut selalu 1,2,3... sesuai hasil filter & sort yang tampil
+            function renumber() {
+                exampleI.column(1, {search: 'applied', order: 'applied'})
+                    .nodes()
+                    .each(function (cell, i) {
+                        cell.innerHTML = i + 1;
                     });
-            }).draw();
+            }
+
+            exampleI.on('order.dt search.dt draw.dt', renumber);
+            renumber();
         });
     </script>
 @endpush
