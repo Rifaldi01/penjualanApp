@@ -81,16 +81,16 @@
                     </tbody>
                     <tfoot>
                     <tr>
-
                         <th></th>
                         <th></th>
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th colspan="" class="text-end">Total</th>
                         <th></th>
-                        <th colspan=""></th>
-                        <th colspan=""></th>
+                        <th></th>
+                        <th class="text-end">Total</th>
+                        <th class="text-center"></th>
+                        <th></th>
                     </tr>
                     </tfoot>
                 </table>
@@ -110,6 +110,9 @@
         });
 
         $(document).ready(function () {
+            // Penghitung nomor urut khusus untuk file Excel
+            let exportNo = 0;
+
             const exampleI = $('#exampleI').DataTable({
                 lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]],
                 pageLength: 10,
@@ -124,12 +127,33 @@
                         extend: 'excelHtml5',
                         text: '<i class="bx bx-file"></i> Download Excel',
                         className: 'btn btn-success btn-sm shadow',
+
+                        // Reset penghitung setiap kali tombol diklik
+                        action: function (e, dt, button, config) {
+                            exportNo = 0;
+                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                        },
+
                         exportOptions: {
+                            // Tanpa kolom checkbox (pertama) dan Aksi (terakhir)
                             columns: ':visible:not(:first-child):not(:last-child)',
                             modifier: {
-                                search: 'applied',
-                                order: 'applied',
-                                page: 'current'
+                                search: 'applied',   // ikut filter pencarian
+                                order: 'applied',    // ikut urutan tampil
+                                page: 'all'          // semua hasil filter, bukan hanya halaman aktif
+                            },
+                            format: {
+                                body: function (data, row, column, node) {
+                                    if (column === 0) {                      // kolom No
+                                        return ++exportNo;
+                                    }
+                                    if (column === 7) {                      // kolom Jumlah Barcode (isinya <input>)
+                                        return $(node).find('input').val() || '';
+                                    }
+
+                                    // Buang semua tag HTML (<a>, <span>, <i>, dan lainnya), sisakan teksnya saja
+                                    return $('<div>').html(data).text().replace(/\s+/g, ' ').trim();
+                                }
                             }
                         }
                     }
@@ -152,7 +176,7 @@
                 }
             });
 
-            // Nomor urut selalu 1,2,3... sesuai hasil filter & sort yang tampil
+            // Nomor urut di tabel selalu 1,2,3... sesuai hasil filter & sort yang tampil
             function renumber() {
                 exampleI.column(1, {search: 'applied', order: 'applied'})
                     .nodes()
