@@ -621,6 +621,7 @@ class SaleController extends Controller
                 'customer_id' => $request->customer_id,
 
                 'divisi_id' => $request->divisi_id,
+                'user_id' => Auth::id(),
 
                 'total_item' => (int) $request->total_item,
 
